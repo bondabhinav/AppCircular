@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
-import '../common/config.dart';
-import '/screens/home.dart';
-import 'check_internet.dart';
+import 'dart:developer';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flexischool/common/webService.dart';
+import 'package:flutter/material.dart';
+
+import '../common/config.dart';
+
 //Loader Screen
 class LoaderRoute extends StatefulWidget {
   const LoaderRoute({Key? key}) : super(key: key);
@@ -15,12 +18,8 @@ class _LoaderRouteState extends State<LoaderRoute> {
   late final String appName = Constants.appName;
 
   Future<void> checkConnection() async {
-
-
-    final connectivityResult =
-    await Connectivity().checkConnectivity();
+    final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
-
       Future.delayed(const Duration(seconds: 3), () {
         // Navigator.pushReplacement(
         //   context,
@@ -28,7 +27,7 @@ class _LoaderRouteState extends State<LoaderRoute> {
         // );
         Navigator.pushNamed(context, "/home");
       });
-    }else{
+    } else {
       Future.delayed(const Duration(seconds: 3), () {
         // Navigator.pushReplacement(
         //   context,
@@ -36,14 +35,13 @@ class _LoaderRouteState extends State<LoaderRoute> {
         // );
         Navigator.pushNamed(context, "/checkInternet");
       });
-
     }
   }
-
 
   @override
   void initState() {
     super.initState();
+    getLoginData();
     checkConnection();
     // Future.delayed(const Duration(seconds: 3), () {
     //   Navigator.pushReplacement(
@@ -51,6 +49,15 @@ class _LoaderRouteState extends State<LoaderRoute> {
     //     MaterialPageRoute(builder: (context) => const CheckInternet()),
     //   );
     // });
+  }
+
+  void getLoginData() async {
+    final data = await WebService.getStudentLoginDetails();
+    if (data != null) {
+      WebService.studentLoginData = data;
+      setState(() {});
+      log('user data ***** ${data.toJson().toString()}');
+    }
   }
 
   @override
@@ -63,8 +70,8 @@ class _LoaderRouteState extends State<LoaderRoute> {
           children: [
             Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                )),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            )),
             SizedBox(height: 10.0),
             Text(
               appName,

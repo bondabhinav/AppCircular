@@ -1,6 +1,5 @@
+import 'package:flexischool/screens/circulars_screen.dart';
 import 'package:flutter/material.dart';
-import '../widgets/card-widget.dart';
-
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -33,7 +32,7 @@ class _DashboardState extends State<Dashboard> {
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
-           UserAccountsDrawerHeader(
+            const UserAccountsDrawerHeader(
               accountName: Text('Vijay Chakaravarthy'),
               accountEmail: Text('vijay@demo.com'),
               currentAccountPicture: CircleAvatar(
@@ -58,9 +57,9 @@ class _DashboardState extends State<Dashboard> {
                 child: Text('Flexi School',style: TextStyle(color: Colors.white),),
               ),*/
             ListTile(
-              visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               title: const Text('Profile'),
-              leading: Icon(Icons.notifications_paused_rounded),
+              leading: const Icon(Icons.notifications_paused_rounded),
               minLeadingWidth: 10,
               horizontalTitleGap: 10,
               //trailing: Icon(Icons.add),
@@ -72,17 +71,17 @@ class _DashboardState extends State<Dashboard> {
             ListTile(
               //dense: true,
               //contentPadding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
-              visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               title: const Text('Change Session'),
-              leading: Icon(Icons.lock_reset),
+              leading: const Icon(Icons.lock_reset),
               minLeadingWidth: 10,
               horizontalTitleGap: 10,
               onTap: () {},
             ),
             ListTile(
-              visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               title: const Text('Change Password'),
-              leading: Icon(Icons.lock),
+              leading: const Icon(Icons.lock),
               minLeadingWidth: 10,
               horizontalTitleGap: 10,
               onTap: () {
@@ -96,13 +95,13 @@ class _DashboardState extends State<Dashboard> {
               },
             ),
             ListTile(
-              visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               title: const Text('Logout'),
-              leading: Icon(Icons.logout),
+              leading: const Icon(Icons.logout),
               minLeadingWidth: 10,
               horizontalTitleGap: 10,
               onTap: () {
-                Navigator.pushNamed(context, "/",arguments: " Login");
+                Navigator.pushNamed(context, "/", arguments: " Login");
               },
             ),
           ],
@@ -147,7 +146,6 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
-
   // void handleButton1Press() {
   //   print('Button 1 pressed!');
   // }
@@ -174,7 +172,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             child: Row(
               //mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Column(
+                const Column(
                   children: <Widget>[
                     CircleAvatar(
                       backgroundImage: NetworkImage(
@@ -187,7 +185,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -196,14 +193,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Vijay Chakaravarthy',
                                 style: TextStyle(
                                   fontSize: 22.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 10.0),
+                              const SizedBox(height: 10.0),
                               Text(
                                 'Employee Code : 5032',
                                 style: TextStyle(
@@ -211,7 +208,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   color: Colors.grey[600],
                                 ),
                               ),
-                              SizedBox(height: 10.0),
+                              const SizedBox(height: 10.0),
                               Text(
                                 'Designation : PPRT',
                                 style: TextStyle(
@@ -219,7 +216,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   color: Colors.grey[600],
                                 ),
                               ),
-                              SizedBox(height: 10.0),
+                              const SizedBox(height: 10.0),
                               Text(
                                 'Session : 2022 - 2023',
                                 style: TextStyle(
@@ -247,219 +244,176 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             crossAxisCount: 2,
             children: <Widget>[
               InkWell(
-                child: Container(
-              //width: 100.0,
-               //height: 100.0,
-                  //padding: const EdgeInsets.all(10),
-
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.blue, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.bus_alert_outlined,
-                              color: Colors.white,
-                              size: 64,
-                            ), // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Assignments",
-                              style: TextStyle(color: Colors.white),
-                            ), // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.blue, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.bus_alert_outlined,
+                            color: Colors.white,
+                            size: 64,
+                          ), // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Assignments",
+                            style: TextStyle(color: Colors.white),
+                          ), // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
               InkWell(
-                child: Container(
-                  //width:160,
-                  //height:160,
-                  //padding: const EdgeInsets.all(10),
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.green, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Circulars",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.green, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 64,
+                          ),
+                          // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Circulars",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
               InkWell(
-                child: Container(
-                  //width:160,
-                  //height:160,
-                  //padding: const EdgeInsets.all(10),
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.deepPurple, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Manage Online Class",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.deepPurple, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 64,
+                          ),
+                          // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Manage Online Class",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
               InkWell(
-                child: Container(
-                  //width:160,
-                  //height:160,
-                  //padding: const EdgeInsets.all(10),
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.deepOrange, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Attendance",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.deepOrange, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 64,
+                          ),
+                          // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Attendance",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
               InkWell(
-                child: Container(
-                  //width:160,
-                  //height:160,
-                  //padding: const EdgeInsets.all(10),
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.pinkAccent, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Examination",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.pinkAccent, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 64,
+                          ),
+                          // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Examination",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
               InkWell(
-                child: Container(
-                  //width:160,
-                  //height:160,
-                  //padding: const EdgeInsets.all(10),
-                  child: SizedBox.fromSize(
-                    size: Size(56, 56), // button width and height
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0.0),
-                      child: Material(
-                        color: Colors.lightGreen, // button color
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            // icon
-                            SizedBox(height: 10),
-                            Text(
-                              "Chatting",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            // text
-                          ],
-                        ),
+                child: SizedBox.fromSize(
+                  size: const Size(56, 56), // button width and height
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: const Material(
+                      color: Colors.lightGreen, // button color
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 64,
+                          ),
+                          // icon
+                          SizedBox(height: 10),
+                          Text(
+                            "Chatting",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          // text
+                        ],
                       ),
                     ),
                   ),
                 ),
-                onTap: () {
-                  print("Tapped on container");
-                },
+                onTap: () {},
               ),
             ],
           ),

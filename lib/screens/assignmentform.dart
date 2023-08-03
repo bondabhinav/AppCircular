@@ -1,16 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:search_choices/search_choices.dart';
-import 'package:intl/intl.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:quill_html_editor/quill_html_editor.dart';
-import 'package:flutter/foundation.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import './studentlist.dart';
+import 'package:search_choices/search_choices.dart';
 
 class Student {
   int id;
@@ -29,6 +25,10 @@ class Section {
 }
 
 class AssignmentForm extends StatefulWidget {
+  final int employeeId;
+
+  const AssignmentForm({super.key, required this.employeeId});
+
   @override
   _AssignmentFormState createState() => _AssignmentFormState();
 }
@@ -51,7 +51,14 @@ class _AssignmentFormState extends State<AssignmentForm> {
 
   // Dropdown options
   List<String> classOptions = ['Class A', 'Class B', 'Class C'];
-  List<dynamic> sectionOptions = ['Section 1', 'Section 2', 'Section 3','Section 4', 'Section 5', 'Section 6'];
+  List<dynamic> sectionOptions = [
+    'Section 1',
+    'Section 2',
+    'Section 3',
+    'Section 4',
+    'Section 5',
+    'Section 6'
+  ];
   List<dynamic> studentOptions = ['Student 1', 'Student 2', 'Student 3'];
   List<String> subjectOptions = ['Subject 1', 'Subject 2', 'Subject 3'];
   List<String> employeeOptions = ['Employee 1', 'Employee 2', 'Employee 3'];
@@ -102,7 +109,6 @@ class _AssignmentFormState extends State<AssignmentForm> {
   bool selectAllSection = false;
   List<int> selectedIdsSection = [];
 
-
   List<File> _selectedFiles = [];
 
   void _openFileExplorer() async {
@@ -127,17 +133,16 @@ class _AssignmentFormState extends State<AssignmentForm> {
   }
 
   void _uploadFiles() async {
-
     if (_selectedFiles.isEmpty) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Warning :'),
-          content: Text('Please choose at least one file.'),
+          title: const Text('Warning :'),
+          content: const Text('Please choose at least one file.'),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -172,6 +177,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
       }
     }
   }
+
   // final QuillEditorController controller = QuillEditorController();
   //
   // final _toolbarColor = Colors.grey.shade200;
@@ -187,7 +193,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
 
   bool _hasFocus = false;
 
-  cancelForm(){
+  cancelForm() {
     Navigator.pushReplacementNamed(context, '/dashboard');
   }
 
@@ -197,25 +203,26 @@ class _AssignmentFormState extends State<AssignmentForm> {
     selectedIdsSection = [];
 
     //Class Options
-    classOptions.map((sclass) =>{
-      //classOptions.indexOf(sclass)
-      itemsClass.add(DropdownMenuItem(
-        value: classOptions.indexOf(sclass),
-        child: Text(sclass),
-      ))
-
-    }).toList();
-
+    classOptions
+        .map((sclass) => {
+              //classOptions.indexOf(sclass)
+              itemsClass.add(DropdownMenuItem(
+                value: classOptions.indexOf(sclass),
+                child: Text(sclass),
+              ))
+            })
+        .toList();
 
     //Section Options
-    sectionOptions.map((section) =>{
-      //sectionOptions.indexOf(section)
-      items.add(DropdownMenuItem(
-        value: section,
-        child: Text(section),
-      ))
-
-    }).toList();
+    sectionOptions
+        .map((section) => {
+              //sectionOptions.indexOf(section)
+              items.add(DropdownMenuItem(
+                value: section,
+                child: Text(section),
+              ))
+            })
+        .toList();
 
     // for(var i = 0; i < sectionOptions.length; i++){
     //   print(sectionOptions[i]);
@@ -227,33 +234,35 @@ class _AssignmentFormState extends State<AssignmentForm> {
     // }
 
     //Students Options
-    studentOptions.map((student) =>{
-      //sectionOptions.indexOf(section)
-      itemsStudents.add(DropdownMenuItem(
-        value: student,
-        child: Text(student),
-      ))
-
-    }).toList();
+    studentOptions
+        .map((student) => {
+              //sectionOptions.indexOf(section)
+              itemsStudents.add(DropdownMenuItem(
+                value: student,
+                child: Text(student),
+              ))
+            })
+        .toList();
 
     //Subject Options
-    subjectOptions.map((subject) =>{
-      itemsSubject.add(DropdownMenuItem(
-        value: subjectOptions.indexOf(subject),
-        child: Text(subject),
-      ))
-
-    }).toList();
+    subjectOptions
+        .map((subject) => {
+              itemsSubject.add(DropdownMenuItem(
+                value: subjectOptions.indexOf(subject),
+                child: Text(subject),
+              ))
+            })
+        .toList();
 
     //Employee Options
-    employeeOptions.map((employee) =>{
-      itemsEmployee.add(DropdownMenuItem(
-        value: employeeOptions.indexOf(employee),
-        child: Text(employee),
-      ))
-
-    }).toList();
-
+    employeeOptions
+        .map((employee) => {
+              itemsEmployee.add(DropdownMenuItem(
+                value: employeeOptions.indexOf(employee),
+                child: Text(employee),
+              ))
+            })
+        .toList();
 
     //
     // items.add(DropdownMenuItem(
@@ -297,7 +306,6 @@ class _AssignmentFormState extends State<AssignmentForm> {
     });
   }
 
-
   void toggleSelectAllSection() {
     setState(() {
       selectAllSection = !selectAllSection;
@@ -327,8 +335,6 @@ class _AssignmentFormState extends State<AssignmentForm> {
   // File upload variables
   int maxFiles = 3;
   int uploadedFileCount = 0;
-
-
 
   void saveForm() {
     print('form load');
@@ -378,16 +384,16 @@ class _AssignmentFormState extends State<AssignmentForm> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Assignment Form'),
+          title: const Text('Assignment Form'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pushReplacementNamed(context, '/dashboard');
             },
           ),
         ),
         body: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: ListView(
@@ -395,7 +401,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 // Assignment Date - DatePicker
 
                 ListTile(
-                  title: Text('Assignment Date'),
+                  title: const Text('Assignment Date'),
                   subtitle: Text(
                     // assignmentDate != null
                     //     ? assignmentDate.toString()
@@ -404,7 +410,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                         ? DateFormat('dd/MM/yyyy').format(assignmentDate!) // Format date as dd/MM/yyyy
                         : 'Select a date',
                   ),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: const Icon(Icons.calendar_today),
                   onTap: () async {
                     final DateTime? pickedDate = await showDatePicker(
                       context: context,
@@ -419,9 +425,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                     }
                   },
                 ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
-
-
+                Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
 
                 //Class Dropdown
                 SearchChoices.single(
@@ -438,13 +442,14 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   },
                   dialogBox: false,
                   isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
+                  menuConstraints: BoxConstraints.tight(const Size.fromHeight(350)),
                 ),
 
                 //Section Custom List
                 const Padding(
-                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12,bottom:0),
-                  child: Text("Section *",
+                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12, bottom: 0),
+                  child: Text(
+                    "Section *",
                     style: TextStyle(
                       fontSize: 15.0,
 
@@ -461,24 +466,24 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           onPressed: toggleSelectAllSection,
                           child: Text(
                             selectAllSection ? 'Deselect All' : 'Select All',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.blue,
                             ),
                           ),
                         ),
                         Text(
                           'Selected: ${selectedIdsSection.length}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                     Container(
-                      constraints: BoxConstraints(maxHeight: 200),
+                      constraints: const BoxConstraints(maxHeight: 200),
                       //height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFD3D3D3)),
+                        border: Border.all(color: const Color(0xFFD3D3D3)),
                       ),
                       child: SingleChildScrollView(
                         child: Container(
@@ -489,11 +494,11 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             children: sections.map((section) {
                               return ListTileTheme(
                                 horizontalTitleGap: 0.0,
-
                                 child: CheckboxListTile(
                                   //dense:true,
-                                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                                  contentPadding: EdgeInsets.only(left: 10.0,right: 10.0,bottom: 0.0,top: 0.0),
+                                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                                  contentPadding:
+                                      const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 0.0, top: 0.0),
                                   title: Text(section.name),
                                   //activeColor: Colors.blue,
                                   controlAffinity: ListTileControlAffinity.trailing,
@@ -518,9 +523,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   ],
                 ),
 
-
                 //Section Custom List
-
 
                 // Section Multi-Select Checkbox Dropdown
                 // SearchChoices.multiple(
@@ -576,10 +579,11 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 //   isExpanded: true,
                 // ),
 
-               //Student List Custom
+                //Student List Custom
                 const Padding(
-                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12,bottom:0),
-                  child: Text("Students *",
+                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12, bottom: 0),
+                  child: Text(
+                    "Students *",
                     style: TextStyle(
                       fontSize: 15.0,
 
@@ -596,24 +600,24 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           onPressed: toggleSelectAll,
                           child: Text(
                             selectAll ? 'Deselect All' : 'Select All',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.blue,
                             ),
                           ),
                         ),
                         Text(
                           'Selected: ${selectedIds.length}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                     Container(
-                      constraints: BoxConstraints(maxHeight: 200),
+                      constraints: const BoxConstraints(maxHeight: 200),
                       //height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFD3D3D3)),
+                        border: Border.all(color: const Color(0xFFD3D3D3)),
                       ),
                       child: SingleChildScrollView(
                         child: Container(
@@ -624,11 +628,11 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             children: students.map((student) {
                               return ListTileTheme(
                                 horizontalTitleGap: 0.0,
-
                                 child: CheckboxListTile(
                                   //dense:true,
-                                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                                  contentPadding: EdgeInsets.only(left: 10.0,right: 10.0,bottom: 0.0,top: 0.0),
+                                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                                  contentPadding:
+                                      const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 0.0, top: 0.0),
                                   title: Text(student.name),
                                   //activeColor: Colors.blue,
                                   controlAffinity: ListTileControlAffinity.trailing,
@@ -711,7 +715,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   },
                   dialogBox: false,
                   isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
+                  menuConstraints: BoxConstraints.tight(const Size.fromHeight(350)),
                 ),
 
                 //Employee Dropdown
@@ -729,9 +733,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   },
                   dialogBox: false,
                   isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
+                  menuConstraints: BoxConstraints.tight(const Size.fromHeight(350)),
                 ),
-
 
                 // Assignment Details - HTML Text Editor
 
@@ -768,9 +771,10 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 // ),
                 //
 
-                Padding(
+                const Padding(
                   padding: EdgeInsets.all(12), //apply padding to all four sides
-                  child: Text("Assignment Details :",
+                  child: Text(
+                    "Assignment Details :",
                     style: TextStyle(
                       fontSize: 15.0,
 
@@ -779,23 +783,20 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   ),
                 ),
 
-
-                SizedBox(height: 10.0),
+                const SizedBox(height: 10.0),
 
                 HtmlEditor(
                   controller: controller,
-                  htmlEditorOptions: HtmlEditorOptions(
+                  htmlEditorOptions: const HtmlEditorOptions(
                     hint: 'Please enter assignment details...',
                     shouldEnsureVisible: true,
-                    autoAdjustHeight:true,
+                    autoAdjustHeight: true,
                     //initialText: "<p>text content initial, if any</p>",
                   ),
-                  otherOptions: OtherOptions(
-                    //height: 400,
-                  ),
-
-
-                  htmlToolbarOptions: HtmlToolbarOptions(
+                  otherOptions: const OtherOptions(
+                      //height: 400,
+                      ),
+                  htmlToolbarOptions: const HtmlToolbarOptions(
                     defaultToolbarButtons: [
                       StyleButtons(),
                       //ParagraphButtons(lineHeight: false, caseConverter: false),
@@ -811,9 +812,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                     customToolbarInsertionIndices: [2, 5],
                     toolbarPosition: ToolbarPosition.aboveEditor, //by default
                     toolbarType: ToolbarType.nativeExpandable,
-
                   ),
-
                 ),
 
                 // TextFormField(
@@ -834,13 +833,13 @@ class _AssignmentFormState extends State<AssignmentForm> {
 
                 // Start Date - DatePicker
                 ListTile(
-                  title: Text('Start Date'),
+                  title: const Text('Start Date'),
                   subtitle: Text(
                     startDate != null
                         ? DateFormat('dd/MM/yyyy').format(startDate!) // Format date as dd/MM/yyyy
                         : 'Select a date',
                   ),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: const Icon(Icons.calendar_today),
                   onTap: () async {
                     final DateTime? pickedDate = await showDatePicker(
                       context: context,
@@ -855,17 +854,17 @@ class _AssignmentFormState extends State<AssignmentForm> {
                     }
                   },
                 ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
+                Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
 
                 // End Date - DatePicker
                 ListTile(
-                  title: Text('End Date'),
+                  title: const Text('End Date'),
                   subtitle: Text(
                     endDate != null
                         ? DateFormat('dd/MM/yyyy').format(endDate!) // Format date as dd/MM/yyyy
                         : 'Select a date',
                   ),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: const Icon(Icons.calendar_today),
                   onTap: () async {
                     final DateTime? pickedDate = await showDatePicker(
                       context: context,
@@ -880,12 +879,12 @@ class _AssignmentFormState extends State<AssignmentForm> {
                     }
                   },
                 ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
+                Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
 
                 // Active Checkbox
                 CheckboxListTile(
-                  contentPadding: EdgeInsets.only(left: 10.0, top: 8.0, right: 8,bottom:8),
-                  title: Text('  Active'),
+                  contentPadding: const EdgeInsets.only(left: 10.0, top: 8.0, right: 8, bottom: 8),
+                  title: const Text('  Active'),
                   value: isActive,
                   onChanged: (bool? newValue) {
                     setState(() {
@@ -897,8 +896,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 //file
 
                 const Padding(
-                  padding: EdgeInsets.only(left: 20.0, top: 12.0, right: 12,bottom:0),
-                   child: Text("Upload Files :",
+                  padding: EdgeInsets.only(left: 20.0, top: 12.0, right: 12, bottom: 0),
+                  child: Text(
+                    "Upload Files :",
                     style: TextStyle(
                       fontSize: 15.0,
 
@@ -908,12 +908,12 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 ),
 
                 Card(
-                  margin: EdgeInsets.all(10.0),
+                  margin: const EdgeInsets.all(10.0),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             primary: Colors.green,
@@ -922,48 +922,46 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             elevation: 3,
                             // shape: RoundedRectangleBorder(
                             //     borderRadius: BorderRadius.circular(32.0)),
-                            minimumSize: Size(280, 40), //////// HERE
+                            minimumSize: const Size(280, 40), //////// HERE
                           ),
                           onPressed: _openFileExplorer,
-                          child: Text('Browse'),
+                          child: const Text('Browse'),
                         ),
-                        Text('Supported file .jpg,.jpeg,.png,.doc,.docx,.pdf',style: TextStyle(color: Colors.red),),
+                        const Text(
+                          'Supported file .jpg,.jpeg,.png,.doc,.docx,.pdf',
+                          style: TextStyle(color: Colors.red),
+                        ),
                         //Text('Upload Files (Max 3)'),
                         // Text(
                         //   'Selected Files:',
                         //   style: TextStyle(fontSize: 18),
                         // ),
-                        SizedBox(height: 8.0),
-                        if( _selectedFiles.isNotEmpty)
+                        const SizedBox(height: 8.0),
+                        if (_selectedFiles.isNotEmpty)
                           DataTable(
                             border: TableBorder.all(
-                              width: 1.0,
-                              color:Color(0xFFD3D3D3),
-                            style: BorderStyle.solid
-                            ),
+                                width: 1.0, color: const Color(0xFFD3D3D3), style: BorderStyle.solid),
                             columns: [
-                              DataColumn(
+                              const DataColumn(
                                 label: Text('Filename'),
                               ),
-                              DataColumn(
+                              const DataColumn(
                                 label: Text('Delete'),
                               ),
                             ],
                             rows: List<DataRow>.generate(
                               _selectedFiles.length,
-                                  (index) =>
-                                  DataRow(
-                                    cells: [
-                                      DataCell(Text(path.basename(
-                                          _selectedFiles[index].path))),
-                                      DataCell(
-                                        IconButton(
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () => _deleteFile(index),
-                                        ),
-                                      ),
-                                    ],
+                              (index) => DataRow(
+                                cells: [
+                                  DataCell(Text(path.basename(_selectedFiles[index].path))),
+                                  DataCell(
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () => _deleteFile(index),
+                                    ),
                                   ),
+                                ],
+                              ),
                             ),
                           ),
 
@@ -988,17 +986,16 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pink, // Background color
                           ),
-                          child: Text('Upload'),
+                          child: const Text('Upload'),
                         ),
 
-                        SizedBox(height: 12.0),
+                        const SizedBox(height: 12.0),
                       ],
                     ),
                   ),
                 ),
 
                 // File Upload
-
 
                 // Save Button
                 // ElevatedButton(
@@ -1016,22 +1013,19 @@ class _AssignmentFormState extends State<AssignmentForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-
                 ElevatedButton(
                   onPressed: () {
                     // Handle save button press
                     saveForm();
                   },
-                  child: Text('Save'),
+                  child: const Text('Save'),
                 ),
-
                 ElevatedButton(
                   onPressed: () {
                     // Handle cancel button press
                     cancelForm();
-
                   },
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
                   ),
@@ -1052,4 +1046,3 @@ class _AssignmentFormState extends State<AssignmentForm> {
     );
   }
 }
-

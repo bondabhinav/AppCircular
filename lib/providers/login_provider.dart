@@ -1,16 +1,20 @@
-import 'package:flexischool/common/webService.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../common/constants.dart';
+
+import 'package:flexischool/common/api_service.dart';
+import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/student/student_login_response.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/user_model.dart';
 import '../utils/helpers.dart';
 
 enum LoginStatus { notLoggedIn, loggedIn }
 
 class LoginProvider extends ChangeNotifier {
+  final apiService = ApiService();
   String _userName = '';
   int _employee_id = 0;
   int _employeeCode = 0;
@@ -73,6 +77,8 @@ class LoginProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("user_details");
     prefs.remove("global_login_type");
+    prefs.remove("student_data");
+    WebService.studentLoginData = null;
     //prefs.remove("global_school_url");
 
     _userName = '';
@@ -97,7 +103,7 @@ class LoginProvider extends ChangeNotifier {
       print(userInfo);
 
       final empLogo = prefs.getString('global_school_logo');
-      String profileLogo = empLogo! + "employee/" + userInfo['PHOTO'];
+      String profileLogo = "${empLogo!}employee/" + userInfo['PHOTO'];
 
       _userName = userInfo['USER_NAME'];
       _employee_id = userInfo['EMPLOYEE_ID'];
@@ -115,6 +121,7 @@ class LoginProvider extends ChangeNotifier {
 
   //Login Validate
   Future loginValidate(String _uname, String _pass) async {
+    debugPrint('enter login teacher');
     var result;
     var requestedData = {"USER_LOGIN": _uname, "USER_PASSWORD": _pass};
 
@@ -126,7 +133,7 @@ class LoginProvider extends ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse(schoolBaseUrl! + 'EmployeeLogin/GetteacherLogin'),
+        Uri.parse('${schoolBaseUrl!}EmployeeLogin/GetteacherLogin'),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
@@ -156,7 +163,7 @@ class LoginProvider extends ChangeNotifier {
 
         final empLogo = preferences.getString('global_school_logo');
 
-        String profileLogo = empLogo! + "employee/" + res['PHOTO'];
+        String profileLogo = "${empLogo!}employee/" + res['PHOTO'];
 
         //Store Local
 
@@ -186,11 +193,54 @@ class LoginProvider extends ChangeNotifier {
     } catch (e) {
       // _errorMessage = 'Error: $e';
       //return 'Something went wrong please try again.';
-      return result = {
-        'status': false,
-        'message': 'Invalid Login Credentials.',
-        'data': ''
-      };
+      return result = {'status': false, 'message': 'Invalid Login Credentials.', 'data': ''};
+    }
+  }
+
+  // student login
+
+  Future studentLogin(String _uname, String _pass) async {
+    debugPrint('enter login student');
+    var result;
+    var requestedData = {"STUD_USERID": _uname, "STUD_PASSWORD": _pass};
+
+    final prefs = await SharedPreferences.getInstance();
+    final schoolBaseUrl = prefs.getString('global_school_url');
+
+    var body = json.encode(requestedData);
+
+    try {
+      final response =
+          await apiService.loginPost(url: '${schoolBaseUrl!}StudentLogin/GetStudentLogin', data: requestedData);
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final loginResponse = StudentLoginResponse.fromJson(responseData);
+        debugPrint('responseData response ${responseData.toString()}');
+        debugPrint('loginResponse response ${loginResponse.toJson().toString()}');
+        WebService.setStudentLoginDetails(loginResponse);
+        WebService.studentLoginData = loginResponse;
+        notifyListeners();
+        debugPrint('if part');
+        return result = {
+          'status': true,
+          'message': 'You have successfully logged in!',
+          'data': json.encode(loginResponse.toJson())
+        };
+      } else {
+        debugPrint('else part');
+        //return 'Unexpected response: ${response.statusCode}';
+
+        return result = {
+          'status': false,
+          'message': 'Unexpected response: ${response.statusCode}',
+          'data': response
+        };
+      }
+    } catch (e) {
+      debugPrint('catch part');
+      // _errorMessage = 'Error: $e';
+      //return 'Something went wrong please try again.';
+      return result = {'status': false, 'message': 'Invalid Login Credentials.', 'data': ''};
     }
   }
 
