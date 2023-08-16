@@ -530,6 +530,9 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                       ShowSnackBar.successToast(
                                           context: context, showMessage: 'Circular created successfully');
                                       Navigator.pop(context);
+                                    }else{
+                                      ShowSnackBar.error(
+                                          context: context, showMessage: 'Something went wrong');
                                     }
                                   });
                                 }

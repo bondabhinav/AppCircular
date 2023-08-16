@@ -306,6 +306,8 @@ class AttendanceProvider extends ChangeNotifier {
       studentDetail.present = 'A';
     } else if (value == 'Half Day') {
       studentDetail.present = 'H';
+    }else if (value == 'Leave') {
+      studentDetail.present = 'L';
     }
 
     studentAttendanceList.map((item) {

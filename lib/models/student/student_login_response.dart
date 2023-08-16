@@ -7,15 +7,15 @@ class StudentLoginResponse {
     if (json['Table1'] != null) {
       table1 = <Table1>[];
       json['Table1'].forEach((v) {
-        table1!.add(new Table1.fromJson(v));
+        table1!.add(Table1.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.table1 != null) {
-      data['Table1'] = this.table1!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (table1 != null) {
+      data['Table1'] = table1!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -30,6 +30,7 @@ class Table1 {
   String? aDMNO;
   String? cLASSDESC;
   String? sECTIONDESC;
+  String? sTUDPHOTO;
 
   Table1(
       {this.aDMSTUDENTID,
@@ -39,6 +40,7 @@ class Table1 {
         this.cITYNAME,
         this.aDMNO,
         this.cLASSDESC,
+        this.sTUDPHOTO,
         this.sECTIONDESC});
 
   Table1.fromJson(Map<String, dynamic> json) {
@@ -50,18 +52,20 @@ class Table1 {
     aDMNO = json['ADM_NO'];
     cLASSDESC = json['CLASS_DESC'];
     sECTIONDESC = json['SECTION_DESC'];
+    sTUDPHOTO = json['STUD_PHOTO'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['ADM_STUDENT_ID'] = this.aDMSTUDENTID;
-    data['FROMSESSION'] = this.fROMSESSION;
-    data['TOSESSION'] = this.tOSESSION;
-    data['SESSION_ID'] = this.sESSIONID;
-    data['CITY_NAME'] = this.cITYNAME;
-    data['ADM_NO'] = this.aDMNO;
-    data['CLASS_DESC'] = this.cLASSDESC;
-    data['SECTION_DESC'] = this.sECTIONDESC;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['ADM_STUDENT_ID'] = aDMSTUDENTID;
+    data['FROMSESSION'] = fROMSESSION;
+    data['TOSESSION'] = tOSESSION;
+    data['SESSION_ID'] = sESSIONID;
+    data['CITY_NAME'] = cITYNAME;
+    data['ADM_NO'] = aDMNO;
+    data['CLASS_DESC'] = cLASSDESC;
+    data['SECTION_DESC'] = sECTIONDESC;
+    data['STUD_PHOTO'] = sTUDPHOTO;
     return data;
   }
 }

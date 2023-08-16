@@ -308,7 +308,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                                   model.updateAttendanceStatus(newValue!,
                                                       model.studentResponse!.aDMSTUDREGISTRATION![index]);
                                                 },
-                                                items: <String>['Present', 'Absent', 'Half Day']
+                                                items: <String>['Present', 'Absent', 'Half Day', 'Leave']
                                                     .map<DropdownMenuItem<String>>(
                                                   (String value) {
                                                     return DropdownMenuItem<String>(

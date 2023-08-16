@@ -1,3 +1,4 @@
+import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/student_detail_response.dart';
@@ -5,6 +6,7 @@ import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,8 +24,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   @override
   void initState() {
     studentDashboardProvider = StudentDashboardProvider();
+    studentDashboardProvider?.getStudentImageUrl();
     if (WebService.studentLoginData != null) {
       Constants.sessionId = WebService.studentLoginData!.table1!.first.sESSIONID!;
+      studentDashboardProvider?.getNotificationCount();
       studentDashboardProvider?.assignSessionValue();
       studentDashboardProvider?.getSessionData();
       studentDashboardProvider?.fetchStudentDetail();
@@ -39,7 +43,52 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         builder: (context, child) {
           return Consumer<StudentDashboardProvider>(builder: (context, model, _) {
             return Scaffold(
-              appBar: AppBar(title: const Text('Dashboard')),
+              appBar: AppBar(
+                title: const Text('Dashboard'),
+                actions: [
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications),
+                        onPressed: () {
+                          // if (model.notificationCountResponse != null &&
+                          //     model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! >
+                          //         0) {
+                          Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) => const StudentNotificationScreen()))
+                              .then((value) {
+                            model.getNotificationCount();
+                          });
+                          // }
+                        },
+                        iconSize: 25,
+                      ),
+                      if (model.notificationCountResponse != null &&
+                          model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! > 0)
+                        Positioned(
+                          right: 5,
+                          top: 5,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT
+                                  .toString(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
               drawer: (model.studentDetailResponse == null)
                   ? const SizedBox.shrink()
                   : Drawer(
@@ -55,22 +104,22 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                               horizontalTitleGap: 10,
                               onTap: () {},
                             ),
-                      ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Profile'),
-                        leading: const Icon(Icons.notifications_paused_rounded),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Change Session'),
-                        leading: const Icon(Icons.lock_reset),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () {},
-                      ),
+                      // ListTile(
+                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      //   title: const Text('Profile'),
+                      //   leading: const Icon(Icons.notifications_paused_rounded),
+                      //   minLeadingWidth: 10,
+                      //   horizontalTitleGap: 10,
+                      //   onTap: () {},
+                      // ),
+                      // ListTile(
+                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      //   title: const Text('Change Session'),
+                      //   leading: const Icon(Icons.lock_reset),
+                      //   minLeadingWidth: 10,
+                      //   horizontalTitleGap: 10,
+                      //   onTap: () {},
+                      // ),
                       ListTile(
                         visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                         title: const Text('Change Password'),
@@ -112,9 +161,21 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      const CircleAvatar(
+                                      CircleAvatar(
                                         radius: 42,
-                                        //  backgroundImage: NetworkImage(loginStore.photo),
+                                        backgroundImage: WebService
+                                                    .studentLoginData?.table1?.first.sTUDPHOTO ==
+                                                null
+                                            ? null
+                                            : NetworkImage(
+                                                '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}'),
+                                        child: WebService.studentLoginData?.table1?.first.sTUDPHOTO == null
+                                            ? const Icon(
+                                                Icons.account_circle,
+                                                color: Colors.blue,
+                                                size: 84, // Adjust the size as needed
+                                              )
+                                            : null,
                                       ),
                                       const SizedBox(
                                         width: 16,
@@ -239,9 +300,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const CircleAvatar(
-                //    backgroundImage: NetworkImage(data.photo),
+              CircleAvatar(
                 radius: 30,
+                backgroundImage: NetworkImage(
+                  '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}',
+                ),
               ),
               const SizedBox(width: 10),
               Text(

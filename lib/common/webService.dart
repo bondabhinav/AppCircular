@@ -17,15 +17,26 @@ class WebService {
     _preferences = await SharedPreferences.getInstance();
   }
 
+  static clearAllPref() async {
+   _preferences?.remove("user_details");
+   _preferences?.remove("global_login_type");
+   _preferences?.remove("student_data");
+   WebService.studentLoginData = null;
+  }
+
   static getSchoolUrl() async {
-    //Get School URL
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
-    return schoolBaseUrl!;
+    return schoolBaseUrl ?? '';
+  }
+
+  static getSchoolImageUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    final schoolBaseImageUrl = prefs.getString('global_school_image_url');
+    return schoolBaseImageUrl ?? '';
   }
 
   static getLoginType() async {
-    //Get School URL
     final prefs = await SharedPreferences.getInstance();
     final loginType = prefs.getString('global_login_type');
     return loginType!;

@@ -12,34 +12,39 @@ import 'package:flexischool/models/get_section_response.dart';
 import 'package:flexischool/models/request/student_request.dart';
 import 'package:flexischool/models/section_class_model.dart';
 import 'package:flexischool/models/student_response.dart';
+import 'package:flexischool/models/teacher/subject_response.dart';
 import 'package:flexischool/models/upload_doc_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
-import 'package:flexischool/utils/date_formater.dart';
 import 'package:flexischool/widgets/custom_checkbox.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
-final GetIt getIt = GetIt.instance;
+import '../../utils/date_formater.dart';
+import '../../utils/locator.dart';
 
-class CircularsProvider extends ChangeNotifier {
+class TeacherAssignmentProvider extends ChangeNotifier {
   final apiService = ApiService();
-  final ValueNotifier<bool> circularInfo = ValueNotifier<bool>(true);
   final ValueNotifier<bool> active = ValueNotifier<bool>(true);
   final ScrollController scrollController = ScrollController();
   GetClassResponse getClassResponse = GetClassResponse();
   GetSectionResponse? getSectionResponse;
   List<UploadDocResponse> docList = [];
   List<String> allFiles = [];
+  File? filePick;
+  var path;
 
   SectionClassResponse sectionClassResponse = SectionClassResponse();
   StudentResponse? studentResponse;
+  SubjectResponse? subjectResponse;
   FormFieldController<List<String>>? checkboxGroupValueController;
   List<String>? checkboxGroupValues;
   final loaderProvider = getIt<LoaderProvider>();
-  File? filePick;
-  var path;
+
+  QuillController quillController = QuillController.basic();
 
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
@@ -49,6 +54,10 @@ class CircularsProvider extends ChangeNotifier {
   int? _selectedClass;
 
   int? get selectedClass => _selectedClass;
+
+  int? _selectedSubject;
+
+  int? get selectedSubject => _selectedSubject;
 
   String selectedClassName = '';
   final List<int> _selectedSectionIds = [];
@@ -88,7 +97,7 @@ class CircularsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSelectedSection(int sectionId, bool isChecked) {
+  void updateSelectedSection(int sectionId, bool isChecked, int employeeId) {
     if (isChecked) {
       _selectedSectionIds.add(sectionId);
       lstSectionCircular.add({"SECTION_ID": sectionId});
@@ -98,16 +107,23 @@ class CircularsProvider extends ChangeNotifier {
     }
     if (selectedClass != null) {
       if (selectedSectionIds.isNotEmpty) {
+        _selectedSubject = null;
+        subjectResponse = null;
+        subjectResponse?.subject!.clear();
         getStudentData();
+        getSubjectApi(employeeId);
       } else {
+        _selectedSubject = null;
         studentResponse = null;
+        subjectResponse = null;
+        subjectResponse?.subject!.clear();
         studentResponse?.aDMSTUDREGISTRATION!.clear();
       }
     }
     notifyListeners();
   }
 
-  void updateSelectedClass(int? value) {
+  void updateSelectedClass(int? value, int employeeId) {
     _selectedClass = value;
     selectedClassName =
         getClassResponse.cLASSandSECTION!.firstWhere((element) => element.classId == value).cLASSDESC!;
@@ -116,6 +132,7 @@ class CircularsProvider extends ChangeNotifier {
     if (selectedClass != null) {
       if (_selectedSectionIds.isNotEmpty) {
         getStudentData();
+        getSubjectApi(employeeId);
       }
     }
     notifyListeners();
@@ -147,44 +164,26 @@ class CircularsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<CommonResponse> addCircularsData({required int teacherId}) async {
-    var commonResponse = CommonResponse();
+  Future<String> onImagePickCallback(File file) async {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final copiedFile = await file.copy('${appDocDir.path}/${basename(file.path)}');
+    return copiedFile.path.toString();
+  }
+
+  Future<String> onVideoPickCallback(File file) async {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final copiedFile = await file.copy('${appDocDir.path}/${basename(file.path)}');
+    return copiedFile.path.toString();
+  }
+
+  Future<void> loadFromAssets() async {
     try {
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-      loaderProvider.showLoader();
+      quillController = QuillController.basic();
       notifyListeners();
-      var data = {
-        "CIRCULAR_DATE": formattedDate,
-        "CIRCULAR_DESCRIPTION": descriptionController.text,
-        "EMPLOYEE_ID": teacherId,
-        "ACTIVE": active.value ? "Y" : "N",
-        "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate!),
-        "END_DATE": DateFormat('yyyy-MM-dd').format(selectedEndDate!),
-        "CLASS_ID": selectedClass,
-        "CIRCULAR_SUBJECT": subjectController.text,
-        "IS_APPLICABLETOPARENT": circularInfo.value ? "Y" : "N",
-        "lstsectionCircular": lstSectionCircular,
-        "lstStudentCircular": lstStudentCircular,
-        "lstStudentCircularinfo": docList,
-        "SESSION_ID":Constants.sessionId
-      };
-      log("Data======> $data");
-      final response = await apiService.post(url: Api.addCircularApi, data: data);
-      if (response.statusCode == 200) {
-        commonResponse = CommonResponse.fromJson(response.data);
-        loaderProvider.hideLoader();
-        notifyListeners();
-      } else {
-        loaderProvider.hideLoader();
-        notifyListeners();
-        return commonResponse;
-      }
-    } catch (e) {
-      loaderProvider.hideLoader();
+    } catch (error) {
+      quillController = QuillController.basic();
       notifyListeners();
     }
-    return commonResponse;
   }
 
   Future<void> fetchClassData({required int teacherId}) async {
@@ -262,6 +261,70 @@ class CircularsProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> getSubjectApi(int employeeId) async {
+    try {
+      var data = {
+        "EMPLOYEE_ID": employeeId,
+        "SESSION_ID": Constants.sessionId,
+        "CLASS_ID": selectedClass,
+        "lstsectionAssignment": selectedSectionIds
+            .map((sectionId) => SectionForSubject(sectionId: sectionId.toString()))
+            .toList(),
+      };
+      loaderProvider.showLoader();
+      final response = await apiService.post(url: Api.getSubjectApi, data: data);
+      if (response.statusCode == 200) {
+        subjectResponse = null;
+        subjectResponse = SubjectResponse.fromJson(response.data);
+        loaderProvider.hideLoader();
+        notifyListeners();
+      } else {
+        loaderProvider.hideLoader();
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      loaderProvider.hideLoader();
+      throw Exception('Failed to connect to the API');
+    }
+  }
+
+  void updateStartDate(DateTime pickedDate) {
+    selectedStartDate = pickedDate;
+    startDateController.text = DateTimeUtils.formatDate(pickedDate).toString();
+    notifyListeners();
+  }
+
+  void updateEndDate(DateTime pickedDate) {
+    selectedEndDate = pickedDate;
+    endDateController.text = DateTimeUtils.formatDate(pickedDate).toString();
+    notifyListeners();
+  }
+
+  void updateSelectedSubject(int value) {
+    _selectedSubject = value;
+    notifyListeners();
+  }
+
+  void selectFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
+      allowMultiple: false,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      filePick = null;
+      _fileName = null;
+      path = result.files.first.path;
+      filePick = File(path!);
+      _fileName = result.files.first.name;
+      debugPrint("File name: ${result.files.first.name}");
+      debugPrint("File Path: $path");
+      debugPrint("pickedFiles: ${File(path)}");
+      notifyListeners();
+    }
+  }
+
   Future<void> uploadFile() async {
     debugPrint('upload ${File(path).path}');
     try {
@@ -270,7 +333,7 @@ class CircularsProvider extends ChangeNotifier {
           '${selectedClassName.replaceAll(' ', '')}_${DateTime.now().millisecondsSinceEpoch}_${path.split('/').last}';
       debugPrint('upload fileName ----> $fileName');
       var request = http.MultipartRequest(
-          'POST', Uri.parse(Api.uploadCircularImageDocFileApi));
+          'POST', Uri.parse(Api.uploadAssignmentImageDocFileApi));
       request.headers['Content-Type'] = 'multipart/form-data; boundary=<calculated when request is sent>';
       request.headers['Accept'] = '*/*';
       request.files.add(await http.MultipartFile.fromPath('', File(path).path, filename: fileName));
@@ -322,7 +385,7 @@ class CircularsProvider extends ChangeNotifier {
   Future<void> deleteFile(String filename, int index) async {
     try {
       loaderProvider.showLoader();
-      final response = await apiService.post(url: Api.deleteCircularFileApi, data: {"FILE_NAME": filename});
+      final response = await apiService.post(url: Api.deleteAssignmentFileApi, data: {"FILE_NAME": filename});
       if (response.statusCode == 200) {
         debugPrint('data =====> ${response.data}');
         if (response.data == "TRUE") {
@@ -344,51 +407,64 @@ class CircularsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> selectDate({required BuildContext context, required bool startDate}) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2094),
-    );
-
-    if (pickedDate != null) {
-      if (startDate) {
-        selectedStartDate = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-        );
-        startDateController.text = DateTimeUtils.formatDate(selectedStartDate!).toString();
-      } else {
-        selectedEndDate = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-        );
-        endDateController.text = DateTimeUtils.formatDate(selectedEndDate!).toString();
-      }
-      notifyListeners();
-    }
+  String getContent() {
+    final doc = quillController.document;
+    log('testing ==>  ${jsonEncode(doc.toDelta().toJson())}');
+    return jsonEncode(doc.toDelta().toJson());
   }
 
-  void selectFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-      allowMultiple: false,
-    );
+  Future<CommonResponse> addAssignmentData({required int employeeId}) async {
+    var commonResponse = CommonResponse();
+    loaderProvider.showLoader();
+    notifyListeners();
 
-    if (result != null && result.files.isNotEmpty) {
-      filePick = null;
-      _fileName = null;
-      path = result.files.first.path;
-      filePick = File(path!);
-      _fileName = result.files.first.name;
-      debugPrint("File name: ${result.files.first.name}");
-      debugPrint("File Path: $path");
-      debugPrint("pickedFiles: ${File(path)}");
+    var jsonData = {
+      "ASSIGNMENT_DATE": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      "ASSIGNMENT_DETAILS": getContent(),
+      "EMPLOYEE_ID": employeeId,
+      "ACTIVE": active.value ? "Y" : "N",
+      "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate!),
+      "END_DATE": DateFormat('yyyy-MM-dd').format(selectedEndDate!),
+      "SUBJECT_ID": selectedSubject,
+      "CLASS_ID": selectedClass,
+      "lstsectionAssignment": lstSectionCircular,
+      "lstStudentAssignment": lstStudentCircular,
+      "lstStudentAssignmentinfo": docList,
+      "SESSION_ID": Constants.sessionId
+    };
+
+    log("Data======> $jsonData");
+    try {
+      final response = await apiService.post(url: Api.addAssignmentApi, data: jsonData);
+      if (response.statusCode == 200) {
+        commonResponse = CommonResponse.fromJson(response.data);
+        loaderProvider.hideLoader();
+        notifyListeners();
+      } else {
+        loaderProvider.hideLoader();
+        notifyListeners();
+        return commonResponse;
+      }
+    } catch (e) {
+      loaderProvider.hideLoader();
       notifyListeners();
     }
+    return commonResponse;
+  }
+}
+
+class SectionForSubject {
+  String? sectionId;
+
+  SectionForSubject({this.sectionId});
+
+  SectionForSubject.fromJson(Map<String, dynamic> json) {
+    sectionId = json['SECTION_ID'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['SECTION_ID'] = sectionId;
+    return data;
   }
 }

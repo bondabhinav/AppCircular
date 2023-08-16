@@ -39,6 +39,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   Duration _showDuration = const Duration(seconds: 2);
   String _schoolName = '';
   late String _logo = '';
+  String userType = '';
 
   //TextField Controller
   // TextEditingController _usernameController = TextEditingController(text: 'E00031');
@@ -80,30 +81,21 @@ class _LoginWidgetState extends State<LoginWidget> {
 
     if (type == 'S') {
       loginStore.studentLogin(_usernameController.text, _passwordController.text).then((response) {
-        //API Response
-        //print(response);
-        if (response['status'] == true) {
+        if (response == 'You have successfully logged in!') {
           loginStore.loginInStatus = LoginStatus.loggedIn;
           loginStore.notify();
-
-          //print(loginStore.userName);
-
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response['message'])),
+            SnackBar(content: Text(response)),
           );
 
           Navigator.pushReplacementNamed(context, '/studentDashboard');
         } else {
-          _errorMessage = response['message'];
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorMessage)),
+            SnackBar(content: Text(response)),
           );
         }
-
-        //API Response
       }).catchError((e) {
         setState(() {
-          // _errorMessage = 'Error: $e';
           _errorMessage = 'Invalid Login Credentials.';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(_errorMessage)),
@@ -162,6 +154,8 @@ class _LoginWidgetState extends State<LoginWidget> {
   Future<void> checkSchoolUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('global_school_url');
+    userType = await WebService.getLoginType();
+    setState(() {});
     String schoolUrl = "";
     if (data != null) {
       schoolUrl = data;
@@ -231,195 +225,211 @@ class _LoginWidgetState extends State<LoginWidget> {
 
     // print(LoginStore.loginInStatus.name);
 
-    return Container(
-      alignment: Alignment.center,
-      margin: const EdgeInsets.only(top: 0.0),
-      //color: Colors.white,
-      child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(10.0),
-              children: <Widget>[
-                Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      _schoolName,
-                      style: const TextStyle(
-                          //color: Colors.blue,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Montserrat Regular",
-                          fontSize: 25),
-                    )),
-                Container(
-                    alignment: Alignment.center,
-                    //padding: const EdgeInsets.all(10),
-                    child: _is_logo_loading
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: Colors.blue,
-                            ),
-                          )
-                        : Image.network(
-                            _logo,
-                            width: 150,
-                          )),
-                Container(
-                    alignment: Alignment.center,
-                    //padding: const EdgeInsets.all(10),
-                    child: const Text(
-                      'Welcome',
-                      style: TextStyle(
-                          //color: Colors.blue,
-                          fontFamily: "Montserrat Regular",
-                          fontWeight: FontWeight.w500,
-                          fontSize: 20),
-                    )),
-                Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    child: const Text(
-                      'Sign in to continue!',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "Montserrat Regular",
-                      ),
-                    )),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  //margin: EdgeInsets.only(top:50.0),
-                  child: TextFormField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                      isDense: true,
-                      // Added this
-                      contentPadding: EdgeInsets.all(14),
-                      prefixIcon: Icon(Icons.account_circle, size: 25),
-                      labelText: 'User ID',
-                      errorStyle: TextStyle(
-                        fontFamily: "Montserrat Regular",
-                        fontSize: 14.0,
-                      ),
-                      //hintText: 'User ID',
-                    ),
-                    validator: (value) {
-                      errorMessage('');
-                      if (value == null || value.isEmpty) {
-                        noteFocus.requestFocus();
-                        return 'Please enter user Id';
-                      }
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  child: TextFormField(
-                    //obscureText: true,
-                    obscureText: _obscureText,
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                      isDense: true,
-                      // Added this
-                      contentPadding: const EdgeInsets.all(14),
-                      prefixIcon: const Icon(Icons.lock, size: 25),
-                      labelText: 'Password',
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                          _showPassword();
-                        },
-                        child: Icon(
-                          _obscureText ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      errorStyle: const TextStyle(
-                        fontFamily: "Montserrat Regular",
-                        fontSize: 14.0,
-                      ),
-                    ),
-                    validator: (value) {
-                      errorMessage('');
-                      if (value == null || value.isEmpty) {
-                        noteFocus.requestFocus();
-                        return 'Please enter Password';
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20.0),
-                Container(
-                    height: 50,
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: ElevatedButton(
-                      child: _isLoading
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+            onPressed: () {
+              WebService.clearAllPref();
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+            icon: const Icon(Icons.arrow_back_ios),
+            color: Colors.black),
+      ),
+      body: Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.only(top: 0.0),
+        //color: Colors.white,
+        child: Padding(
+            padding: const EdgeInsets.all(0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(10.0),
+                children: <Widget>[
+                  Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        _schoolName,
+                        style: const TextStyle(
+                            //color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Montserrat Regular",
+                            fontSize: 25),
+                      )),
+                  Container(
+                      alignment: Alignment.center,
+                      //padding: const EdgeInsets.all(10),
+                      child: _is_logo_loading
                           ? const SizedBox(
                               height: 16,
                               width: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 1.5,
-                                color: Colors.white,
+                                color: Colors.blue,
                               ),
                             )
-                          : const Text('Login'),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _isLoading ? null : _submitForm(context);
-                        }
-
-                        //Navigator.pushNamed(context, "/dashboard");
-                      },
-                    )),
-                TextButton(
-                  onPressed: () {
-                    //forgot password screen
-                  },
-                  child:
-                      const Text('Forgot Password', style: TextStyle(decoration: TextDecoration.underline)),
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Text(
-                  '$_errorMessage',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.red,
-                  ),
-                ),
-                /*
-                Row(
-                  children: <Widget>[
-                    const Text('Does not have account?'),
-                    TextButton(
+                          : Image.network(
+                              _logo,
+                              width: 150,
+                            )),
+                  Container(
+                      alignment: Alignment.center,
+                      //padding: const EdgeInsets.all(10),
                       child: const Text(
-                        'Sign in',
-                        style: TextStyle(fontSize: 20),
+                        'Welcome',
+                        style: TextStyle(
+                            //color: Colors.blue,
+                            fontFamily: "Montserrat Regular",
+                            fontWeight: FontWeight.w500,
+                            fontSize: 20),
+                      )),
+                  Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        userType == 'S'
+                            ? 'Sign in as student to continue!'
+                            : 'Sign in as teacher to continue!',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: "Montserrat Regular",
+                        ),
+                      )),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    //margin: EdgeInsets.only(top:50.0),
+                    child: TextFormField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                        isDense: true,
+                        // Added this
+                        contentPadding: EdgeInsets.all(14),
+                        prefixIcon: Icon(Icons.account_circle, size: 25),
+                        labelText: 'User ID',
+                        errorStyle: TextStyle(
+                          fontFamily: "Montserrat Regular",
+                          fontSize: 14.0,
+                        ),
+                        //hintText: 'User ID',
                       ),
-                      onPressed: () {
-
+                      validator: (value) {
+                        errorMessage('');
+                        if (value == null || value.isEmpty) {
+                          noteFocus.requestFocus();
+                          return 'Please enter user Id';
+                        }
                       },
-                    )
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),*/
-              ],
-            ),
-          )),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    child: TextFormField(
+                      //obscureText: true,
+                      obscureText: _obscureText,
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                        isDense: true,
+                        // Added this
+                        contentPadding: const EdgeInsets.all(14),
+                        prefixIcon: const Icon(Icons.lock, size: 25),
+                        labelText: 'Password',
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                            _showPassword();
+                          },
+                          child: Icon(
+                            _obscureText ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        errorStyle: const TextStyle(
+                          fontFamily: "Montserrat Regular",
+                          fontSize: 14.0,
+                        ),
+                      ),
+                      validator: (value) {
+                        errorMessage('');
+                        if (value == null || value.isEmpty) {
+                          noteFocus.requestFocus();
+                          return 'Please enter Password';
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  Container(
+                      height: 50,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: ElevatedButton(
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Login'),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _isLoading ? null : _submitForm(context);
+                          }
+
+                          //Navigator.pushNamed(context, "/dashboard");
+                        },
+                      )),
+                  TextButton(
+                    onPressed: () {
+                      //forgot password screen
+                    },
+                    child:
+                        const Text('Forgot Password', style: TextStyle(decoration: TextDecoration.underline)),
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  Text(
+                    '$_errorMessage',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      fontFamily: "Montserrat Regular",
+                      color: Colors.red,
+                    ),
+                  ),
+                  /*
+                  Row(
+                    children: <Widget>[
+                      const Text('Does not have account?'),
+                      TextButton(
+                        child: const Text(
+                          'Sign in',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        onPressed: () {
+
+                        },
+                      )
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.center,
+                  ),*/
+                ],
+              ),
+            )),
+      ),
     );
   }
 }

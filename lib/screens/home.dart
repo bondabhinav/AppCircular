@@ -7,7 +7,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       //appBar: AppBar(
       //  title: const Text('Flexi School'),
       // ),
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var size = MediaQuery.of(context).size;
 
     // style
-    var cardTextStyle = TextStyle(
+    var cardTextStyle = const TextStyle(
         fontFamily: "Montserrat Regular",
         fontSize: 14,
         fontWeight: FontWeight.bold,
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             margin: const EdgeInsets.only(top :0.0),
             height: size.height * .3,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage("assets/images/school-clip-art-86.png"),
                 //image: NetworkImage(
@@ -65,8 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          SizedBox(height: 20.0),
-          Text(
+          const SizedBox(height: 20.0),
+          const Text(
             'Flexi School',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -98,9 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         //   height: 128,
                         // ),
                         //Image.('https://image.flaticon.com/icons/svg/1904/1904425.png',height: 128,),
-                        Image(image: AssetImage('assets/images/school-bus.png'),height: 80,),
+                        const Image(image: AssetImage('assets/images/school-bus.png'),height: 80,),
                         //Icon(Icons.lock_reset,size: 80.0,color:Colors.blue,),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Text(
                           'I am a Bus Driver',
                           style: cardTextStyle,
@@ -127,8 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Image(image: AssetImage('assets/images/teacher.png'),height: 80,),
-                        SizedBox(height: 10.0),
+                        const Image(image: AssetImage('assets/images/teacher.png'),height: 80,),
+                        const SizedBox(height: 10.0),
                         Text(
                           'I am a Teacher',
                           style: cardTextStyle,
@@ -151,8 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Image(image: AssetImage('assets/images/parents.png'),height: 80,),
-                        SizedBox(height: 10.0),
+                        const Image(image: AssetImage('assets/images/parents.png'),height: 80,),
+                        const SizedBox(height: 10.0),
                         Text(
                           'I am a \nParent/Student',
                           style: cardTextStyle,
@@ -176,8 +176,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Image(image: AssetImage('assets/images/immigration.png'),height: 80,),
-                        SizedBox(height: 10.0),
+                        const Image(image: AssetImage('assets/images/immigration.png'),height: 80,),
+                        const SizedBox(height: 10.0),
                         Text(
                           'I am a \nManagement',
                           textAlign: TextAlign.center,

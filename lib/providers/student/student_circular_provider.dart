@@ -4,6 +4,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
+import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/student_circular_doc_list_respnose.dart';
 import 'package:flexischool/models/student/student_circular_list_response.dart';
@@ -32,7 +33,10 @@ class StudentCircularProvider extends ChangeNotifier {
   Future<void> fetchStudentCircularData() async {
     try {
       loaderProvider.showLoader();
-      var data = {"STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID};
+      var data = {
+        "STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID,
+        "SESSION_ID": Constants.sessionId
+      };
       final response = await apiService.post(url: Api.studentCircularListApi, data: data);
       if (response.statusCode == 200) {
         studentCircularListResponse = StudentCircularListResponse.fromJson(response.data);
@@ -196,7 +200,7 @@ class StudentCircularProvider extends ChangeNotifier {
     try {
       final dio = Dio();
       await dio.download(
-        Api.imageBaseUrl + url,
+        '${Api.imageBaseUrl}/$url',
         savePath,
         onReceiveProgress: (received, total) async {
           int progress = ((received / total) * 100).toInt();

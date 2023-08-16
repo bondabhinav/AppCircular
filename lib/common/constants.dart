@@ -5,6 +5,7 @@ class Constants {
   static const int maxItems = 10;
   static const String baseUrl = 'https://androidschool.sapinfotek.com/API/Version/';
   static int sessionId = 0;
+  static String teacherSessionYear = '';
   static String currentDate = getCurrentDate();
 
   static String getCurrentDate() {

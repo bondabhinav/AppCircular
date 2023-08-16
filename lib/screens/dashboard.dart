@@ -1,112 +1,54 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:flexischool/common/api_urls.dart';
-import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/common/webService.dart';
-import 'package:flexischool/screens/assignmentform.dart';
+import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
+import 'package:flexischool/screens/student/student_assignment_screen.dart';
 import 'package:flexischool/screens/student/student_circular.dart';
 import 'package:flexischool/screens/teacher/attendance_screen.dart';
+import 'package:flexischool/screens/teacher/teacher_assignment_list_screen.dart';
 import 'package:flexischool/screens/teacher/teacher_circular_list_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/login_provider.dart';
 
-class DropdownSession {
-  final int SESSION_ID;
-  final String START_DATE;
-  final String END_DATE;
-  final String? ACTIVE;
-
-  DropdownSession(
-      {required this.SESSION_ID, required this.START_DATE, required this.END_DATE, required this.ACTIVE});
-}
-
 class MyDropdownWidget extends StatefulWidget {
-  const MyDropdownWidget({super.key});
+  final TeacherDashboardProvider model;
+
+  const MyDropdownWidget({super.key, required this.model});
 
   @override
   _MyDropdownWidgetState createState() => _MyDropdownWidgetState();
 }
 
 class _MyDropdownWidgetState extends State<MyDropdownWidget> {
-  List sData = [];
-  var selectedDropdownItem;
-  var activeVal;
-
-  Future<void> sessionData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final schoolBaseUrl = prefs.getString('global_school_url');
-    debugPrint('schoolBaseUrl-----> $schoolBaseUrl ');
-    var requestedData = {"SCHOOL_ID": "1"};
-    var body = json.encode(requestedData);
-    final response = await http.post(
-      Uri.parse('${schoolBaseUrl!}SessionSearch/SessionSearch'),
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: body,
-    );
-    if (response.statusCode == 200) {
-      final data1 = json.decode(response.body);
-      log("session data ===> $data1");
-      final data = data1['SessionDD'];
-
-      setState(() {
-        sData = data;
-      });
-      await Future.delayed(const Duration(milliseconds: 1000));
-    } else {}
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    sessionData();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final activeItem = sData.where((item) => item['ACTIVE'] == 'Y').toList();
-    if (activeItem.isNotEmpty) {
-      activeVal = (activeItem.first)['SESSION_ID'];
-      selectedDropdownItem ??= activeVal;
-    }
-
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(right: 20.0),
       child: DropdownButton(
-          items: sData.map((item) {
-            var itemDate = (item['START_DATE']).substring(0, 4) + '-' + (item['END_DATE']).substring(0, 4);
-            //print('inside');
-            //print(item['SESSION_ID']);
+          items: widget.model.teacherSessionResponse?.sessionDD?.map((item) {
+            var itemDate = '${(item.sTARTDATE)!.substring(0, 4)}-${(item.eNDDATE)!.substring(0, 4)}';
             return DropdownMenuItem(
-              value: item['SESSION_ID'],
+              value: item.sESSIONID,
               child: Text(itemDate),
             );
           }).toList(),
-          value: selectedDropdownItem,
+          value: widget.model.selectedTeacherSessionDropDownValue,
           isExpanded: true,
           elevation: 16,
           alignment: Alignment.center,
           onChanged: (newValue) {
-            setState(() {
-              selectedDropdownItem = newValue!;
-              Constants.sessionId = selectedDropdownItem;
-            });
-            debugPrint('session id ---> ${Constants.sessionId}');
+            widget.model.updateSession(newValue);
           }),
     );
   }
 }
 
 class CustomUserAccountsDrawerHeader extends StatelessWidget {
-  const CustomUserAccountsDrawerHeader({super.key});
+  final TeacherDashboardProvider model;
+
+  const CustomUserAccountsDrawerHeader({super.key, required this.model});
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +110,7 @@ class CustomUserAccountsDrawerHeader extends StatelessWidget {
           ),
           //SizedBox(height: 5),
           Text(
-            'Session : ${loginStore.session}',
+            'Session : ${model.sessionYear}',
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "Montserrat Regular",
@@ -196,107 +138,91 @@ class _DashboardState extends State<Dashboard> {
     Navigator.pushReplacementNamed(context, '/home');
   }
 
+  TeacherDashboardProvider? teacherDashboardProvider;
+
   @override
   void initState() {
-    sessionData();
+    teacherDashboardProvider = TeacherDashboardProvider();
+    teacherDashboardProvider?.getSessionData();
     super.initState();
-  }
-
-  Future<void> sessionData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final schoolBaseUrl = prefs.getString('global_school_url');
-    Api.baseUrl = schoolBaseUrl ?? "";
-    debugPrint('setup base url ----> ${Api.baseUrl}');
-    var requestedData = {"SCHOOL_ID": "1"};
-    var body = json.encode(requestedData);
-    final response = await http.post(
-      Uri.parse('${schoolBaseUrl!}SessionSearch/SessionSearch'),
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: body,
-    );
-    if (response.statusCode == 200) {
-      final data1 = json.decode(response.body);
-      log("session data ===> $data1");
-      final data = data1['SessionDD'];
-      final activeItem = data.where((item) => item['ACTIVE'] == 'Y').toList();
-      if (activeItem.isNotEmpty) {
-        Constants.sessionId = (activeItem.first)['SESSION_ID'];
-        setState(() {});
-      }
-      debugPrint('dashboard init session id ${Constants.sessionId}');
-      await Future.delayed(const Duration(milliseconds: 1000));
-    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const CustomUserAccountsDrawerHeader(),
-            ListTile(
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: const MyDropdownWidget(),
-              leading: const Icon(Icons.access_time),
-              minLeadingWidth: 10,
-              horizontalTitleGap: 10,
-              onTap: () {},
-            ),
-            ListTile(
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: const Text('Profile'),
-              leading: const Icon(Icons.notifications_paused_rounded),
-              minLeadingWidth: 10,
-              horizontalTitleGap: 10,
-              onTap: () {},
-            ),
-            ListTile(
-              //dense: true,
-              //contentPadding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: const Text('Change Session'),
-              leading: const Icon(Icons.lock_reset),
-              minLeadingWidth: 10,
-              horizontalTitleGap: 10,
-              onTap: () {},
-            ),
-            ListTile(
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: const Text('Change Password'),
-              leading: const Icon(Icons.lock),
-              minLeadingWidth: 10,
-              horizontalTitleGap: 10,
-              onTap: () {},
-            ),
-            ListTile(
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: const Text('Logout'),
-              leading: const Icon(Icons.logout),
-              minLeadingWidth: 10,
-              horizontalTitleGap: 10,
-              onTap: () {
-                logout(context);
-              },
-            ),
-          ],
-        ),
-      ),
-      body: const DashboardWidget(),
-    );
+    return ChangeNotifierProvider(
+        create: (_) => teacherDashboardProvider,
+        builder: (context, child) {
+          return Consumer<TeacherDashboardProvider>(builder: (context, model, _) {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: const Text('Dashboard'),
+              ),
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    CustomUserAccountsDrawerHeader(model: model),
+                    model.teacherSessionResponse == null
+                        ? const SizedBox()
+                        : ListTile(
+                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            title: MyDropdownWidget(model: model),
+                            leading: const Icon(Icons.access_time),
+                            minLeadingWidth: 10,
+                            horizontalTitleGap: 10,
+                            onTap: () {},
+                          ),
+                    // ListTile(
+                    //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    //   title: const Text('Profile'),
+                    //   leading: const Icon(Icons.notifications_paused_rounded),
+                    //   minLeadingWidth: 10,
+                    //   horizontalTitleGap: 10,
+                    //   onTap: () {},
+                    // ),
+                    // ListTile(
+                    //   //dense: true,
+                    //   //contentPadding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
+                    //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    //   title: const Text('Change Session'),
+                    //   leading: const Icon(Icons.lock_reset),
+                    //   minLeadingWidth: 10,
+                    //   horizontalTitleGap: 10,
+                    //   onTap: () {},
+                    // ),
+                    ListTile(
+                      visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      title: const Text('Change Password'),
+                      leading: const Icon(Icons.lock),
+                      minLeadingWidth: 10,
+                      horizontalTitleGap: 10,
+                      onTap: () {},
+                    ),
+                    ListTile(
+                      visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      title: const Text('Logout'),
+                      leading: const Icon(Icons.logout),
+                      minLeadingWidth: 10,
+                      horizontalTitleGap: 10,
+                      onTap: () {
+                        logout(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              body: DashboardWidget(model: model),
+            );
+          });
+        });
   }
 }
 
 class DashboardWidget extends StatefulWidget {
-  const DashboardWidget({Key? key}) : super(key: key);
+  final TeacherDashboardProvider model;
+
+  const DashboardWidget({Key? key, required this.model}) : super(key: key);
 
   @override
   State<DashboardWidget> createState() => _DashboardWidgetState();
@@ -378,7 +304,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             ),
                             //SizedBox(height: 10.0),
                             Text(
-                              'Session :  ${loginStore.session}',
+                              'Session : ${widget.model.sessionYear}',
                               style: const TextStyle(
                                 fontSize: 14.0,
                                 fontFamily: "Montserrat Regular",
@@ -511,7 +437,16 @@ class DashBoardList extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => AssignmentForm(
+                                builder: (context) => TeacherAssignmentListScreen(
+                                      employeeId: employeeId,
+                                    )));
+                      }
+                    } else if (type == 'S') {
+                      if (context.mounted) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => StudentAssignmentCalenderWithList(
                                       employeeId: employeeId,
                                     )));
                       }

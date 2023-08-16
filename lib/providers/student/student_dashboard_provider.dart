@@ -4,11 +4,13 @@ import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/student/notification_count_response.dart';
 import 'package:flexischool/models/student/session_list_response.dart';
 import 'package:flexischool/models/student/student_detail_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -16,7 +18,11 @@ class StudentDashboardProvider extends ChangeNotifier {
   final loaderProvider = getIt<LoaderProvider>();
   StudentDetailResponse? studentDetailResponse;
   SessionListResponse? sessionListResponse;
+  NotificationCountResponse? notificationCountResponse;
   final apiService = ApiService();
+  String _imageUrl = '';
+
+  String get imageUrl => _imageUrl;
   String? _message;
 
   String? _sessionYear;
@@ -57,6 +63,23 @@ class StudentDashboardProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> getNotificationCount() async {
+    var requestedData = {"STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID};
+    var body = json.encode(requestedData);
+    try {
+      final response = await apiService.post(
+        url: Api.notificationCountApi,
+        data: body,
+      );
+      if (response.statusCode == 200) {
+        notificationCountResponse = NotificationCountResponse.fromJson(response.data);
+        notifyListeners();
+      } else {}
+    } catch (e) {
+      debugPrint('Failed to connect to the API ${e.toString()}');
+    }
+  }
+
   Future<void> getSessionData() async {
     var requestedData = {"ADM_NO": WebService.studentLoginData?.table1?.first.aDMNO};
     var body = json.encode(requestedData);
@@ -89,6 +112,12 @@ class StudentDashboardProvider extends ChangeNotifier {
     final sessionData = WebService.studentLoginData?.table1?.first;
     _selectedSessionDropDownValue = sessionData?.sESSIONID!;
     _sessionYear = '${sessionData?.fROMSESSION} - ${sessionData?.tOSESSION}';
+    notifyListeners();
+  }
+
+  getStudentImageUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    _imageUrl = prefs.getString('global_school_logo')!;
     notifyListeners();
   }
 }

@@ -93,7 +93,7 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                           child: Text(
                                           model.message ?? "",
                                           style: const TextStyle(
-                                            fontSize: 25,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ))
@@ -197,7 +197,7 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                           child: Text(
                                           model.message ?? "",
                                           style: const TextStyle(
-                                            fontSize: 25,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ))
@@ -285,7 +285,6 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                     }
                                                   });
                                                 }
-                                                // });
                                               },
                                               showMoreOnTap: () {
                                                 showScrollableTextDialog(
@@ -351,9 +350,8 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-          border: Border.all(color: circular.fLAG == 'N' ? Colors.black : Colors.black.withOpacity(0.5)),
-          borderRadius: BorderRadius.circular(5)),
+      decoration:
+          BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -363,18 +361,16 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
             children: [
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+               //   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(right: 10),
-                  decoration: BoxDecoration(
-                      color: circular.fLAG == 'N' ? Colors.teal : const Color(0xff737EA9).withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(10)),
+                // decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
                   child: Text(circular.aPPCIRCULARSUBJECT ?? "",
-                      maxLines: 2,
+                      maxLines: 5,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Montserrat Regular",
-                        color: Colors.white,
+                        color: Colors.black,
                       )),
                 ),
               ),
@@ -382,11 +378,11 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
                       fontFamily: "Montserrat Regular",
-                      color: circular.fLAG == 'N' ? Colors.deepPurple : Colors.deepPurple.withOpacity(0.5),
+                      color: Colors.orange,
                     )),
               ),
             ],
@@ -395,11 +391,11 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
           Text(circular.aPPCIRCULARDESCRIPTION ?? "",
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.normal,
                 fontFamily: "Montserrat Regular",
-                color: circular.fLAG == 'N' ? Colors.black : Colors.black.withOpacity(0.8),
+                color: Colors.black,
               )),
           const SizedBox(height: 5),
           Row(
@@ -407,17 +403,16 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
               if (circular.lstCircularFile!.isNotEmpty)
                 InkWell(
                     onTap: documentOnTap,
-                    child: CircleAvatar(
-                        backgroundColor:
-                            circular.fLAG == 'N' ? Colors.deepPurple : Colors.blue.withOpacity(0.8),
+                    child: const CircleAvatar(
+                        backgroundColor: Colors.blue,
                         child: Icon(
                           Icons.cloud_download,
-                          color: circular.fLAG == 'N' ? Colors.white : Colors.white.withOpacity(0.6),
+                          color: Colors.white,
                         ))),
               const Spacer(),
               MaterialButton(
                 onPressed: showMoreOnTap,
-                color: circular.fLAG == 'N' ? Colors.deepPurple : Colors.blue.withOpacity(0.8),
+                color: Colors.blue,
                 child: const Text("View more",
                     style: TextStyle(
                       fontSize: 14,

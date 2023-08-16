@@ -1,8 +1,8 @@
-import 'package:flexischool/screens/schoolurl.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+import 'package:flexischool/common/api_urls.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -64,7 +64,11 @@ class UrlProvider extends ChangeNotifier {
 
         await preferences.setString('global_school_logo', schoolLogo);
 
-        await preferences.setString('global_school_BASE_URL', res['API_IMAGE']);
+        await preferences.setString('global_school_image_url', res['API_IMAGE']);
+
+        Api.baseUrl = res['API_URL'];
+        Api.imageBaseUrl = res['API_IMAGE'];
+        notifyListeners();
 
         return result = {
           'status': true,
@@ -84,11 +88,7 @@ class UrlProvider extends ChangeNotifier {
     } catch (e) {
       // _errorMessage = 'Error: $e';
       //return 'Something went wrong please try again.';
-      return result = {
-        'status': false,
-        'message': 'Something went wrong please try again.',
-        'data': ''
-      };
+      return result = {'status': false, 'message': 'Something went wrong please try again.', 'data': ''};
     }
   }
 

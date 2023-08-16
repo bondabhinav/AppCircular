@@ -1,30 +1,32 @@
-import 'package:flexischool/common/config.dart';
-import 'package:flexischool/models/teacher/teacher_circular_list_response.dart';
+import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/models/teacher/teacher_assignment_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
-import 'package:flexischool/providers/teacher/teacher_circular_list_provider.dart';
-import 'package:flexischool/screens/circulars_screen.dart';
+import 'package:flexischool/providers/teacher/teacher_assignment_list_provider.dart';
+import 'package:flexischool/screens/assignment_detail_screen.dart';
+import 'package:flexischool/screens/assignmentform.dart';
 import 'package:flexischool/utils/date_formater.dart';
 import 'package:flexischool/widgets/custom_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TeacherCircularListScreen extends StatefulWidget {
+class TeacherAssignmentListScreen extends StatefulWidget {
   final int employeeId;
 
-  const TeacherCircularListScreen({Key? key, required this.employeeId}) : super(key: key);
+  const TeacherAssignmentListScreen({Key? key, required this.employeeId}) : super(key: key);
 
   @override
-  State<TeacherCircularListScreen> createState() => _TeacherCircularListScreenState();
+  State<TeacherAssignmentListScreen> createState() => _TeacherAssignmentListScreenState();
 }
 
-class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
-  TeacherCircularListProvider? teacherCircularListProvider;
+class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScreen> {
+  TeacherAssignmentListProvider? teacherAssignmentListProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
   @override
   void initState() {
-    teacherCircularListProvider = TeacherCircularListProvider();
-    teacherCircularListProvider?.fetchTeacherCircularListData(
+    debugPrint('init called again ');
+    teacherAssignmentListProvider = TeacherAssignmentListProvider();
+    teacherAssignmentListProvider?.fetchTeacherAssignmentListData(
         employeeId: widget.employeeId, endDate: Constants.currentDate, fromDate: Constants.currentDate);
     super.initState();
   }
@@ -32,26 +34,26 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => teacherCircularListProvider,
+        create: (_) => teacherAssignmentListProvider,
         builder: (context, child) {
-          return Consumer<TeacherCircularListProvider>(builder: (context, model, _) {
+          return Consumer<TeacherAssignmentListProvider>(builder: (context, model, _) {
             return Scaffold(
-              backgroundColor: Colors.white,
               appBar: AppBar(
-                leading: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => Navigator.pop(context)),
                 centerTitle: true,
-                title: const Text('Circulars'),
+                title: const Text(
+                  'Assignment',
+                  style: TextStyle(color: Colors.white),
+                ),
+                leading: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios),
+                    color: Colors.white),
                 actions: [
                   IconButton(
                     onPressed: () {
                       model.getDateRange(context).then((value) {
                         if (value.isNotEmpty) {
-                          model.fetchTeacherCircularListData(
+                          model.fetchTeacherAssignmentListData(
                               employeeId: widget.employeeId,
                               endDate: model.endDate,
                               fromDate: model.startDate);
@@ -66,14 +68,9 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => CircularsScreen(
+                              builder: (context) => AssignmentForm(
                                     employeeId: widget.employeeId,
-                                  ))).then((value) {
-                        teacherCircularListProvider?.fetchTeacherCircularListData(
-                            employeeId: widget.employeeId,
-                            endDate: Constants.currentDate,
-                            fromDate: Constants.currentDate);
-                      });
+                                  )));
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.white,
@@ -113,8 +110,8 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                           ),
                         ),
                         Expanded(
-                          child: (model.teacherCircularListResponse == null ||
-                                  model.teacherCircularListResponse!.classlist == null)
+                          child: (model.teacherAssignmentListModel == null ||
+                                  model.teacherAssignmentListModel!.lstAssignment == null)
                               ? const SizedBox.shrink()
                               : model.message != null
                                   ? Center(
@@ -127,27 +124,19 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                     ))
                                   : ListView.builder(
                                       shrinkWrap: true,
-                                      itemCount: model.teacherCircularListResponse!.classlist!.length,
+                                      itemCount: model.teacherAssignmentListModel!.lstAssignment!.length,
                                       itemBuilder: (context, index) => listItem(
-                                          circular: model.teacherCircularListResponse!.classlist![index],
+                                          model: model,
+                                          assignment: model.teacherAssignmentListModel!.lstAssignment![index],
                                           documentOnTap: () {
-                                            // model
-                                            //     .fetchStudentDocumentData(
-                                            //         circularId: model.teacherCircularListResponse
-                                            //             .classlist![index].aPPCIRCULARID!)
-                                            //     .then((value) {
-                                            if (model.teacherCircularListResponse!.classlist![index]
+                                            if (model.teacherAssignmentListModel!.lstAssignment![index]
                                                 .lstCircularFile!.isNotEmpty) {
                                               showDialog(
                                                 context: context,
                                                 barrierDismissible: false,
                                                 builder: (BuildContext context) {
                                                   var data =
-                                                      model.teacherCircularListResponse!.classlist![index];
-                                                  // if (data.fLAG == "N") {
-                                                  //   model.updateCircularFlag(
-                                                  //       data.aPPCIRCULARID.toString());
-                                                  // }
+                                                      model.teacherAssignmentListModel!.lstAssignment![index];
                                                   return AlertDialog(
                                                     title: const Text('Document'),
                                                     content: SizedBox(
@@ -188,30 +177,17 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                                     ],
                                                   );
                                                 },
-                                              ).whenComplete(() {
-                                                // if (model.teacherCircularListResponse!.classlist![index]
-                                                //     .fLAG ==
-                                                //     "N") {
-                                                //   model.updateFlagStatus(model
-                                                //       .teacherCircularListResponse!.classlist![index]);
-                                                // }
-                                              });
+                                              );
                                             }
                                             //  });
                                           },
                                           showMoreOnTap: () {
-                                            showScrollableTextDialog(
-                                                model: model,
-                                                complete: () {
-                                                  // if (model.teacherCircularListResponse!.classlist![index]
-                                                  //     .fLAG ==
-                                                  //     "N") {
-                                                  //   model.updateFlagStatus(model
-                                                  //       .teacherCircularListResponse!.classlist![index]);
-                                                  // }
-                                                },
-                                                context: context,
-                                                data: model.teacherCircularListResponse!.classlist![index]);
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => AssignmentDetailScreen(
+                                                        assignmentId: model.teacherAssignmentListModel!
+                                                            .lstAssignment![index].aPPASSIGNMENTID!)));
                                           })),
                         ),
                       ],
@@ -225,38 +201,11 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
         });
   }
 
-  void showScrollableTextDialog(
-      {required BuildContext context,
-      required void Function() complete,
-      required TeacherCircularListProvider model,
-      required Classlist data}) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        //  if (data.fLAG == "N") model.updateCircularFlag(data.aPPCIRCULARID.toString());
-        return AlertDialog(
-          title: const Text('Description'),
-          content: SingleChildScrollView(
-            child: Text(data.aPPCIRCULARDESCRIPTION ?? ""),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    ).whenComplete(() {
-      complete();
-    });
-  }
-
   Widget listItem(
-      {required Classlist circular, void Function()? documentOnTap, void Function()? showMoreOnTap}) {
+      {void Function()? documentOnTap,
+      void Function()? showMoreOnTap,
+      required TeacherAssignmentListProvider model,
+      required LstAssignment assignment}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
@@ -270,36 +219,99 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(
-                child: Text(circular.aPPCIRCULARSUBJECT ?? "",
-                    maxLines: 2,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.black,
-                    )),
-              ),
-              //  const Spacer(),
-              Row(
-                children: [
-                  Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
+                child: Container(
+                  //   padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(right: 10),
+                  //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
+                  child: Text(assignment.sUBJECTNAME ?? "",
+                      maxLines: 2,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         fontFamily: "Montserrat Regular",
-                        color: Colors.orange,
+                        color: Colors.black,
                       )),
-                  const SizedBox(width: 5),
-                  CircleAvatar(
-                    radius: 4,
-                    backgroundColor: circular.aCTIVE == 'Y' ? Colors.green : Colors.red,
-                  )
+                ),
+              ),
+              const Spacer(),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('Assignment Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          )),
+                      Text(DateTimeUtils.formatDateTime(assignment.aSSIGNMENTDATE ?? ""),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          )),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('Start Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          )),
+                      Text(DateTimeUtils.formatDateTime(assignment.sTARTDATE ?? ""),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          )),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('Submission Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          )),
+                      Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          )),
+                    ],
+                  ),
                 ],
               ),
+
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 8.0),
+              //   child: Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
+              //       style: const TextStyle(
+              //         fontSize: 12,
+              //         fontWeight: FontWeight.normal,
+              //         fontFamily: "Montserrat Regular",
+              //         color: Colors.orange,
+              //       )),
+              // ),
             ],
           ),
           const SizedBox(height: 5),
-          Text(circular.aPPCIRCULARDESCRIPTION ?? "",
+          Text(model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -308,10 +320,17 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                 fontFamily: "Montserrat Regular",
                 color: Colors.black,
               )),
+          // SizedBox(
+          //   height: 60,
+          //   child: Html(
+          //     shrinkWrap: true,
+          //     data: model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
+          //   ),
+          // ),
           const SizedBox(height: 5),
           Row(
             children: [
-              if (circular.lstCircularFile!.isNotEmpty)
+              if (assignment.lstCircularFile!.isNotEmpty)
                 InkWell(
                     onTap: documentOnTap,
                     child: const CircleAvatar(
@@ -334,6 +353,8 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
               ),
             ],
           ),
+
+          const SizedBox(height: 5),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -344,18 +365,16 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                     fontFamily: "Montserrat Regular",
                     color: Colors.black,
                   )),
-              Text(
-                circular.cLASSDESC ?? "",
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ),
-              )
+              Text(assignment.cLASSDESC ?? "",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                    fontFamily: "Montserrat Regular",
+                    color: Colors.orange,
+                  )),
             ],
           ),
-          if (circular.lstCircularSection != null)
+          if (assignment.lstCircularSection != null)
             SizedBox(
               height: 30,
               child: Row(
@@ -371,10 +390,10 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                   Expanded(
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: circular.lstCircularSection!.length,
+                      itemCount: assignment.lstCircularSection!.length,
                       itemBuilder: (context, index) {
                         return Text(
-                          circular.lstCircularSection![index].sECTIONDESC ?? "",
+                          assignment.lstCircularSection![index].sECTIONDESC ?? "",
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.normal,
@@ -390,75 +409,9 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                   )
                 ],
               ),
-            )
+            ),
         ],
       ),
     );
-
-    // ListTile(
-    //   contentPadding: const EdgeInsets.all(0),
-    //   trailing: Text(circular.aPPCIRCULARDATE ?? "",
-    //       style: const TextStyle(
-    //         fontSize: 14,
-    //         fontWeight: FontWeight.normal,
-    //         fontFamily: "Montserrat Regular",
-    //         color: Colors.black,
-    //       )),
-    //   // Column(
-    //   //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //   //   children: [
-    //   //     if (circular.lstCircularFile!.isNotEmpty)
-    //   //       GestureDetector(onTap: documentOnTap, child: const Icon(CupertinoIcons.cloud_download)),
-    //   //     GestureDetector(onTap: showMoreOnTap, child: const Icon(Icons.chrome_reader_mode))
-    //   //   ],
-    //   // ),
-    //   leading: const CircleAvatar(
-    //     radius: 30,
-    //     child: Icon(Icons.blur_circular_outlined),
-    //   ),
-    //   title: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(circular.aPPCIRCULARSUBJECT ?? "",
-    //           style: const TextStyle(
-    //             fontSize: 16,
-    //             fontWeight: FontWeight.bold,
-    //             fontFamily: "Montserrat Regular",
-    //             color: Colors.black,
-    //           )),
-    //     ],
-    //   ),
-    //   subtitle: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(circular.aPPCIRCULARDESCRIPTION ?? "",
-    //           maxLines: 3,
-    //           overflow: TextOverflow.ellipsis,
-    //           style: const TextStyle(
-    //             fontSize: 14,
-    //             fontWeight: FontWeight.normal,
-    //             fontFamily: "Montserrat Regular",
-    //             color: Colors.black54,
-    //           )),
-    //       Row(
-    //         children: [
-    //           const CircleAvatar(child: Icon(Icons.cloud_download)),
-    //           const Spacer(),
-    //           MaterialButton(
-    //             onPressed: () {},
-    //             color: Colors.blue,
-    //             child: const Text("View more",
-    //                 style: TextStyle(
-    //                   fontSize: 14,
-    //                   fontWeight: FontWeight.normal,
-    //                   fontFamily: "Montserrat Regular",
-    //                   color: Colors.white,
-    //                 )),
-    //           ),
-    //         ],
-    //       )
-    //     ],
-    //   ),
-    // );
   }
 }

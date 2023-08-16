@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,9 @@ class _LoaderRouteState extends State<LoaderRoute> {
         //   context,
         //   MaterialPageRoute(builder: (context) => const Home()),
         // );
-        Navigator.pushNamed(context, "/home");
+        if (mounted) {
+          Navigator.pushNamed(context, "/home");
+        }
       });
     } else {
       Future.delayed(const Duration(seconds: 3), () {
@@ -42,6 +45,7 @@ class _LoaderRouteState extends State<LoaderRoute> {
   void initState() {
     super.initState();
     getLoginData();
+    getUrlData();
     checkConnection();
     // Future.delayed(const Duration(seconds: 3), () {
     //   Navigator.pushReplacement(
@@ -57,6 +61,22 @@ class _LoaderRouteState extends State<LoaderRoute> {
       WebService.studentLoginData = data;
       setState(() {});
       log('user data ***** ${data.toJson().toString()}');
+    }
+  }
+
+  void getUrlData() async {
+    final data = await WebService.getSchoolUrl();
+    final imageUrlData = await WebService.getSchoolImageUrl();
+    if (data != null) {
+      Api.baseUrl = data;
+      setState(() {});
+      log('baseUrl ***** ${Api.baseUrl}');
+    }
+
+    if (imageUrlData != null) {
+      Api.imageBaseUrl = imageUrlData;
+      setState(() {});
+      log('imageUrlData ***** ${Api.imageBaseUrl}');
     }
   }
 

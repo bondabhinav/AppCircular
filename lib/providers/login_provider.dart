@@ -123,7 +123,7 @@ class LoginProvider extends ChangeNotifier {
   Future loginValidate(String _uname, String _pass) async {
     debugPrint('enter login teacher');
     var result;
-    var requestedData = {"USER_LOGIN": _uname, "USER_PASSWORD": _pass};
+    var requestedData = {"USER_LOGIN": _uname.trim(), "USER_PASSWORD": _pass.trim()};
 
     //Get School URL
     final prefs = await SharedPreferences.getInstance();
@@ -199,49 +199,40 @@ class LoginProvider extends ChangeNotifier {
 
   // student login
 
-  Future studentLogin(String _uname, String _pass) async {
+  Future<String> studentLogin(String uname, String pass) async {
     debugPrint('enter login student');
-    var result;
-    var requestedData = {"STUD_USERID": _uname, "STUD_PASSWORD": _pass};
-
+    String result = '';
+    var requestedData = {"STUD_USERID": uname.trim(), "STUD_PASSWORD": pass.trim()};
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
-
-    var body = json.encode(requestedData);
-
     try {
-      final response =
-          await apiService.loginPost(url: '${schoolBaseUrl!}StudentLogin/GetStudentLogin', data: requestedData);
+      final response = await apiService.loginPost(
+          url: '${schoolBaseUrl!}StudentLogin/GetStudentLogin', data: requestedData);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         final loginResponse = StudentLoginResponse.fromJson(responseData);
         debugPrint('responseData response ${responseData.toString()}');
         debugPrint('loginResponse response ${loginResponse.toJson().toString()}');
-        WebService.setStudentLoginDetails(loginResponse);
-        WebService.studentLoginData = loginResponse;
+        if (loginResponse.table1!.isNotEmpty) {
+          WebService.setStudentLoginDetails(loginResponse);
+          WebService.studentLoginData = loginResponse;
+          result = 'You have successfully logged in!';
+        }else{
+          result = 'Invalid Login Credentials.';
+        }
         notifyListeners();
-        debugPrint('if part');
-        return result = {
-          'status': true,
-          'message': 'You have successfully logged in!',
-          'data': json.encode(loginResponse.toJson())
-        };
       } else {
         debugPrint('else part');
-        //return 'Unexpected response: ${response.statusCode}';
-
-        return result = {
-          'status': false,
-          'message': 'Unexpected response: ${response.statusCode}',
-          'data': response
-        };
+        result = 'Unexpected response: ${response.statusCode}';
+        notifyListeners();
       }
     } catch (e) {
       debugPrint('catch part');
-      // _errorMessage = 'Error: $e';
-      //return 'Something went wrong please try again.';
-      return result = {'status': false, 'message': 'Invalid Login Credentials.', 'data': ''};
+      result = 'Invalid Login Credentials.';
+      notifyListeners();
     }
+
+    return result;
   }
 
   //Notify Listeners
