@@ -27,14 +27,14 @@ class CalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Date'),
+        title: const Text('Select Date'),
       ),
       body: TableCalendar(
         firstDay: DateTime.utc(2010, 10, 16),
         lastDay: DateTime.utc(2030, 3, 14),
         focusedDay: DateTime.now(),
         calendarFormat: _calendarFormat,
-        headerStyle: HeaderStyle(
+        headerStyle: const HeaderStyle(
           formatButtonVisible : false,
           titleCentered: true,
         ),
@@ -150,16 +150,16 @@ class _NotificationAssignmentState extends State<NotificationAssignment> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Notifications'),
+          title: const Text('Notifications'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pushReplacementNamed(context, '/dashboard');
             },
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.calendar_today),
+              icon: const Icon(Icons.calendar_today),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -215,30 +215,30 @@ class _NotificationAssignmentState extends State<NotificationAssignment> {
                           Container(
                             width: 50,
                             height: 50,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.orange,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.notifications,
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(width: 8.0),
+                          const SizedBox(width: 8.0),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   notification.title,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16.0,
                                   ),
                                 ),
-                                SizedBox(height: 4.0),
+                                const SizedBox(height: 4.0),
                                 Text(notification.subtitle),
-                                SizedBox(height: 4.0),
+                                const SizedBox(height: 4.0),
                                 Text(DateFormat('dd/MM/yyyy').format(notification.date!)),
                               ],
                             ),
@@ -253,7 +253,7 @@ class _NotificationAssignmentState extends State<NotificationAssignment> {
             );
           },
         )
-              : Center(
+              : const Center(
           child: Text('No notifications found for the selected date.'),
     ),
       ),
@@ -270,31 +270,31 @@ class DetailedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notification Details'),
+        title: const Text('Notification Details'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               notification.title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Text(
               notification.subtitle,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Text(
               'Date: ${notification.date.toString()}',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Text(
               notification.description,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),

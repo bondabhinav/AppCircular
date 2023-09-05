@@ -1,13 +1,9 @@
 import 'package:flexischool/providers/url_provider.dart';
 import 'package:flutter/material.dart';
-import '../screens/login.dart';
-import '../common/config.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert'; // for using json.decode()
-import '../models/schoolUrl_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import '../providers/url_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../common/config.dart';
 
 //Get School Url Screen
 class Schoolurl extends StatelessWidget {
@@ -15,7 +11,7 @@ class Schoolurl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       //appBar: AppBar(
       //  title: const Text('Flexi School'),
       // ),
@@ -58,10 +54,9 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
       _errorMessage = '';
     });
 
-    final UrlProvider urlAuth =
-        Provider.of<UrlProvider>(context, listen: false);
+    final UrlProvider urlAuth = Provider.of<UrlProvider>(context, listen: false);
 
-    urlAuth.getUrl(_urlController.text).then((response) {
+    urlAuth.getUrl(_urlController.text).then((response) async {
       //API Response
 
       if (response['status'] == true) {
@@ -195,7 +190,7 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
         //     fit: BoxFit.cover,
         //   ),
         // ),
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -204,7 +199,7 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
               Container(
                 height: size.height * .1,
                 margin: const EdgeInsets.only(top: 10.0),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage("assets/images/sap.jpg"),
                     //image: NetworkImage(
@@ -215,7 +210,7 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
               ),
               Container(
                 height: size.height * .2,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage("assets/images/school-clip-art-86.png"),
                     //image: NetworkImage(
@@ -224,8 +219,8 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10.0),
-              Text(
+              const SizedBox(height: 10.0),
+              const Text(
                 'Flexi School',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -234,7 +229,7 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                   color: Colors.blue,
                 ),
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               TextFormField(
                 controller: _urlController,
                 focusNode: noteFocus,
@@ -269,14 +264,14 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                   return null;
                 },
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               Container(
                 width: 150.0,
                 height: 40,
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: ElevatedButton(
                   child: _isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 16,
                           width: 16,
                           child: CircularProgressIndicator(
@@ -284,12 +279,12 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                             color: Colors.white,
                           ),
                         )
-                      : Text('Submit'),
+                      : const Text('Submit'),
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.blue),
                       //padding: MaterialStateProperty.all(EdgeInsets.all(50)),
-                      textStyle: MaterialStateProperty.all(
-                          TextStyle(fontSize: 18, color: Colors.white))),
+                      textStyle:
+                          MaterialStateProperty.all(const TextStyle(fontSize: 18, color: Colors.white))),
                   onPressed: () {
                     //errorMessage('Test Error');
 
@@ -306,12 +301,12 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10.0,
               ),
               Text(
                 '$_errorMessage',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14.0,
                   fontFamily: "Montserrat Regular",
                   color: Colors.red,

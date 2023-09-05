@@ -1,16 +1,12 @@
+import 'package:flexischool/providers/loader_provider.dart';
+import 'package:flexischool/providers/teacher/teacher_assignment_provider.dart';
+import 'package:flexischool/widgets/custom_loader.dart';
+import 'package:flexischool/widgets/custom_snackbar.dart';
+import 'package:flexischool/widgets/file_table.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:search_choices/search_choices.dart';
-import 'package:intl/intl.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:quill_html_editor/quill_html_editor.dart';
-import 'package:flutter/foundation.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
-import './studentlist.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:provider/provider.dart';
+import 'package:flexischool/utils/locator.dart';
 
 class Student {
   int id;
@@ -29,1027 +25,590 @@ class Section {
 }
 
 class AssignmentForm extends StatefulWidget {
+  final int employeeId;
+
+  const AssignmentForm({super.key, required this.employeeId});
+
   @override
   _AssignmentFormState createState() => _AssignmentFormState();
 }
 
 class _AssignmentFormState extends State<AssignmentForm> {
   final _formKey = GlobalKey<FormState>();
-
-  // Form fields
-  DateTime? assignmentDate;
-  String? selectedClass;
-  List<dynamic> selectedSections = [];
-  List<String> selectedStudents = [];
-  String? selectedSubject;
-  String? selectedEmployee;
-  String? assignmentDetails;
-  DateTime? startDate;
-  DateTime? endDate;
-  bool isActive = false;
-  List<String> uploadedFiles = [];
-
-  // Dropdown options
-  List<String> classOptions = ['Class A', 'Class B', 'Class C'];
-  List<dynamic> sectionOptions = ['Section 1', 'Section 2', 'Section 3','Section 4', 'Section 5', 'Section 6'];
-  List<dynamic> studentOptions = ['Student 1', 'Student 2', 'Student 3'];
-  List<String> subjectOptions = ['Subject 1', 'Subject 2', 'Subject 3'];
-  List<String> employeeOptions = ['Employee 1', 'Employee 2', 'Employee 3'];
-
-  List<int> selectedItemsMultiMenuSelectAllNone = [];
-  List<DropdownMenuItem> items = [];
-
-  List<int> selectedItemsStudents = [];
-  List<DropdownMenuItem> itemsStudents = [];
-
-  String? selectedItemsClass;
-  List<DropdownMenuItem> itemsClass = [];
-
-  String? selectedItemsSubject;
-  List<DropdownMenuItem> itemsSubject = [];
-
-  String? selectedItemsEmployee;
-  List<DropdownMenuItem> itemsEmployee = [];
-
-  //String? selectedValueSingleDialog;
-
-  HtmlEditorController controller = HtmlEditorController();
-
-  //Student
-  List<Student> students = [
-    Student(id: 1, name: "Student 1"),
-    Student(id: 2, name: "Student 2"),
-    Student(id: 3, name: "Student 3"),
-    Student(id: 4, name: "Student 4"),
-    Student(id: 5, name: "Student 5"),
-    Student(id: 6, name: "Student 6"),
-    Student(id: 7, name: "Student 7"),
-    // Add more students here
-  ];
-
-  bool selectAll = false;
-  List<int> selectedIds = [];
-
-  //Section
-  List<Section> sections = [
-    Section(id: 1, name: "Section 1"),
-    Section(id: 2, name: "Section 2"),
-    Section(id: 3, name: "Section 3"),
-
-    // Add more students here
-  ];
-
-  bool selectAllSection = false;
-  List<int> selectedIdsSection = [];
-
-
-  List<File> _selectedFiles = [];
-
-  void _openFileExplorer() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-    );
-
-    if (result != null) {
-      setState(() {
-        _selectedFiles = result.paths.map((path) => File(path!)).toList();
-        if (_selectedFiles.length > 3) {
-          _selectedFiles = _selectedFiles.sublist(0, 3);
-        }
-      });
-    }
-  }
-
-  void _deleteFile(int index) {
-    setState(() {
-      _selectedFiles.removeAt(index);
-    });
-  }
-
-  void _uploadFiles() async {
-
-    if (_selectedFiles.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Warning :'),
-          content: Text('Please choose at least one file.'),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    // Perform API upload logic here using the selected files
-    // Example code:
-    for (var file in _selectedFiles) {
-      // Construct the multipart request
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('YOUR_API_ENDPOINT'),
-      );
-
-      // Attach the file to the request
-      request.files.add(await http.MultipartFile.fromPath(
-        'file',
-        file.path,
-      ));
-
-      // Send the request and await the response
-      var response = await request.send();
-
-      // Process the response
-      if (response.statusCode == 200) {
-        // File uploaded successfully
-        print('File uploaded: ${file.path}');
-      } else {
-        // Error uploading file
-        print('Error uploading file: ${file.path}');
-      }
-    }
-  }
-  // final QuillEditorController controller = QuillEditorController();
-  //
-  // final _toolbarColor = Colors.grey.shade200;
-  // final _backgroundColor = Colors.white70;
-  // final _toolbarIconColor = Colors.black87;
-  // final _editorTextStyle = const TextStyle(
-  //     fontSize: 18,
-  //     color: Colors.black,
-  //     fontWeight: FontWeight.normal,
-  //     fontFamily: 'Architects Daughter');
-  // final _hintTextStyle = const TextStyle(
-  //     fontSize: 18, color: Colors.black12, fontWeight: FontWeight.normal);
-
-  bool _hasFocus = false;
-
-  cancelForm(){
-    Navigator.pushReplacementNamed(context, '/dashboard');
-  }
+  TeacherAssignmentProvider? teacherAssignmentProvider;
+  final loaderProvider = getIt<LoaderProvider>();
 
   @override
   void initState() {
-    selectedIds = [];
-    selectedIdsSection = [];
-
-    //Class Options
-    classOptions.map((sclass) =>{
-      //classOptions.indexOf(sclass)
-      itemsClass.add(DropdownMenuItem(
-        value: classOptions.indexOf(sclass),
-        child: Text(sclass),
-      ))
-
-    }).toList();
-
-
-    //Section Options
-    sectionOptions.map((section) =>{
-      //sectionOptions.indexOf(section)
-      items.add(DropdownMenuItem(
-        value: section,
-        child: Text(section),
-      ))
-
-    }).toList();
-
-    // for(var i = 0; i < sectionOptions.length; i++){
-    //   print(sectionOptions[i]);
-    //   items.add(DropdownMenuItem(
-    //     value: sectionOptions[i],
-    //     child: Text(sectionOptions[i]),
-    //   ));
-    //
-    // }
-
-    //Students Options
-    studentOptions.map((student) =>{
-      //sectionOptions.indexOf(section)
-      itemsStudents.add(DropdownMenuItem(
-        value: student,
-        child: Text(student),
-      ))
-
-    }).toList();
-
-    //Subject Options
-    subjectOptions.map((subject) =>{
-      itemsSubject.add(DropdownMenuItem(
-        value: subjectOptions.indexOf(subject),
-        child: Text(subject),
-      ))
-
-    }).toList();
-
-    //Employee Options
-    employeeOptions.map((employee) =>{
-      itemsEmployee.add(DropdownMenuItem(
-        value: employeeOptions.indexOf(employee),
-        child: Text(employee),
-      ))
-
-    }).toList();
-
-
-    //
-    // items.add(DropdownMenuItem(
-    //   value: 'raj%1',
-    //   child: Text('raj'),
-    // ));
-    //
-    // items.add(DropdownMenuItem(
-    //   value: 'vijay%2',
-    //   child: Text('vijay'),
-    // ));
-
-    print(items[1].value);
-
+    teacherAssignmentProvider = TeacherAssignmentProvider();
+    teacherAssignmentProvider?.fetchClassData(teacherId: widget.employeeId);
+    teacherAssignmentProvider?.fetchSectionData(teacherId: widget.employeeId);
     super.initState();
-  }
-
-  void toggleSelectAll() {
-    setState(() {
-      selectAll = !selectAll;
-      students.forEach((student) {
-        student.isChecked = selectAll;
-      });
-      if (selectAll) {
-        selectedIds = students.map((student) => student.id).toList();
-      } else {
-        selectedIds.clear();
-      }
-    });
-  }
-
-  void toggleStudentSelection(int studentId, bool value) {
-    setState(() {
-      students.firstWhere((student) => student.id == studentId).isChecked = value;
-      if (value) {
-        selectedIds.add(studentId);
-      } else {
-        selectedIds.remove(studentId);
-      }
-      selectAll = students.every((student) => student.isChecked);
-    });
-  }
-
-
-  void toggleSelectAllSection() {
-    setState(() {
-      selectAllSection = !selectAllSection;
-      sections.forEach((section) {
-        section.isChecked = selectAllSection;
-      });
-      if (selectAllSection) {
-        selectedIdsSection = sections.map((section) => section.id).toList();
-      } else {
-        selectedIdsSection.clear();
-      }
-    });
-  }
-
-  void toggleSectionSelection(int sectionId, bool value) {
-    setState(() {
-      sections.firstWhere((section) => section.id == sectionId).isChecked = value;
-      if (value) {
-        selectedIdsSection.add(sectionId);
-      } else {
-        selectedIdsSection.remove(sectionId);
-      }
-      selectAllSection = sections.every((section) => section.isChecked);
-    });
-  }
-
-  // File upload variables
-  int maxFiles = 3;
-  int uploadedFileCount = 0;
-
-
-
-  void saveForm() {
-    print('form load');
-    if (_formKey.currentState!.validate()) {
-      // Perform your API call to save the data
-      // Replace the API_URL with your actual API endpoint
-      const String API_URL = 'https://example.com/saveAssignment';
-      // Prepare the data to be sent
-      Map<String, dynamic> postData = {
-        'assignmentDate': assignmentDate!.toIso8601String(),
-        'selectedClass': selectedClass,
-        'selectedSections': selectedSections,
-        'selectedStudents': selectedStudents,
-        'selectedSubject': selectedSubject,
-        'selectedEmployee': selectedEmployee,
-        'assignmentDetails': assignmentDetails,
-        'startDate': startDate!.toIso8601String(),
-        'endDate': endDate!.toIso8601String(),
-        'isActive': isActive,
-        'uploadedFiles': uploadedFiles,
-      };
-      // Make the API call
-      // Replace the implementation according to your preferred HTTP client library
-      // Here's an example using the http package
-      // Import the http package: `import 'package:http/http.dart' as http;`
-      // http.post(Uri.parse(API_URL), body: postData)
-      //     .then((response) {
-      //   if (response.statusCode == 200) {
-      //     // Success
-      //     print('Assignment saved successfully!');
-      //   } else {
-      //     // Error
-      //     print('Failed to save assignment. Error: ${response.body}');
-      //   }
-      // }).catchError((error) {
-      //   print('Failed to save assignment. Error: $error');
-      // });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-        return false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Assignment Form'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/dashboard');
-            },
-          ),
-        ),
-        body: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
+    return ChangeNotifierProvider(
+        create: (_) => teacherAssignmentProvider,
+        builder: (context, child) {
+          return Consumer<TeacherAssignmentProvider>(builder: (context, model, _) {
+            return Stack(
               children: [
-                // Assignment Date - DatePicker
-
-                ListTile(
-                  title: Text('Assignment Date'),
-                  subtitle: Text(
-                    // assignmentDate != null
-                    //     ? assignmentDate.toString()
-                    //     : 'Select a date',
-                    assignmentDate != null
-                        ? DateFormat('dd/MM/yyyy').format(assignmentDate!) // Format date as dd/MM/yyyy
-                        : 'Select a date',
-                  ),
-                  trailing: Icon(Icons.calendar_today),
-                  onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        assignmentDate = pickedDate;
-                      });
-                    }
-                  },
-                ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
-
-
-
-                //Class Dropdown
-                SearchChoices.single(
-                  items: itemsClass,
-                  value: selectedItemsClass,
-                  hint: "Class",
-                  searchHint: "Select Class",
-                  displayClearIcon: false,
-                  onChanged: (value) {
-                    print(value);
-                    setState(() {
-                      selectedItemsClass = value;
-                    });
-                  },
-                  dialogBox: false,
-                  isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
-                ),
-
-                //Section Custom List
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12,bottom:0),
-                  child: Text("Section *",
-                    style: TextStyle(
-                      fontSize: 15.0,
-
-                      //color: Colors.blue,
+                Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Assignment Form'),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
-                ),
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          onPressed: toggleSelectAllSection,
-                          child: Text(
-                            selectAllSection ? 'Deselect All' : 'Select All',
-                            style: TextStyle(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Selected: ${selectedIdsSection.length}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      constraints: BoxConstraints(maxHeight: 200),
-                      //height: 200,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFD3D3D3)),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Container(
-                          /*decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                          ),*/
-                          child: Column(
-                            children: sections.map((section) {
-                              return ListTileTheme(
-                                horizontalTitleGap: 0.0,
-
-                                child: CheckboxListTile(
-                                  //dense:true,
-                                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                                  contentPadding: EdgeInsets.only(left: 10.0,right: 10.0,bottom: 0.0,top: 0.0),
-                                  title: Text(section.name),
-                                  //activeColor: Colors.blue,
-                                  controlAffinity: ListTileControlAffinity.trailing,
-                                  value: section.isChecked,
-                                  onChanged: (bool? value) {
-                                    toggleSectionSelection(section.id, value!);
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     // Retrieve the selected student IDs
-                    //     print(selectedIdsSection);
-                    //   },
-                    //   child: Text('Get Selected IDs'),
-                    // ),
-                  ],
-                ),
-
-
-                //Section Custom List
-
-
-                // Section Multi-Select Checkbox Dropdown
-                // SearchChoices.multiple(
-                //   items: items,
-                //   selectedItems: selectedItemsMultiMenuSelectAllNone,
-                //   hint: "Section",
-                //   searchHint: "Select Section",
-                //   // validator: (selectedItemsForValidator) {
-                //   //   if (selectedItemsForValidator.length != 1) {
-                //   //     return ("Must select 1");
-                //   //   }
-                //   //   return (null);
-                //   // },
-                //   // validator: (value) {
-                //   //   if (value == null || value.isEmpty) {
-                //   //     return 'Please select a section';
-                //   //   }
-                //   //   return null;
-                //   // },
-                //   displayClearIcon: false,
-                //   onChanged: (value) {
-                //     print(value);
-                //     setState(() {
-                //       selectedItemsMultiMenuSelectAllNone = value;
-                //     });
-                //   },
-                //   dialogBox: true,
-                //   closeButton: (selectedItemsClose, closeContext, Function updateParent) {
-                //     return Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //       children: <Widget>[
-                //         ElevatedButton(
-                //             onPressed: () {
-                //               setState(() {
-                //                 selectedItemsClose.clear();
-                //                 selectedItemsClose.addAll(
-                //                     Iterable<int>.generate(items.length).toList());
-                //               });
-                //               updateParent(selectedItemsClose);
-                //             },
-                //             child: Text("Select all")),
-                //         ElevatedButton(
-                //             onPressed: () {
-                //               setState(() {
-                //                 selectedItemsClose.clear();
-                //               });
-                //               updateParent(selectedItemsClose);
-                //             },
-                //             child: Text("Select none")),
-                //       ],
-                //     );
-                //   },
-                //   isExpanded: true,
-                // ),
-
-               //Student List Custom
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 12,bottom:0),
-                  child: Text("Students *",
-                    style: TextStyle(
-                      fontSize: 15.0,
-
-                      //color: Colors.blue,
-                    ),
-                  ),
-                ),
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          onPressed: toggleSelectAll,
-                          child: Text(
-                            selectAll ? 'Deselect All' : 'Select All',
-                            style: TextStyle(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Selected: ${selectedIds.length}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      constraints: BoxConstraints(maxHeight: 200),
-                      //height: 200,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFD3D3D3)),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Container(
-                          /*decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                          ),*/
-                          child: Column(
-                            children: students.map((student) {
-                              return ListTileTheme(
-                                horizontalTitleGap: 0.0,
-
-                                child: CheckboxListTile(
-                                  //dense:true,
-                                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                                  contentPadding: EdgeInsets.only(left: 10.0,right: 10.0,bottom: 0.0,top: 0.0),
-                                  title: Text(student.name),
-                                  //activeColor: Colors.blue,
-                                  controlAffinity: ListTileControlAffinity.trailing,
-                                  value: student.isChecked,
-                                  onChanged: (bool? value) {
-                                    toggleStudentSelection(student.id, value!);
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     // Retrieve the selected student IDs
-                    //     print(selectedIds);
-                    //   },
-                    //   child: Text('Get Selected IDs'),
-                    // ),
-                  ],
-                ),
-
-                //Student List Custom
-                //Students Multiple
-                // SearchChoices.multiple(
-                //   items: itemsStudents,
-                //   selectedItems: selectedItemsStudents,
-                //   hint: "Students",
-                //   searchHint: "Select Students",
-                //   displayClearIcon: false,
-                //   onChanged: (value) {
-                //     print(value);
-                //     setState(() {
-                //       selectedItemsStudents = value;
-                //     });
-                //   },
-                //   dialogBox: true,
-                //   closeButton: (selectedItemsClose, closeContext, Function updateParent) {
-                //     return Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //       children: <Widget>[
-                //         ElevatedButton(
-                //             onPressed: () {
-                //               setState(() {
-                //                 selectedItemsClose.clear();
-                //                 selectedItemsClose.addAll(
-                //                     Iterable<int>.generate(itemsStudents.length).toList());
-                //               });
-                //               updateParent(selectedItemsClose);
-                //             },
-                //             child: Text("Select all")),
-                //         ElevatedButton(
-                //             onPressed: () {
-                //               setState(() {
-                //                 selectedItemsClose.clear();
-                //               });
-                //               updateParent(selectedItemsClose);
-                //             },
-                //             child: Text("Select none")),
-                //       ],
-                //     );
-                //   },
-                //   isExpanded: true,
-                // ),
-
-                //Subject Dropdown
-                SearchChoices.single(
-                  items: itemsSubject,
-                  value: selectedItemsSubject,
-                  hint: "Subject",
-                  searchHint: "Select Subject",
-                  displayClearIcon: false,
-                  onChanged: (value) {
-                    print(value);
-                    setState(() {
-                      selectedItemsSubject = value;
-                    });
-                  },
-                  dialogBox: false,
-                  isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
-                ),
-
-                //Employee Dropdown
-                SearchChoices.single(
-                  items: itemsEmployee,
-                  value: selectedItemsEmployee,
-                  hint: "Employee",
-                  searchHint: "Select Employee",
-                  displayClearIcon: false,
-                  onChanged: (value) {
-                    print(value);
-                    setState(() {
-                      selectedItemsEmployee = value;
-                    });
-                  },
-                  dialogBox: false,
-                  isExpanded: true,
-                  menuConstraints: BoxConstraints.tight(Size.fromHeight(350)),
-                ),
-
-
-                // Assignment Details - HTML Text Editor
-
-                // ToolBar(
-                //   toolBarColor: Colors.cyan.shade50,
-                //   activeIconColor: Colors.green,
-                //   padding: const EdgeInsets.all(8),
-                //   iconSize: 20,
-                //   controller: controller,
-                //   customButtons: [
-                //     InkWell(onTap: () {}, child: const Icon(Icons.favorite)),
-                //     InkWell(onTap: () {}, child: const Icon(Icons.add_circle)),
-                //   ],
-                // ),
-                // QuillHtmlEditor(
-                //     text: "<h1>Hello</h1>This is a quill html editor example 😊",
-                //     hintText: 'Hint text goes here',
-                //     controller: controller,
-                //     isEnabled: true,
-                //     minHeight: 300,
-                //     textStyle: _editorTextStyle,
-                //     hintTextStyle: _hintTextStyle,
-                //     hintTextAlign: TextAlign.start,
-                //     padding: const EdgeInsets.only(left: 10, top: 5),
-                //     hintTextPadding: EdgeInsets.zero,
-                //     backgroundColor: _backgroundColor,
-                //     onFocusChanged: (hasFocus) => debugPrint('has focus $hasFocus'),
-                //     onTextChanged: (text) => debugPrint('widget text change $text'),
-                //     onEditorCreated: () => debugPrint('Editor has been loaded'),
-                //     onEditorResized: (height) =>
-                //         debugPrint('Editor resized $height'),
-                //     onSelectionChanged: (sel) =>
-                //         debugPrint('${sel.index},${sel.length}')
-                // ),
-                //
-
-                Padding(
-                  padding: EdgeInsets.all(12), //apply padding to all four sides
-                  child: Text("Assignment Details :",
-                    style: TextStyle(
-                      fontSize: 15.0,
-
-                      //color: Colors.blue,
-                    ),
-                  ),
-                ),
-
-
-                SizedBox(height: 10.0),
-
-                HtmlEditor(
-                  controller: controller,
-                  htmlEditorOptions: HtmlEditorOptions(
-                    hint: 'Please enter assignment details...',
-                    shouldEnsureVisible: true,
-                    autoAdjustHeight:true,
-                    //initialText: "<p>text content initial, if any</p>",
-                  ),
-                  otherOptions: OtherOptions(
-                    //height: 400,
-                  ),
-
-
-                  htmlToolbarOptions: HtmlToolbarOptions(
-                    defaultToolbarButtons: [
-                      StyleButtons(),
-                      //ParagraphButtons(lineHeight: false, caseConverter: false),
-                      FontSettingButtons(),
-                      FontButtons(),
-                      ColorButtons(),
-                      ListButtons(),
-                      ParagraphButtons(),
-                      InsertButtons(),
-                      OtherButtons(),
-                    ],
-
-                    customToolbarInsertionIndices: [2, 5],
-                    toolbarPosition: ToolbarPosition.aboveEditor, //by default
-                    toolbarType: ToolbarType.nativeExpandable,
-
-                  ),
-
-                ),
-
-                // TextFormField(
-                //   decoration: InputDecoration(labelText: 'Assignment Details'),
-                //   maxLines: 5,
-                //   onChanged: (value) {
-                //     setState(() {
-                //       assignmentDetails = value;
-                //     });
-                //   },
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return 'Please enter assignment details';
-                //     }
-                //     return null;
-                //   },
-                // ),
-
-                // Start Date - DatePicker
-                ListTile(
-                  title: Text('Start Date'),
-                  subtitle: Text(
-                    startDate != null
-                        ? DateFormat('dd/MM/yyyy').format(startDate!) // Format date as dd/MM/yyyy
-                        : 'Select a date',
-                  ),
-                  trailing: Icon(Icons.calendar_today),
-                  onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        startDate = pickedDate;
-                      });
-                    }
-                  },
-                ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
-
-                // End Date - DatePicker
-                ListTile(
-                  title: Text('End Date'),
-                  subtitle: Text(
-                    endDate != null
-                        ? DateFormat('dd/MM/yyyy').format(endDate!) // Format date as dd/MM/yyyy
-                        : 'Select a date',
-                  ),
-                  trailing: Icon(Icons.calendar_today),
-                  onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        endDate = pickedDate;
-                      });
-                    }
-                  },
-                ),
-                Container(height: 1, color: Color(0xFFD3D3D3)), //divider
-
-                // Active Checkbox
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.only(left: 10.0, top: 8.0, right: 8,bottom:8),
-                  title: Text('  Active'),
-                  value: isActive,
-                  onChanged: (bool? newValue) {
-                    setState(() {
-                      isActive = newValue!;
-                    });
-                  },
-                ),
-
-                //file
-
-                const Padding(
-                  padding: EdgeInsets.only(left: 20.0, top: 12.0, right: 12,bottom:0),
-                   child: Text("Upload Files :",
-                    style: TextStyle(
-                      fontSize: 15.0,
-
-                      //color: Colors.blue,
-                    ),
-                  ),
-                ),
-
-                Card(
-                  margin: EdgeInsets.all(10.0),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 8.0),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.green,
-                            onPrimary: Colors.white,
-                            shadowColor: Colors.greenAccent,
-                            elevation: 3,
-                            // shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(32.0)),
-                            minimumSize: Size(280, 40), //////// HERE
-                          ),
-                          onPressed: _openFileExplorer,
-                          child: Text('Browse'),
-                        ),
-                        Text('Supported file .jpg,.jpeg,.png,.doc,.docx,.pdf',style: TextStyle(color: Colors.red),),
-                        //Text('Upload Files (Max 3)'),
-                        // Text(
-                        //   'Selected Files:',
-                        //   style: TextStyle(fontSize: 18),
-                        // ),
-                        SizedBox(height: 8.0),
-                        if( _selectedFiles.isNotEmpty)
-                          DataTable(
-                            border: TableBorder.all(
-                              width: 1.0,
-                              color:Color(0xFFD3D3D3),
-                            style: BorderStyle.solid
-                            ),
-                            columns: [
-                              DataColumn(
-                                label: Text('Filename'),
-                              ),
-                              DataColumn(
-                                label: Text('Delete'),
-                              ),
-                            ],
-                            rows: List<DataRow>.generate(
-                              _selectedFiles.length,
-                                  (index) =>
-                                  DataRow(
-                                    cells: [
-                                      DataCell(Text(path.basename(
-                                          _selectedFiles[index].path))),
-                                      DataCell(
-                                        IconButton(
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () => _deleteFile(index),
-                                        ),
+                  body: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: ListView(
+                        controller: model.scrollController,
+                        children: [
+                          model.getClassResponse.cLASSandSECTION == null
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Class*',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.normal,
+                                          fontFamily: "Montserrat Regular",
+                                          color: Colors.black,
+                                        )),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(), borderRadius: BorderRadius.circular(8)),
+                                      child: DropdownButton(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        value: model.selectedClass,
+                                        underline: const SizedBox(),
+                                        isExpanded: true,
+                                        hint: const Text('Select a class'),
+                                        items: model.getClassResponse.cLASSandSECTION
+                                            ?.map((item) => DropdownMenuItem(
+                                                  value: item.classId,
+                                                  child: Text(item.cLASSDESC ?? ""),
+                                                ))
+                                            .toList(),
+                                        onChanged: (int? value) {
+                                          if (value != null) {
+                                            model.updateSelectedClass(value, widget.employeeId);
+                                          }
+                                        },
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                ),
+                          (model.getSectionResponse == null ||
+                                  model.getSectionResponse!.cLASSandSECTION!.isEmpty)
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 15),
+                                    const Text('Section*',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.normal,
+                                          fontFamily: "Montserrat Regular",
+                                          color: Colors.black,
+                                        )),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5.0),
+                                        border: Border.all(),
+                                      ),
+                                      child: LayoutBuilder(builder: (context, constraints) {
+                                        return ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            minHeight: 0,
+                                            maxHeight: 200,
+                                          ).normalize(),
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              children:
+                                                  model.getSectionResponse!.cLASSandSECTION!.map((item) {
+                                                final sectionId = item.sECTIONID;
+                                                final sectionDesc = item.sECTIONDESC;
+                                                return CheckboxListTile(
+                                                  title: Text(sectionDesc ?? ""),
+                                                  value: model.selectedSectionIds.contains(sectionId),
+                                                  onChanged: (bool? isChecked) {
+                                                    model.updateSelectedSection(
+                                                        sectionId!, isChecked ?? false, widget.employeeId);
+                                                  },
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                ),
+
+                          const SizedBox(height: 15),
+                          (model.subjectResponse == null || model.subjectResponse?.subject == null)
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Subject*',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.normal,
+                                          fontFamily: "Montserrat Regular",
+                                          color: Colors.black,
+                                        )),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(), borderRadius: BorderRadius.circular(8)),
+                                      child: DropdownButton(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        value: model.selectedSubject,
+                                        underline: const SizedBox(),
+                                        isExpanded: true,
+                                        hint: const Text('Select a subject'),
+                                        items: model.subjectResponse?.subject
+                                            ?.map((item) => DropdownMenuItem(
+                                                  value: item.subjectId,
+                                                  child: Text(item.subjectName ?? ""),
+                                                ))
+                                            .toList(),
+                                        onChanged: (int? value) {
+                                          if (value != null) {
+                                            model.updateSelectedSubject(value);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                          const SizedBox(height: 15),
+                          (model.studentResponse == null)
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Student*',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              fontFamily: "Montserrat Regular",
+                                              color: Colors.black,
+                                            )),
+                                        const Spacer(),
+                                        ElevatedButton(
+                                          onPressed: model.toggleSelectAll,
+                                          child: Text(model.selectAll ? 'Deselect All' : 'Select All'),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5.0),
+                                        border: Border.all(),
+                                      ),
+                                      child: LayoutBuilder(builder: (context, constraints) {
+                                        return ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            minHeight: 0,
+                                            maxHeight: 200,
+                                          ).normalize(),
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              children:
+                                                  model.studentResponse!.aDMSTUDREGISTRATION!.map((item) {
+                                                final studentId = item.aDMSTUDENTID;
+                                                final student = "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
+                                                return CheckboxListTile(
+                                                  title: Text(student),
+                                                  value:
+                                                      model.selectAll || model.studentIds.contains(studentId),
+                                                  onChanged: (bool? isChecked) {
+                                                    model.updateStudentData(studentId!, isChecked ?? false);
+                                                  },
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                ),
+
+                          const SizedBox(height: 15),
+                          const Text("Assignment Details :",
+                              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+                          QuillToolbar.basic(
+                            controller: model.quillController,
+                            // embedButtons: FlutterQuillEmbeds.buttons(
+                            //   onImagePickCallback: model.onImagePickCallback,
+                            //   onVideoPickCallback: model.onVideoPickCallback,
+                            // ),
+                            showAlignmentButtons: true,
+                            //   afterButtonPressed: model.focusNode.requestFocus,
+                          ),
+
+                          Container(
+                            height: 300,
+                            decoration:
+                                BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all()),
+                            child: QuillEditor.basic(
+                              padding: const EdgeInsets.all(10),
+                              controller: model.quillController,
+                              autoFocus: false,
+                              readOnly: false,
                             ),
                           ),
-
-                        // ListView.builder(
-                        //   shrinkWrap: true,
-                        //   itemCount: _selectedFiles.length,
-                        //   itemBuilder: (context, index) {
-                        //     final file = _selectedFiles[index];
-                        //     final fileName = path.basename(file.path);
-                        //     return ListTile(
-                        //       //title: Text(file.path),
-                        //       title: Text(fileName),
-                        //       trailing: IconButton(
-                        //         icon: Icon(Icons.delete),
-                        //         onPressed: () => _deleteFile(index),
-                        //       ),
-                        //     );
-                        //   },
-                        // ),
-                        ElevatedButton(
-                          onPressed: _uploadFiles,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pink, // Background color
+                          ListTile(
+                            contentPadding: const EdgeInsets.all(0),
+                            title: const Text('Start Date'),
+                            subtitle: Text(
+                              model.startDateController.text.isNotEmpty
+                                  ? model.startDateController.text
+                                  : 'Select a date',
+                            ),
+                            trailing: const Icon(Icons.calendar_today),
+                            onTap: () async {
+                              final DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2094),
+                              );
+                              if (pickedDate != null) {
+                                model.updateStartDate(pickedDate);
+                              }
+                            },
                           ),
-                          child: Text('Upload'),
-                        ),
+                          Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
 
-                        SizedBox(height: 12.0),
-                      ],
+                          ListTile(
+                            contentPadding: const EdgeInsets.all(0),
+                            title: const Text('End Date'),
+                            subtitle: Text(
+                              model.endDateController.text.isNotEmpty
+                                  ? model.endDateController.text
+                                  : 'Select a date',
+                            ),
+                            trailing: const Icon(Icons.calendar_today),
+                            onTap: () async {
+                              final DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2094),
+                              );
+                              if (pickedDate != null) {
+                                model.updateEndDate(pickedDate);
+                              }
+                            },
+                          ),
+                          Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
+
+                          ValueListenableBuilder<bool>(
+                              valueListenable: model.active,
+                              builder: (BuildContext context, bool isChecked, Widget? child) {
+                                return CheckboxListTile(
+                                  contentPadding: const EdgeInsets.all(0),
+                                  title: const Text('Active'),
+                                  value: isChecked,
+                                  onChanged: (newValue) {
+                                    model.active.value = newValue!;
+                                  },
+                                );
+                              }),
+
+
+                          const Text(
+                            'Upload Files',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    model.selectFile();
+                                  },
+                                  child: Container(
+                                    height: 45,
+                                    padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(), borderRadius: BorderRadius.circular(10)),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                                color: Colors.grey, borderRadius: BorderRadius.circular(5)),
+                                            child: const Text(
+                                              'Browse',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                fontFamily: "Montserrat Regular",
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            model.fileName ?? 'Select file',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              fontFamily: "Montserrat Regular",
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              InkWell(
+                                onTap: () {
+                                  if (model.filePick != null) {
+                                    if (model.selectedClass != null) {
+                                      model.uploadFile();
+                                    } else {
+                                      ShowSnackBar.info(context: context, showMessage: 'Please select class');
+                                    }
+                                  }
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                      color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+                                  child: const Text(
+                                    'Upload',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                      fontFamily: "Montserrat Regular",
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Supported file: jpg, jpeg, png, pdf, doc, docx',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          model.docList.isEmpty
+                              ? const SizedBox.shrink()
+                              : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Uploaded files',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              FileTable(
+                                files: model.docList,
+                                onRemove: (file, index) {
+                                  model.deleteFile(file, index);
+                                },
+                              ),
+                              const SizedBox(height: 100)
+                            ],
+                          ),
+
+                          // const Padding(
+                          //   padding: EdgeInsets.only(left: 20.0, top: 12.0, right: 12, bottom: 0),
+                          //   child: Text(
+                          //     "Upload Files :",
+                          //     style: TextStyle(
+                          //       fontSize: 15.0,
+                          //     ),
+                          //   ),
+                          // ),
+                          // Card(
+                          //   margin: const EdgeInsets.all(10.0),
+                          //   child: Center(
+                          //     child: Column(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       children: [
+                          //         const SizedBox(height: 8.0),
+                          //         ElevatedButton(
+                          //           style: ElevatedButton.styleFrom(
+                          //             primary: Colors.green,
+                          //             onPrimary: Colors.white,
+                          //             shadowColor: Colors.greenAccent,
+                          //             elevation: 3,
+                          //             minimumSize: const Size(280, 40),
+                          //           ),
+                          //           onPressed: () => model.selectFile(),
+                          //           child: const Text('Browse'),
+                          //         ),
+                          //         const Text(
+                          //           'Supported file .jpg,.jpeg,.png,.doc,.docx,.pdf',
+                          //           style: TextStyle(color: Colors.red),
+                          //         ),
+                          //         Text(
+                          //           model.fileName ?? "",
+                          //           style: const TextStyle(color: Colors.black54),
+                          //         ),
+                          //         ElevatedButton(
+                          //           onPressed: () {
+                          //             if (model.filePick != null) {
+                          //               if (model.selectedClass != null) {
+                          //                 model.uploadFile();
+                          //               } else {
+                          //                 ShowSnackBar.info(
+                          //                     context: context, showMessage: 'Please select class');
+                          //               }
+                          //             } else {
+                          //               ShowSnackBar.info(
+                          //                   context: context, showMessage: 'Please select any file');
+                          //             }
+                          //           },
+                          //           style: ElevatedButton.styleFrom(
+                          //             backgroundColor: Colors.pink, // Background color
+                          //           ),
+                          //           child: const Text('Upload'),
+                          //         ),
+                          //         const SizedBox(height: 12.0),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
+                          // model.docList.isEmpty
+                          //     ? const SizedBox.shrink()
+                          //     : Column(
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         children: [
+                          //           const Text(
+                          //             'Uploaded files',
+                          //             style: TextStyle(
+                          //               fontSize: 14,
+                          //               fontWeight: FontWeight.bold,
+                          //               fontFamily: "Montserrat Regular",
+                          //               color: Colors.black,
+                          //             ),
+                          //           ),
+                          //           const SizedBox(height: 5),
+                          //           FileTable(
+                          //             files: model.docList,
+                          //             onRemove: (file, index) {
+                          //               model.deleteFile(file, index);
+                          //             },
+                          //           )
+                          //         ],
+                          //       ),
+
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                // File Upload
-
-
-                // Save Button
-                // ElevatedButton(
-                //   onPressed: saveForm,
-                //   child: Text('Save'),
-                // ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          //color: Colors.white70,
-          child: Container(
-            height: 56.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle save button press
-                    saveForm();
-                  },
-                  child: Text('Save'),
-                ),
-
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle cancel button press
-                    cancelForm();
-
-                  },
-                  child: Text('Cancel'),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                  bottomNavigationBar: BottomAppBar(
+                    child: SizedBox(
+                      height: 56.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              if (model.selectedClass == null) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select a class');
+                              } else if (model.selectedSectionIds.isEmpty) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select any section');
+                              } else if (model.selectedSubject == null) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select a subject');
+                              } else if (model.studentIds.isEmpty) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select any student');
+                              } else if (model.quillController.document.toPlainText().trim().isEmpty) {
+                                ShowSnackBar.info(
+                                    context: context, showMessage: 'Please enter assignment detail');
+                              } else if (model.selectedStartDate == null) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select start date');
+                              } else if (model.selectedEndDate == null) {
+                                ShowSnackBar.info(context: context, showMessage: 'Please select end date');
+                              } else {
+                                model.addAssignmentData(employeeId: widget.employeeId).then((value) {
+                                  if (value.success ?? false) {
+                                    ShowSnackBar.successToast(
+                                        context: context, showMessage: 'Assignment created successfully');
+                                    Navigator.pushReplacementNamed(context, '/dashboard');
+                                  } else {
+                                    ShowSnackBar.error(context: context, showMessage: 'Something went wrong');
+                                  }
+                                });
+                              }
+                            },
+                            child: const Text('Save'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                  // ),
                 ),
+                if (loaderProvider.isLoading) const CustomLoader(),
               ],
-            ),
-          ),
-        ),
-        // bottomNavigationBar: Padding(
-        //   padding: EdgeInsets.all(16.0),
-        //   child: ElevatedButton(
-        //     onPressed: () {saveForm();},
-        //
-        //     child: Text('Fixed Button'),
-        //   ),
-        // ),
-      ),
-    );
+            );
+          });
+        });
   }
 }
-

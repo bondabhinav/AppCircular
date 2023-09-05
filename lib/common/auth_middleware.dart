@@ -3,9 +3,6 @@ import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../providers/url_provider.dart';
-import 'config.dart';
-import 'app_routes.dart';
 
 class AuthGuard {
   static bool isLogged = false;
@@ -27,8 +24,7 @@ class AuthMiddleware extends NavigatorObserver {
   //final MyUrlProvider = Provider.of<UrlProvider>(context);
 
   @override
-  Future<void> didPush(
-      Route<dynamic> route, Route<dynamic>? previousRoute) async {
+  Future<void> didPush(Route<dynamic> route, Route<dynamic>? previousRoute) async {
     //context = navigatorKey.currentContext;
 
     print('call');
@@ -48,17 +44,19 @@ class AuthMiddleware extends NavigatorObserver {
 
     //await isUserIn() ? print("true1") : print("false1");
 
-
     if (route.settings.name == '/home' || route.settings.name == '/schoolUrl') {
       if ((await isUserIn())) {
-        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context,
-            listen: false);
+        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
         loginlAuth.assignUserProvider();
-
-        Future.delayed(Duration.zero, () {
+        Future.delayed(Duration.zero, () async {
           navigatorKey.currentState?.pushReplacementNamed('/dashboard');
         });
-
+      } else if ((await isStudentUserIn())) {
+        final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
+        loginlAuth.assignUserProvider();
+        Future.delayed(Duration.zero, () async {
+          navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
+        });
       } else if (!await isLoginType()) {
         print('midlcall type');
         Future.delayed(Duration.zero, () {
@@ -106,24 +104,28 @@ class AuthMiddleware extends NavigatorObserver {
   // }
   //
   @override
-  Future<void> didPop(
-      Route<dynamic> route, Route<dynamic>? previousRoute) async {
+  Future<void> didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async {
     super.didPop(route, previousRoute);
     print('pop122');
     print(route.settings.name);
-
     if (route.settings.name == '/dashboard' ||
+        route.settings.name == '/studentDashboard' ||
         route.settings.name == '/home' ||
         route.settings.name == '/schoolUrl' ||
         route.settings.name == '/login') {
       if ((await isUserIn())) {
         print('popA');
-        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context,
-            listen: false);
+        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
         loginlAuth.assignUserProvider();
 
-        Future.delayed(Duration.zero, () {
+        Future.delayed(Duration.zero, () async {
           navigatorKey.currentState?.pushReplacementNamed('/dashboard');
+        });
+      } else if ((await isStudentUserIn())) {
+        final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
+        loginlAuth.assignUserProvider();
+        Future.delayed(Duration.zero, () async {
+          navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
         });
       } else if (await isSchoolUrlIn()) {
         Future.delayed(Duration.zero, () {
@@ -131,8 +133,6 @@ class AuthMiddleware extends NavigatorObserver {
         });
       }
     }
-
-
     // Check if the popped route requires authentication
     //print('call back');
     // if (previousRoute?.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
@@ -164,8 +164,14 @@ class AuthMiddleware extends NavigatorObserver {
     return userDetails != null;
   }
 
-  Future<void> checkAuth(
-      Route<dynamic> route, Route<dynamic>? previousRoute) async {
+  Future<bool> isStudentUserIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDetails = prefs.getString('student_data');
+    // Return true if the token exists, false otherwise
+    return userDetails != null;
+  }
+
+  Future<void> checkAuth(Route<dynamic> route, Route<dynamic>? previousRoute) async {
     //Provider Value Get
     // final urlAuth  = Provider.of<UrlProvider >(route!.navigator!.context, listen: false);
     // final value = urlAuth.myValue;
@@ -177,8 +183,14 @@ class AuthMiddleware extends NavigatorObserver {
     // print(data);
 
     if (route.settings.name == '/schoolUrl') {
-      Future.delayed(Duration.zero, () {
-        navigatorKey.currentState?.pushReplacementNamed('/dashboard');
+      Future.delayed(Duration.zero, () async {
+        final newType = await WebService.getLoginType();
+        if (newType == 'S') {
+
+          navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
+        } else {
+          navigatorKey.currentState?.pushReplacementNamed('/dashboard');
+        }
       });
     }
 
