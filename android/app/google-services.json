@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "905905139189",
+    "project_id": "flexischoolapp",
+    "storage_bucket": "flexischoolapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905905139189:android:4d843074e1c0e0fb92c4bc",
+        "android_client_info": {
+          "package_name": "com.example.flexischool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905905139189-u2o0m3sbdbr0ug8abf88lvkdjsdi38co.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flexischool",
+            "certificate_hash": "a77d323925651d2516d49165e66167dd3466bfac"
+          }
+        },
+        {
+          "client_id": "905905139189-jmk9ocg3emm1tkics0naf2aqda5ia4c6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnH8_XKS8a7ARcVM9v5Ll3Ac2AMM6dOL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905905139189-jmk9ocg3emm1tkics0naf2aqda5ia4c6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "905905139189-o75qt6kplv2j033mvp7lfa3jfd9vq4ur.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flexischool"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
