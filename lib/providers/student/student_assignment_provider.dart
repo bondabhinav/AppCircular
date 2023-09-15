@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,8 +9,6 @@ import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/student_assignment_model.dart';
-import 'package:flexischool/models/student/student_circular_doc_list_respnose.dart';
-import 'package:flexischool/models/student/student_circular_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/utils/notification_service.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
@@ -19,17 +18,22 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:quill_json_to_html/json_to_html.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../../models/student/date_of_assignment_response.dart';
 
 final GetIt getIt = GetIt.instance;
 
 class StudentAssignmentProvider extends ChangeNotifier {
   StudentAssignmentModel? studentAssignmentModel;
+  DateOfAssignmentResponse? dateOfAssignmentResponse;
   CalendarFormat calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   final QuillController _controller = QuillController.basic();
+  late Map<DateTime, List<dynamic>> events;
+  late StreamController<Map<DateTime, List<dynamic>>> eventsStreamController;
+
   String? _message;
 
   String? get message => _message;
@@ -46,6 +50,44 @@ class StudentAssignmentProvider extends ChangeNotifier {
     _focusedDay = focusedDay;
     fetchStudentAssignmentData();
     notifyListeners();
+  }
+
+  Future<void> getAssignmentDates(
+      {required String year, required String month, required DateTime dateTime}) async {
+    _focusedDay = dateTime;
+    dateOfAssignmentResponse = null;
+    events.clear();
+    notifyListeners();
+    try {
+      var data = {
+        "STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID,
+        "YEAR": year,
+        "MONTH": month,
+      };
+      final response = await apiService.post(url: Api.getAssignmentDatesApi, data: data);
+      if (response.statusCode == 200) {
+        dateOfAssignmentResponse = DateOfAssignmentResponse.fromJson(response.data);
+
+        Map<DateTime, List<dynamic>> newEvents = {};
+        if (dateOfAssignmentResponse!.dATEFORASSIGNMENT!.isNotEmpty) {
+          for (var eventData in dateOfAssignmentResponse!.dATEFORASSIGNMENT!) {
+            var endDateTime = DateTime.parse(eventData.eNDDATE!);
+            var endDate = DateTime.utc(endDateTime.year, endDateTime.month, endDateTime.day);
+
+            if (newEvents.containsKey(endDate)) {
+              newEvents[endDate]!.add(eventData);
+            } else {
+              newEvents[endDate] = [eventData];
+            }
+          }
+        }
+        events.addAll(newEvents);
+        eventsStreamController.add(events);
+        debugPrint('event data ${events.keys}');
+      } else {}
+    } catch (e) {
+      debugPrint('Failed to connect to the API ${e.toString()}');
+    }
   }
 
   Future<void> fetchStudentAssignmentData() async {
@@ -145,18 +187,16 @@ class StudentAssignmentProvider extends ChangeNotifier {
   }
 
   String getContentAsHTML(String jsonString) {
-  //   final List<dynamic> jsonData = jsonDecode(jsonString);
-  // //  debugPrint(QuillJsonToHTML.encodeJson(jsonData));
-  //   List deltaJson = _controller.document.toDelta().toJson();
-  //  // debugPrint(QuillJsonToHTML.encodeJson(deltaJson));
-  //   return QuillJsonToHTML.encodeJson(jsonData);
-
+    //   final List<dynamic> jsonData = jsonDecode(jsonString);
+    // //  debugPrint(QuillJsonToHTML.encodeJson(jsonData));
+    //   List deltaJson = _controller.document.toDelta().toJson();
+    //  // debugPrint(QuillJsonToHTML.encodeJson(deltaJson));
+    //   return QuillJsonToHTML.encodeJson(jsonData);
 
     List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List).cast<Map<String, dynamic>>();
     Delta delta = Delta.fromJson(quillDelta);
     String plainText = delta.toList().where((op) => op.data != null).map((op) => op.data).join('');
     debugPrint('Plain Text ===> $plainText');
     return plainText;
-
   }
 }

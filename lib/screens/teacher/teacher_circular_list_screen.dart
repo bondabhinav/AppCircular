@@ -129,13 +129,9 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                       shrinkWrap: true,
                                       itemCount: model.teacherCircularListResponse!.classlist!.length,
                                       itemBuilder: (context, index) => listItem(
+                                          model: model,
                                           circular: model.teacherCircularListResponse!.classlist![index],
                                           documentOnTap: () {
-                                            // model
-                                            //     .fetchStudentDocumentData(
-                                            //         circularId: model.teacherCircularListResponse
-                                            //             .classlist![index].aPPCIRCULARID!)
-                                            //     .then((value) {
                                             if (model.teacherCircularListResponse!.classlist![index]
                                                 .lstCircularFile!.isNotEmpty) {
                                               showDialog(
@@ -144,10 +140,6 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                                 builder: (BuildContext context) {
                                                   var data =
                                                       model.teacherCircularListResponse!.classlist![index];
-                                                  // if (data.fLAG == "N") {
-                                                  //   model.updateCircularFlag(
-                                                  //       data.aPPCIRCULARID.toString());
-                                                  // }
                                                   return AlertDialog(
                                                     title: const Text('Document'),
                                                     content: SizedBox(
@@ -197,19 +189,11 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                                 // }
                                               });
                                             }
-                                            //  });
                                           },
                                           showMoreOnTap: () {
                                             showScrollableTextDialog(
                                                 model: model,
-                                                complete: () {
-                                                  // if (model.teacherCircularListResponse!.classlist![index]
-                                                  //     .fLAG ==
-                                                  //     "N") {
-                                                  //   model.updateFlagStatus(model
-                                                  //       .teacherCircularListResponse!.classlist![index]);
-                                                  // }
-                                                },
+                                                complete: () {},
                                                 context: context,
                                                 data: model.teacherCircularListResponse!.classlist![index]);
                                           })),
@@ -256,209 +240,198 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
   }
 
   Widget listItem(
-      {required Classlist circular, void Function()? documentOnTap, void Function()? showMoreOnTap}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration:
-          BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Text(circular.aPPCIRCULARSUBJECT ?? "",
-                    maxLines: 2,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.black,
-                    )),
-              ),
-              //  const Spacer(),
-              Row(
-                children: [
-                  Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
+      {required Classlist circular,
+      void Function()? documentOnTap,
+      void Function()? showMoreOnTap,
+      required TeacherCircularListProvider model}) {
+    return Opacity(
+      opacity: circular.aCTIVE == "Y" ? 1.0 : 0.5,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(8),
+        decoration:
+            BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Text(circular.aPPCIRCULARSUBJECT ?? "",
+                      maxLines: 2,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.orange,
-                      )),
-                  const SizedBox(width: 5),
-                  CircleAvatar(
-                    radius: 4,
-                    backgroundColor: circular.aCTIVE == 'Y' ? Colors.green : Colors.red,
-                  )
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(circular.aPPCIRCULARDESCRIPTION ?? "",
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                fontFamily: "Montserrat Regular",
-                color: Colors.black,
-              )),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              if (circular.lstCircularFile!.isNotEmpty)
-                InkWell(
-                    onTap: documentOnTap,
-                    child: const CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Icon(
-                          Icons.cloud_download,
-                          color: Colors.white,
-                        ))),
-              const Spacer(),
-              MaterialButton(
-                onPressed: showMoreOnTap,
-                color: Colors.blue,
-                child: const Text("View more",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.white,
-                    )),
-              ),
-            ],
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Class: ',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.black,
-                  )),
-              Text(
-                circular.cLASSDESC ?? "",
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ),
-              )
-            ],
-          ),
-          if (circular.lstCircularSection != null)
-            SizedBox(
-              height: 30,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Section: ',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                         fontFamily: "Montserrat Regular",
                         color: Colors.black,
                       )),
-                  Expanded(
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: circular.lstCircularSection!.length,
-                      itemBuilder: (context, index) {
-                        return Text(
-                          circular.lstCircularSection![index].sECTIONDESC ?? "",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.black,
+                ),
+                //  const Spacer(),
+                Row(
+                  children: [
+                    Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          fontFamily: "Montserrat Regular",
+                          color: Colors.orange,
+                        )),
+                    const SizedBox(width: 5),
+                    CircleAvatar(
+                      radius: 4,
+                      backgroundColor: circular.aCTIVE == 'Y' ? Colors.green : Colors.red,
+                    )
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(circular.aPPCIRCULARDESCRIPTION ?? "",
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                  fontFamily: "Montserrat Regular",
+                  color: Colors.black,
+                )),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                if (circular.lstCircularFile!.isNotEmpty)
+                  InkWell(
+                      onTap: documentOnTap,
+                      child: const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Icon(
+                            Icons.cloud_download,
+                            color: Colors.white,
+                          ))),
+                const Spacer(),
+                MaterialButton(
+                  onPressed: showMoreOnTap,
+                  color: Colors.blue,
+                  child: const Text("View more",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Montserrat Regular",
+                        color: Colors.white,
+                      )),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Class: ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: "Montserrat Regular",
+                                color: Colors.black,
+                              )),
+                          Text(
+                            circular.cLASSDESC ?? "",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            ),
+                          )
+                        ],
+                      ),
+                      if (circular.lstCircularSection != null)
+                        SizedBox(
+                          height: 30,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Section: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: "Montserrat Regular",
+                                    color: Colors.black,
+                                  )),
+                              Expanded(
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: circular.lstCircularSection!.length,
+                                  itemBuilder: (context, index) {
+                                    return Text(
+                                      circular.lstCircularSection![index].sECTIONDESC ?? "",
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder: (BuildContext context, int index) {
+                                    return const Text(', ');
+                                  },
+                                ),
+                              )
+                            ],
                           ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return const Text(', ');
-                      },
+                        )
+                    ],
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: circular.aCTIVE == "Y",
+                      onChanged: circular.aCTIVE == "Y"
+                          ? (newValue) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Confirm Action'),
+                                    content: const Text('Are you sure you want to inactive this circular?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          model.inActiveCircular(circular, context);
+                                        },
+                                        child: const Text('Yes'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('No'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          : null,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                  )
-                ],
-              ),
+                    Text(circular.aCTIVE == "Y"?'Active':'Inactive')
+                  ],
+                ),
+              ],
             )
-        ],
+          ],
+        ),
       ),
     );
-
-    // ListTile(
-    //   contentPadding: const EdgeInsets.all(0),
-    //   trailing: Text(circular.aPPCIRCULARDATE ?? "",
-    //       style: const TextStyle(
-    //         fontSize: 14,
-    //         fontWeight: FontWeight.normal,
-    //         fontFamily: "Montserrat Regular",
-    //         color: Colors.black,
-    //       )),
-    //   // Column(
-    //   //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //   //   children: [
-    //   //     if (circular.lstCircularFile!.isNotEmpty)
-    //   //       GestureDetector(onTap: documentOnTap, child: const Icon(CupertinoIcons.cloud_download)),
-    //   //     GestureDetector(onTap: showMoreOnTap, child: const Icon(Icons.chrome_reader_mode))
-    //   //   ],
-    //   // ),
-    //   leading: const CircleAvatar(
-    //     radius: 30,
-    //     child: Icon(Icons.blur_circular_outlined),
-    //   ),
-    //   title: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(circular.aPPCIRCULARSUBJECT ?? "",
-    //           style: const TextStyle(
-    //             fontSize: 16,
-    //             fontWeight: FontWeight.bold,
-    //             fontFamily: "Montserrat Regular",
-    //             color: Colors.black,
-    //           )),
-    //     ],
-    //   ),
-    //   subtitle: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(circular.aPPCIRCULARDESCRIPTION ?? "",
-    //           maxLines: 3,
-    //           overflow: TextOverflow.ellipsis,
-    //           style: const TextStyle(
-    //             fontSize: 14,
-    //             fontWeight: FontWeight.normal,
-    //             fontFamily: "Montserrat Regular",
-    //             color: Colors.black54,
-    //           )),
-    //       Row(
-    //         children: [
-    //           const CircleAvatar(child: Icon(Icons.cloud_download)),
-    //           const Spacer(),
-    //           MaterialButton(
-    //             onPressed: () {},
-    //             color: Colors.blue,
-    //             child: const Text("View more",
-    //                 style: TextStyle(
-    //                   fontSize: 14,
-    //                   fontWeight: FontWeight.normal,
-    //                   fontFamily: "Montserrat Regular",
-    //                   color: Colors.white,
-    //                 )),
-    //           ),
-    //         ],
-    //       )
-    //     ],
-    //   ),
-    // );
   }
 }

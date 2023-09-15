@@ -27,4 +27,9 @@ class Api {
   static String getAssignmentByDatesApi = "${baseUrl}GetAssignmentFromDatetoTodate/GetAssignmentFromDatetoTodate";
   static String getCircularByIdApi = "${baseUrl}GetCircularByCircularId/GetCircularByCircularId";
   static String getTeacherSessionApi = "${baseUrl}SessionSearch/SessionSearch";
+  static String inActiveCircularApi = "${baseUrl}UpdateCircularStatus/UpdateCircularStatus";
+  static String inActiveAssignmentApi = "${baseUrl}UpdateAssignmentStatus/UpdateAssignmentStatus";
+  static String getAssignmentDatesApi = "${baseUrl}GetDateofAssinmentForCalendar/GetDateofAssinmentForCalendar";
+  static String addFcmTokenApi = "${baseUrl}DeviceTokenAdd/AddDeviceToken";
+  static String removeFcmTokenApi = "${baseUrl}Logout/LogoutDevice";
 }

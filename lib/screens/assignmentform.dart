@@ -1,3 +1,4 @@
+import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/teacher/teacher_assignment_provider.dart';
 import 'package:flexischool/widgets/custom_loader.dart';
@@ -292,9 +293,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             onTap: () async {
                               final DateTime? pickedDate = await showDatePicker(
                                 context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2094),
+                                initialDate: DateTime.parse(Constants.startDate),
+                                firstDate: DateTime.parse(Constants.startDate),
+                                lastDate: DateTime.parse(Constants.endDate),
                               );
                               if (pickedDate != null) {
                                 model.updateStartDate(pickedDate);
@@ -313,14 +314,31 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             ),
                             trailing: const Icon(Icons.calendar_today),
                             onTap: () async {
-                              final DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2094),
-                              );
-                              if (pickedDate != null) {
-                                model.updateEndDate(pickedDate);
+                              if (model.startDateController.text.isNotEmpty) {
+                                final DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.parse(Constants.startDate),
+                                  firstDate: DateTime.parse(Constants.startDate),
+                                  lastDate: DateTime.parse(Constants.endDate),
+                                );
+                                if (pickedDate != null) {
+                                  if (pickedDate.isBefore(model.selectedStartDate)) {
+                                    if (context.mounted) {
+                                      ShowSnackBar.error(
+                                          context: context,
+                                          showMessage: 'End date cannot be earlier than the start date!');
+                                    }
+                                  } else {
+                                    model.updateEndDate(pickedDate);
+                                  }
+                                }
+                              } else {
+                                if (context.mounted) {
+                                  ShowSnackBar.error(
+                                      context: context,
+                                      showMessage:
+                                          'Start date must be selected before choosing an end date!');
+                                }
                               }
                             },
                           ),
@@ -338,7 +356,6 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                   },
                                 );
                               }),
-
 
                           const Text(
                             'Upload Files',
@@ -444,27 +461,27 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           model.docList.isEmpty
                               ? const SizedBox.shrink()
                               : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Uploaded files',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: "Montserrat Regular",
-                                  color: Colors.black,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Uploaded files',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    FileTable(
+                                      files: model.docList,
+                                      onRemove: (file, index) {
+                                        model.deleteFile(file, index);
+                                      },
+                                    ),
+                                    const SizedBox(height: 100)
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 5),
-                              FileTable(
-                                files: model.docList,
-                                onRemove: (file, index) {
-                                  model.deleteFile(file, index);
-                                },
-                              ),
-                              const SizedBox(height: 100)
-                            ],
-                          ),
 
                           // const Padding(
                           //   padding: EdgeInsets.only(left: 20.0, top: 12.0, right: 12, bottom: 0),
@@ -548,7 +565,6 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           //           )
                           //         ],
                           //       ),
-
                         ],
                       ),
                     ),

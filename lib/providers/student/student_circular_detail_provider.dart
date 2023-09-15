@@ -28,10 +28,10 @@ class StudentCircularDetailProvider extends ChangeNotifier {
 
   String? get message => _message;
 
-  Future<void> fetchStudentCircularDetail(int id) async {
+  Future<void> fetchStudentCircularDetail(int id, int sessionId) async {
     try {
       loaderProvider.showLoader();
-      var data = {"APP_CIRCULAR_ID": id, "SESSION_ID": Constants.sessionId};
+      var data = {"APP_CIRCULAR_ID": id, "SESSION_ID": sessionId};
       final response = await apiService.post(url: Api.getCircularByIdApi, data: data);
       if (response.statusCode == 200) {
         studentCircularDetailResponse = StudentCircularDetailResponse.fromJson(response.data);

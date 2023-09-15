@@ -7,9 +7,12 @@ import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/notification_count_response.dart';
 import 'package:flexischool/models/student/session_list_response.dart';
 import 'package:flexischool/models/student/student_detail_response.dart';
+import 'package:flexischool/notification_count_handler.dart';
 import 'package:flexischool/providers/loader_provider.dart';
+import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final GetIt getIt = GetIt.instance;
@@ -73,6 +76,8 @@ class StudentDashboardProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         notificationCountResponse = NotificationCountResponse.fromJson(response.data);
+        NotificationCountHandler.updateNotificationCount(
+            int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
         notifyListeners();
       } else {}
     } catch (e) {
@@ -119,5 +124,36 @@ class StudentDashboardProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _imageUrl = prefs.getString('global_school_logo')!;
     notifyListeners();
+  }
+
+  Future<void> logoutApi(BuildContext context, String appDeviceId) async {
+    var requestedData = {"APP_DEVICE_ID": appDeviceId};
+    var body = json.encode(requestedData);
+    try {
+      final response = await apiService.post(
+        url: Api.removeFcmTokenApi,
+        data: body,
+      );
+      if (response.statusCode == 200) {
+        sessionListResponse = SessionListResponse.fromJson(response.data);
+        if (context.mounted) {
+          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          loginStore.userLogout();
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+        notifyListeners();
+      } else {
+        if (context.mounted) {
+          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          loginStore.userLogout();
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
+    } catch (e) {
+      final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+      loginStore.userLogout();
+      Navigator.pushReplacementNamed(context, '/home');
+      debugPrint('Failed to connect to the API ${e.toString()}');
+    }
   }
 }

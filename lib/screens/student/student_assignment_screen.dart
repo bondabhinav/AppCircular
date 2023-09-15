@@ -1,9 +1,11 @@
+import 'dart:async';
+
+import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/models/student/student_assignment_model.dart';
 import 'package:flexischool/providers/student/student_assignment_provider.dart';
 import 'package:flexischool/screens/assignment_detail_screen.dart';
 import 'package:flexischool/utils/date_formater.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -22,12 +24,27 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
   @override
   void initState() {
     studentAssignmentProvider = StudentAssignmentProvider();
+    studentAssignmentProvider?.events = {};
+    studentAssignmentProvider?.eventsStreamController =
+        StreamController<Map<DateTime, List<dynamic>>>.broadcast();
+
+    studentAssignmentProvider!.getAssignmentDates(
+        year: DateTime.now().year.toString(),
+        month: DateTime.now().month.toString(),
+        dateTime: DateTime.now());
     studentAssignmentProvider!.fetchStudentAssignmentData();
     super.initState();
   }
 
   @override
+  void dispose() {
+    studentAssignmentProvider?.eventsStreamController.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint('build method called again');
     return ChangeNotifierProvider(
         create: (_) => studentAssignmentProvider,
         builder: (context, child) {
@@ -46,19 +63,55 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
               ),
               body: Column(
                 children: [
-                  TableCalendar(
-                    firstDay: DateTime.utc(2010, 10, 16),
-                    lastDay: DateTime.utc(2030, 3, 14),
-                    focusedDay: model.focusedDay,
-                    selectedDayPredicate: (day) {
-                      return isSameDay(model.selectedDay, day);
-                    },
-                    onDaySelected: (selectedDay, focusedDay) {
-                      if (!isSameDay(model.selectedDay, selectedDay)) {
-                        model.updateDate(selectedDay, focusedDay);
-                      }
-                    },
-                  ),
+                  StreamBuilder<Map<DateTime, List<dynamic>>>(
+                      stream: model.eventsStreamController.stream,
+                      initialData: model.events,
+                      builder: (context, snapshot) {
+                        final allEvents = snapshot.data ?? {};
+                        return TableCalendar(
+                          firstDay: DateTime.utc(2010, 10, 16),
+                          lastDay: DateTime.utc(2030, 3, 14),
+                          headerStyle: const HeaderStyle(formatButtonVisible: false),
+                          onPageChanged: (dateTime) {
+                            debugPrint('format change $dateTime');
+                            model.getAssignmentDates(
+                                year: dateTime.year.toString(),
+                                month: dateTime.month.toString(),
+                                dateTime: dateTime);
+                          },
+                          calendarBuilders: CalendarBuilders(
+                            defaultBuilder: (context, day, focusedDay) {
+                              for (DateTime d in allEvents.keys) {
+                                if (day.day == d.day && day.month == d.month && day.year == d.year) {
+                                  return Container(
+                                    margin: const EdgeInsets.all(5),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffc6c627),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${day.day}',
+                                        style: const TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                          focusedDay: model.focusedDay,
+                          selectedDayPredicate: (day) {
+                            return isSameDay(model.selectedDay, day);
+                          },
+                          onDaySelected: (selectedDay, focusedDay) {
+                            if (!isSameDay(model.selectedDay, selectedDay)) {
+                              model.updateDate(selectedDay, focusedDay);
+                            }
+                          },
+                        );
+                      }),
                   Expanded(
                     child: (model.studentAssignmentModel == null ||
                             model.studentAssignmentModel!.assignment == null)
@@ -140,6 +193,7 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => AssignmentDetailScreen(
+                                            sessionId: Constants.sessionId,
                                               assignmentId: model.studentAssignmentModel!.assignment![index]
                                                   .aPPASSIGNMENTID!)));
 
@@ -178,9 +232,7 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
       margin: const EdgeInsets.all(10),
       padding: const EdgeInsets.all(8),
       decoration:
-          BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(5)),
+          BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,10 +242,10 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
             children: [
               Flexible(
                 child: Container(
-               //   padding: const EdgeInsets.all(8),
+                  //   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(right: 10),
-               //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
-                  child:  Text(circular.sUBJECT_NAME ?? "",
+                  //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
+                  child: Text(circular.sUBJECT_NAME ?? "",
                       maxLines: 2,
                       style: const TextStyle(
                         fontSize: 14,
@@ -214,7 +266,6 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
                         fontFamily: "Montserrat Regular",
                         color: Colors.black,
                       )),
-
                   Text(DateTimeUtils.formatNextDateTime(circular.eNDDATE ?? ""),
                       style: const TextStyle(
                         fontSize: 12,

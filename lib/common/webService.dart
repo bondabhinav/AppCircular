@@ -11,17 +11,17 @@ import '../models/dashboard_model.dart';
 
 class WebService {
   static SharedPreferences? _preferences;
-  static  StudentLoginResponse? studentLoginData;
+  static StudentLoginResponse? studentLoginData;
 
   static Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 
   static clearAllPref() async {
-   _preferences?.remove("user_details");
-   _preferences?.remove("global_login_type");
-   _preferences?.remove("student_data");
-   WebService.studentLoginData = null;
+    _preferences?.remove("user_details");
+    _preferences?.remove("global_login_type");
+    _preferences?.remove("student_data");
+    WebService.studentLoginData = null;
   }
 
   static getSchoolUrl() async {
@@ -55,6 +55,15 @@ class WebService {
 
   static setStudentLoginDetails(StudentLoginResponse loginResponse) async {
     await _preferences?.setString("student_data", json.encode(loginResponse));
+  }
+
+  static setFcmData(String fcmId) async {
+    await _preferences?.setString("fcmId", fcmId);
+  }
+
+  static Future<String?> getFcmData() async {
+   final value = await _preferences?.get("fcmId").toString();
+   return value;
   }
 
   static Future<StudentLoginResponse?> getStudentLoginDetails() async {

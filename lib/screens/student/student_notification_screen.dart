@@ -1,3 +1,4 @@
+import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/models/student/notification_list_response.dart';
 import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/screens/assignment_detail_screen.dart';
@@ -75,6 +76,7 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => AssignmentDetailScreen(
+                                              sessionId: Constants.sessionId,
                                                 assignmentId: notificationItem.aPPASSIGNMENTID!)));
                                   } else if (notificationItem.nOTIFICATIONTYPE == 'CIRCULAR') {
                                     if (notificationItem.nOTIFICATIONFLAG == 'N') {
@@ -85,6 +87,7 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => StudentCircularDetailScreen(
+                                              sessionId: Constants.sessionId,
                                                 id: notificationItem.aPPCIRCULARID!)));
                                   } else if (notificationItem.nOTIFICATIONTYPE == 'ATTENDANCE') {}
                                 },

@@ -56,15 +56,18 @@ class AttendanceDataRequest {
 class AttendanceDetail {
   String present;
   int studentId;
+  String adm_id;
 
   AttendanceDetail({
     required this.present,
     required this.studentId,
+    required this.adm_id,
   });
 
   factory AttendanceDetail.fromJson(Map<String, dynamic> json) {
     return AttendanceDetail(
       present: json['PRESENT'],
+      adm_id: json['ADM_NO'],
       studentId: json['STUDENT_ID'],
     );
   }
@@ -72,6 +75,7 @@ class AttendanceDetail {
   Map<String, dynamic> toJson() {
     return {
       'PRESENT': present,
+      'ADM_NO': adm_id,
       'STUDENT_ID': studentId,
     };
   }

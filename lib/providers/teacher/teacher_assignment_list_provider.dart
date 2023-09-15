@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/models/common_model.dart';
 import 'package:flexischool/models/teacher/teacher_assignment_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/utils/notification_service.dart';
@@ -156,13 +157,42 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
   }
 
   String getContentAsHTML(String jsonString) {
-    // final List<dynamic> jsonData = jsonDecode(jsonString);
-    // return QuillJsonToHTML.encodeJson(jsonData);
-
     List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List).cast<Map<String, dynamic>>();
     Delta delta = Delta.fromJson(quillDelta);
     String plainText = delta.toList().where((op) => op.data != null).map((op) => op.data).join('');
-    debugPrint('Plain Text ===> $plainText');
     return plainText;
+  }
+
+  Future<void> inActiveAssignment(LstAssignment assignment, BuildContext context) async {
+    try {
+      loaderProvider.showLoader();
+      var data = {"APP_ASSIGNMENT_ID": assignment.aPPASSIGNMENTID};
+      notifyListeners();
+      final response = await apiService.post(url: Api.inActiveAssignmentApi, data: data);
+      if (response.statusCode == 200) {
+        final commonResponse = CommonResponse.fromJson(response.data);
+        if (commonResponse.success ?? false) {
+          assignment.aCTIVE = "N";
+        } else {
+          if (context.mounted) {
+            ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+          }
+        }
+        loaderProvider.hideLoader();
+        notifyListeners();
+      } else {
+        if (context.mounted) {
+          ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+        }
+        loaderProvider.hideLoader();
+        notifyListeners();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+      }
+      loaderProvider.hideLoader();
+      notifyListeners();
+    }
   }
 }

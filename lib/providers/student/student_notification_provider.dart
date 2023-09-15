@@ -25,11 +25,21 @@ class StudentNotificationProvider extends ChangeNotifier {
   final QuillController _controller = QuillController.basic();
 
   String getContentAsHTML(String jsonString) {
-    final List<dynamic> jsonData = jsonDecode(jsonString);
-    //  debugPrint(QuillJsonToHTML.encodeJson(jsonData));
-    List deltaJson = _controller.document.toDelta().toJson();
-    //  debugPrint(QuillJsonToHTML.encodeJson(deltaJson));
-    return QuillJsonToHTML.encodeJson(jsonData);
+    try {
+      final dynamic jsonData = jsonDecode(jsonString);
+      if (jsonData is List) {
+        return QuillJsonToHTML.encodeJson(jsonData);
+      } else if (jsonData is String) {
+        // Handle the case when jsonData is a single string
+        return jsonData;
+      } else {
+        // Handle other unexpected data types
+        return "Invalid JSON data";
+      }
+    } catch (e) {
+      // Handle JSON decoding errors
+      return "Error decoding JSON: $e";
+    }
   }
 
   Future<void> fetchNotificationData() async {

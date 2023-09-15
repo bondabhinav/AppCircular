@@ -87,7 +87,6 @@ class _LoginWidgetState extends State<LoginWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response)),
           );
-
           Navigator.pushReplacementNamed(context, '/studentDashboard');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -36,10 +36,10 @@ class AssignmentDetailProvider extends ChangeNotifier {
     return QuillJsonToHTML.encodeJson(jsonData);
   }
 
-  Future<void> fetchAssignmentDetailData(int assignmentId) async {
+  Future<void> fetchAssignmentDetailData(int assignmentId, int sessionId) async {
     try {
       loaderProvider.showLoader();
-      var data = {"APP_ASSIGNMENT_ID": assignmentId, "SESSION_ID": Constants.sessionId};
+      var data = {"APP_ASSIGNMENT_ID": assignmentId, "SESSION_ID": sessionId};
       final response = await apiService.post(url: Api.getAssignmentByIdApi, data: data);
       if (response.statusCode == 200) {
         assignmentDetailResponse = AssignmentDetailResponse.fromJson(response.data);

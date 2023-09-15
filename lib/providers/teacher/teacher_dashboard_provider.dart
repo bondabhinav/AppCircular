@@ -35,6 +35,8 @@ class TeacherDashboardProvider extends ChangeNotifier {
           Constants.sessionId = sessionData.sESSIONID!;
           _sessionYear =
               '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
+          Constants.startDate = sessionData.sTARTDATE!;
+          Constants.endDate = sessionData.eNDDATE!;
         }
         notifyListeners();
         debugPrint('session id----> ${Constants.sessionId}');
@@ -50,6 +52,8 @@ class TeacherDashboardProvider extends ChangeNotifier {
     var sessionData = teacherSessionResponse?.sessionDD?.firstWhere((data) => data.sESSIONID == newValue);
     if (sessionData != null) {
       _sessionYear = '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
+      Constants.startDate = sessionData.sTARTDATE!;
+      Constants.endDate = sessionData.eNDDATE!;
     }
     notifyListeners();
   }

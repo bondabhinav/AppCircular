@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
+import 'package:flexischool/models/common_model.dart';
 import 'package:flexischool/models/student/student_circular_doc_list_respnose.dart';
 import 'package:flexischool/models/teacher/teacher_circular_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
@@ -191,5 +192,38 @@ class TeacherCircularListProvider extends ChangeNotifier {
       notifyListeners();
     }
     return _startDate;
+  }
+
+  Future<void> inActiveCircular(Classlist circular, BuildContext context) async {
+    try {
+      loaderProvider.showLoader();
+      var data = {"APP_CIRCULAR_ID": circular.aPPCIRCULARID};
+      notifyListeners();
+      final response = await apiService.post(url: Api.inActiveCircularApi, data: data);
+      if (response.statusCode == 200) {
+        final commonResponse = CommonResponse.fromJson(response.data);
+        if (commonResponse.success ?? false) {
+          circular.aCTIVE = "N";
+        } else {
+          if (context.mounted) {
+            ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+          }
+        }
+        loaderProvider.hideLoader();
+        notifyListeners();
+      } else {
+        if (context.mounted) {
+          ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+        }
+        loaderProvider.hideLoader();
+        notifyListeners();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+      }
+      loaderProvider.hideLoader();
+      notifyListeners();
+    }
   }
 }

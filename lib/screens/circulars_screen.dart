@@ -282,7 +282,7 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Start Date',
+                                    const Text('Start Date*',
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,
@@ -291,9 +291,7 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                         )),
                                     const SizedBox(height: 5),
                                     InkWell(
-                                      onTap: () {
-                                        model.selectDate(context: context, startDate: true);
-                                      },
+                                      onTap: () => model.selectDate(context: context, startDate: true),
                                       child: Container(
                                           height: 45,
                                           alignment: Alignment.centerLeft,
@@ -318,7 +316,7 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('End Date',
+                                    const Text('End Date*',
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,
@@ -327,9 +325,7 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                         )),
                                     const SizedBox(height: 5),
                                     InkWell(
-                                      onTap: () {
-                                        model.selectDate(context: context, startDate: false);
-                                      },
+                                      onTap: () => model.selectDate(context: context, startDate: false),
                                       child: Container(
                                           height: 45,
                                           alignment: Alignment.centerLeft,
@@ -530,7 +526,7 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                       ShowSnackBar.successToast(
                                           context: context, showMessage: 'Circular created successfully');
                                       Navigator.pop(context);
-                                    }else{
+                                    } else {
                                       ShowSnackBar.error(
                                           context: context, showMessage: 'Something went wrong');
                                     }

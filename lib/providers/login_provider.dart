@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flexischool/common/api_service.dart';
+import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/student/add_token_response.dart';
 import 'package:flexischool/models/student/student_login_response.dart';
+import 'package:flexischool/notification_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +81,7 @@ class LoginProvider extends ChangeNotifier {
     prefs.remove("user_details");
     prefs.remove("global_login_type");
     prefs.remove("student_data");
+    prefs.remove("fcmId");
     WebService.studentLoginData = null;
     //prefs.remove("global_school_url");
 
@@ -216,8 +220,32 @@ class LoginProvider extends ChangeNotifier {
         if (loginResponse.table1!.isNotEmpty) {
           WebService.setStudentLoginDetails(loginResponse);
           WebService.studentLoginData = loginResponse;
-          result = 'You have successfully logged in!';
-        }else{
+          debugPrint("check push notification ${PushNotificationsManager().fcmToken}");
+          if (PushNotificationsManager().fcmToken.isNotEmpty) {
+            try {
+              var data = {
+                "ADM_NO": loginResponse.table1!.first.aDMNO!,
+                "DEVICE_TOKEN": PushNotificationsManager().fcmToken
+              };
+              final response = await apiService.post(url: Api.addFcmTokenApi, data: data);
+              if (response.statusCode == 200) {
+             //   final responseData = json.decode(response.data);
+                final addTokenResponse = AddTokenResponse.fromJson(response.data);
+                debugPrint('fcm token api response ${addTokenResponse.toString()}');
+                debugPrint('fcm token number ${addTokenResponse.nUMBER.toString()}');
+                WebService.setFcmData(addTokenResponse.nUMBER.toString());
+                result = 'You have successfully logged in!';
+              } else {
+                result = 'You have successfully logged in!';
+              }
+            } on Exception catch (e) {
+              debugPrint(e.toString());
+              result = 'You have successfully logged in!';
+            }
+          } else {
+            result = 'You have successfully logged in!';
+          }
+        } else {
           result = 'Invalid Login Credentials.';
         }
         notifyListeners();

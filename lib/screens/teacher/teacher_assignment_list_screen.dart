@@ -186,6 +186,7 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (context) => AssignmentDetailScreen(
+                                                      sessionId: Constants.sessionId,
                                                         assignmentId: model.teacherAssignmentListModel!
                                                             .lstAssignment![index].aPPASSIGNMENTID!)));
                                           })),
@@ -206,211 +207,251 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
       void Function()? showMoreOnTap,
       required TeacherAssignmentListProvider model,
       required LstAssignment assignment}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration:
-          BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Container(
-                  //   padding: const EdgeInsets.all(8),
-                  margin: const EdgeInsets.only(right: 10),
-                  //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
-                  child: Text(assignment.sUBJECTNAME ?? "",
-                      maxLines: 2,
-                      style: const TextStyle(
+    return Opacity(
+      opacity: assignment.aCTIVE == "Y" ? 1.0 : 0.5,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(8),
+        decoration:
+            BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
+                    child: Text(assignment.sUBJECTNAME ?? "",
+                        maxLines: 2,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: "Montserrat Regular",
+                          color: Colors.black,
+                        )),
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('Assignment Date: ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            )),
+                        Text(DateTimeUtils.formatDateTime(assignment.aSSIGNMENTDATE ?? ""),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.orange,
+                            )),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('Start Date: ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            )),
+                        Text(DateTimeUtils.formatDateTime(assignment.sTARTDATE ?? ""),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.orange,
+                            )),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('Submission Date: ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            )),
+                        Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.orange,
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                  fontFamily: "Montserrat Regular",
+                  color: Colors.black,
+                )),
+            // SizedBox(
+            //   height: 60,
+            //   child: Html(
+            //     shrinkWrap: true,
+            //     data: model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
+            //   ),
+            // ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                if (assignment.lstCircularFile!.isNotEmpty)
+                  InkWell(
+                      onTap: documentOnTap,
+                      child: const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Icon(
+                            Icons.cloud_download,
+                            color: Colors.white,
+                          ))),
+                const Spacer(),
+                MaterialButton(
+                  onPressed: showMoreOnTap,
+                  color: Colors.blue,
+                  child: const Text("View more",
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Montserrat Regular",
-                        color: Colors.black,
+                        color: Colors.white,
                       )),
                 ),
-              ),
-              const Spacer(),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text('Assignment Date: ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.black,
-                          )),
-                      Text(DateTimeUtils.formatDateTime(assignment.aSSIGNMENTDATE ?? ""),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.orange,
-                          )),
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text('Start Date: ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.black,
-                          )),
-                      Text(DateTimeUtils.formatDateTime(assignment.sTARTDATE ?? ""),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.orange,
-                          )),
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text('Submission Date: ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.black,
-                          )),
-                      Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.orange,
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-
-              // Padding(
-              //   padding: const EdgeInsets.only(top: 8.0),
-              //   child: Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
-              //       style: const TextStyle(
-              //         fontSize: 12,
-              //         fontWeight: FontWeight.normal,
-              //         fontFamily: "Montserrat Regular",
-              //         color: Colors.orange,
-              //       )),
-              // ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                fontFamily: "Montserrat Regular",
-                color: Colors.black,
-              )),
-          // SizedBox(
-          //   height: 60,
-          //   child: Html(
-          //     shrinkWrap: true,
-          //     data: model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
-          //   ),
-          // ),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              if (assignment.lstCircularFile!.isNotEmpty)
-                InkWell(
-                    onTap: documentOnTap,
-                    child: const CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Icon(
-                          Icons.cloud_download,
-                          color: Colors.white,
-                        ))),
-              const Spacer(),
-              MaterialButton(
-                onPressed: showMoreOnTap,
-                color: Colors.blue,
-                child: const Text("View more",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.white,
-                    )),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 5),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Class: ',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.black,
-                  )),
-              Text(assignment.cLASSDESC ?? "",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.orange,
-                  )),
-            ],
-          ),
-          if (assignment.lstCircularSection != null)
-            SizedBox(
-              height: 30,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Section: ',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.black,
-                      )),
-                  Expanded(
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: assignment.lstCircularSection!.length,
-                      itemBuilder: (context, index) {
-                        return Text(
-                          assignment.lstCircularSection![index].sECTIONDESC ?? "",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: "Montserrat Regular",
-                            color: Colors.black,
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return const Text(', ');
-                      },
-                    ),
-                  )
-                ],
-              ),
+              ],
             ),
-        ],
+
+            const SizedBox(height: 5),
+
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Class: ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: "Montserrat Regular",
+                                color: Colors.black,
+                              )),
+                          Text(assignment.cLASSDESC ?? "",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: "Montserrat Regular",
+                                color: Colors.black,
+                              )),
+                        ],
+                      ),
+                      if (assignment.lstCircularSection != null)
+                        SizedBox(
+                          height: 30,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Section: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: "Montserrat Regular",
+                                    color: Colors.black,
+                                  )),
+                              Expanded(
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: assignment.lstCircularSection!.length,
+                                  itemBuilder: (context, index) {
+                                    return Text(
+                                      assignment.lstCircularSection![index].sECTIONDESC ?? "",
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder: (BuildContext context, int index) {
+                                    return const Text(', ');
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: assignment.aCTIVE == "Y",
+                      onChanged: assignment.aCTIVE == "Y"
+                          ? (newValue) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Confirm Action'),
+                                    content: const Text('Are you sure you want to inactive this assignment?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          model.inActiveAssignment(assignment, context);
+                                        },
+                                        child: const Text('Yes'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('No'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          : null,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                     Text(assignment.aCTIVE == "Y"?'Active':'Inactive')
+                  ],
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

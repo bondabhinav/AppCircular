@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -48,7 +47,7 @@ class TeacherAssignmentProvider extends ChangeNotifier {
 
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-  DateTime? selectedStartDate;
+  DateTime selectedStartDate = DateTime.parse(Constants.startDate);
   DateTime? selectedEndDate;
 
   int? _selectedClass;
@@ -65,7 +64,7 @@ class TeacherAssignmentProvider extends ChangeNotifier {
   List<int> get selectedSectionIds => _selectedSectionIds;
 
   List<Map<String, dynamic>> lstSectionCircular = [];
-  List<Map<String, dynamic>> lstStudentCircular = [];
+  List<StudentListModel> lstStudentCircular = [];
 
   final List<int> _studentIds = [];
 
@@ -88,7 +87,9 @@ class TeacherAssignmentProvider extends ChangeNotifier {
       _studentIds.clear();
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
-        lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+
+        lstStudentCircular
+            .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID.toString(), ADM_NO: item.aDMNO.toString()));
       }
     } else {
       _studentIds.clear();
@@ -142,7 +143,12 @@ class TeacherAssignmentProvider extends ChangeNotifier {
     if (_selectAll) {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
       } else {
         _studentIds.remove(studentId);
         lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
@@ -151,7 +157,15 @@ class TeacherAssignmentProvider extends ChangeNotifier {
     } else {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
+
+        //  lstStudentCircular.add({"STUDENT_ID": studentId});
         if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
           _selectAll = true;
         }
@@ -246,7 +260,8 @@ class TeacherAssignmentProvider extends ChangeNotifier {
           _selectAll = true;
           studentResponse!.aDMSTUDREGISTRATION!.map((item) {
             _studentIds.add(item.aDMSTUDENTID!);
-            lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+            lstStudentCircular
+                .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID!.toString(), ADM_NO: item.aDMNO));
           }).toList();
         }
         loaderProvider.hideLoader();
@@ -327,13 +342,13 @@ class TeacherAssignmentProvider extends ChangeNotifier {
 
   Future<void> uploadFile() async {
     debugPrint('upload ${File(path).path}');
+    loaderProvider.showLoader();
+    notifyListeners();
     try {
-      loaderProvider.showLoader();
       String fileName =
           '${selectedClassName.replaceAll(' ', '')}_${DateTime.now().millisecondsSinceEpoch}_${path.split('/').last}';
       debugPrint('upload fileName ----> $fileName');
-      var request = http.MultipartRequest(
-          'POST', Uri.parse(Api.uploadAssignmentImageDocFileApi));
+      var request = http.MultipartRequest('POST', Uri.parse(Api.uploadAssignmentImageDocFileApi));
       request.headers['Content-Type'] = 'multipart/form-data; boundary=<calculated when request is sent>';
       request.headers['Accept'] = '*/*';
       request.files.add(await http.MultipartFile.fromPath('', File(path).path, filename: fileName));
@@ -349,6 +364,12 @@ class TeacherAssignmentProvider extends ChangeNotifier {
           List<dynamic> jsonResponse = json.decode(data.body);
           if (jsonResponse.isNotEmpty) {
             for (var jsonItem in jsonResponse) {
+              scrollController.animateTo(
+                scrollController.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+              notifyListeners();
               Map<String, dynamic> jsonData = jsonItem;
               UploadDocResponse uploadDocResponse = UploadDocResponse.fromJson(jsonData);
               docList.add(uploadDocResponse);
@@ -358,33 +379,28 @@ class TeacherAssignmentProvider extends ChangeNotifier {
               filePick = null;
               _fileName = null;
               notifyListeners();
-              debugPrint(uploadDocResponse.fileNAME);
-              scrollController.animateTo(
-                scrollController.position.maxScrollExtent,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
-              loaderProvider.hideLoader();
-              notifyListeners();
             }
           }
         }
+        loaderProvider.hideLoader();
+        notifyListeners();
       } else {
         loaderProvider.hideLoader();
         debugPrint(response.reasonPhrase);
         debugPrint("else part ${response.reasonPhrase}");
-        throw Exception("else part ${response.reasonPhrase}");
+        notifyListeners();
       }
     } catch (e) {
       debugPrint("catch part ${e.toString()}");
       loaderProvider.hideLoader();
-      throw Exception('Failed to connect to the API ${e.toString()}');
+      notifyListeners();
     }
   }
 
   Future<void> deleteFile(String filename, int index) async {
+    loaderProvider.showLoader();
+    notifyListeners();
     try {
-      loaderProvider.showLoader();
       final response = await apiService.post(url: Api.deleteAssignmentFileApi, data: {"FILE_NAME": filename});
       if (response.statusCode == 200) {
         debugPrint('data =====> ${response.data}');
@@ -400,10 +416,11 @@ class TeacherAssignmentProvider extends ChangeNotifier {
         notifyListeners();
       } else {
         loaderProvider.hideLoader();
+        notifyListeners();
       }
     } catch (e) {
       loaderProvider.hideLoader();
-      throw Exception('Failed to connect to the API ${e.toString()}');
+      notifyListeners();
     }
   }
 
@@ -433,7 +450,8 @@ class TeacherAssignmentProvider extends ChangeNotifier {
       "SESSION_ID": Constants.sessionId
     };
 
-    log("Data======> $jsonData");
+    String jsonString = json.encode(jsonData);
+    log("Json encoded data ==> $jsonString");
     try {
       final response = await apiService.post(url: Api.addAssignmentApi, data: jsonData);
       if (response.statusCode == 200) {
@@ -465,6 +483,25 @@ class SectionForSubject {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['SECTION_ID'] = sectionId;
+    return data;
+  }
+}
+
+class StudentListModel {
+  String? STUDENT_ID;
+  String? ADM_NO;
+
+  StudentListModel({this.ADM_NO, this.STUDENT_ID});
+
+  StudentListModel.fromJson(Map<String, dynamic> json) {
+    STUDENT_ID = json['STUDENT_ID'];
+    ADM_NO = json['ADM_NO'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['ADM_NO'] = ADM_NO;
+    data['STUDENT_ID'] = STUDENT_ID;
     return data;
   }
 }

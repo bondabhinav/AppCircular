@@ -7,10 +7,18 @@ class Constants {
   static int sessionId = 0;
   static String teacherSessionYear = '';
   static String currentDate = getCurrentDate();
+  static String startDate = '';
+  static String endDate = '';
+
 
   static String getCurrentDate() {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    return formattedDate;
+  }
+
+  static String getFormattedDate(String date) {
+    String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(date));
     return formattedDate;
   }
 }

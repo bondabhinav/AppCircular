@@ -15,7 +15,7 @@ class AuthGuard {
 
 //class AuthMiddleware extends RouteObserver<PageRoute<dynamic>> {
 class AuthMiddleware extends NavigatorObserver {
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   //late final BuildContext context;
 

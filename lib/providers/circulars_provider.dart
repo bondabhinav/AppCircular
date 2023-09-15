@@ -16,6 +16,7 @@ import 'package:flexischool/models/upload_doc_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/utils/date_formater.dart';
 import 'package:flexischool/widgets/custom_checkbox.dart';
+import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -41,9 +42,9 @@ class CircularsProvider extends ChangeNotifier {
   File? filePick;
   var path;
 
-  final startDateController = TextEditingController();
-  final endDateController = TextEditingController();
-  DateTime? selectedStartDate;
+  final startDateController = TextEditingController(text: Constants.getFormattedDate(Constants.startDate));
+  final endDateController = TextEditingController(text: Constants.getFormattedDate(Constants.endDate));
+  DateTime selectedStartDate = DateTime.parse(Constants.startDate);
   DateTime? selectedEndDate;
 
   int? _selectedClass;
@@ -56,7 +57,7 @@ class CircularsProvider extends ChangeNotifier {
   List<int> get selectedSectionIds => _selectedSectionIds;
 
   List<Map<String, dynamic>> lstSectionCircular = [];
-  List<Map<String, dynamic>> lstStudentCircular = [];
+  List<StudentListModel> lstStudentCircular = [];
 
   final List<int> _studentIds = [];
 
@@ -79,7 +80,9 @@ class CircularsProvider extends ChangeNotifier {
       _studentIds.clear();
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
-        lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+        // lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+        lstStudentCircular
+            .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID.toString(), ADM_NO: item.aDMNO.toString()));
       }
     } else {
       _studentIds.clear();
@@ -125,7 +128,13 @@ class CircularsProvider extends ChangeNotifier {
     if (_selectAll) {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+        // lstStudentCircular.add({"STUDENT_ID": studentId});
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
       } else {
         _studentIds.remove(studentId);
         lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
@@ -134,7 +143,13 @@ class CircularsProvider extends ChangeNotifier {
     } else {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+        // lstStudentCircular.add({"STUDENT_ID": studentId});
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
         if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
           _selectAll = true;
         }
@@ -148,6 +163,9 @@ class CircularsProvider extends ChangeNotifier {
   }
 
   Future<CommonResponse> addCircularsData({required int teacherId}) async {
+    final List<Map<String, dynamic>> studentJsonList = lstStudentCircular.map((student) => student.toJson()).toList();
+
+    log("student data $studentJsonList end");
     var commonResponse = CommonResponse();
     try {
       DateTime now = DateTime.now();
@@ -167,7 +185,7 @@ class CircularsProvider extends ChangeNotifier {
         "lstsectionCircular": lstSectionCircular,
         "lstStudentCircular": lstStudentCircular,
         "lstStudentCircularinfo": docList,
-        "SESSION_ID":Constants.sessionId
+        "SESSION_ID": Constants.sessionId
       };
       log("Data======> $data");
       final response = await apiService.post(url: Api.addCircularApi, data: data);
@@ -247,7 +265,8 @@ class CircularsProvider extends ChangeNotifier {
           _selectAll = true;
           studentResponse!.aDMSTUDREGISTRATION!.map((item) {
             _studentIds.add(item.aDMSTUDENTID!);
-            lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+            lstStudentCircular
+                .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID!.toString(), ADM_NO: item.aDMNO));
           }).toList();
         }
         loaderProvider.hideLoader();
@@ -264,13 +283,13 @@ class CircularsProvider extends ChangeNotifier {
 
   Future<void> uploadFile() async {
     debugPrint('upload ${File(path).path}');
+    loaderProvider.showLoader();
+    notifyListeners();
     try {
-      loaderProvider.showLoader();
       String fileName =
           '${selectedClassName.replaceAll(' ', '')}_${DateTime.now().millisecondsSinceEpoch}_${path.split('/').last}';
       debugPrint('upload fileName ----> $fileName');
-      var request = http.MultipartRequest(
-          'POST', Uri.parse(Api.uploadCircularImageDocFileApi));
+      var request = http.MultipartRequest('POST', Uri.parse(Api.uploadCircularImageDocFileApi));
       request.headers['Content-Type'] = 'multipart/form-data; boundary=<calculated when request is sent>';
       request.headers['Accept'] = '*/*';
       request.files.add(await http.MultipartFile.fromPath('', File(path).path, filename: fileName));
@@ -301,21 +320,22 @@ class CircularsProvider extends ChangeNotifier {
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOut,
               );
-              loaderProvider.hideLoader();
               notifyListeners();
             }
           }
         }
+        loaderProvider.hideLoader();
+        notifyListeners();
       } else {
         loaderProvider.hideLoader();
         debugPrint(response.reasonPhrase);
         debugPrint("else part ${response.reasonPhrase}");
-        throw Exception("else part ${response.reasonPhrase}");
+        notifyListeners();
       }
     } catch (e) {
       debugPrint("catch part ${e.toString()}");
       loaderProvider.hideLoader();
-      throw Exception('Failed to connect to the API ${e.toString()}');
+      notifyListeners();
     }
   }
 
@@ -347,9 +367,9 @@ class CircularsProvider extends ChangeNotifier {
   Future<void> selectDate({required BuildContext context, required bool startDate}) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2094),
+      initialDate: DateTime.parse(Constants.startDate),
+      firstDate: DateTime.parse(Constants.startDate),
+      lastDate: DateTime.parse(Constants.endDate),
     );
 
     if (pickedDate != null) {
@@ -359,14 +379,21 @@ class CircularsProvider extends ChangeNotifier {
           pickedDate.month,
           pickedDate.day,
         );
-        startDateController.text = DateTimeUtils.formatDate(selectedStartDate!).toString();
+        startDateController.text = DateTimeUtils.formatDate(selectedStartDate).toString();
       } else {
-        selectedEndDate = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-        );
-        endDateController.text = DateTimeUtils.formatDate(selectedEndDate!).toString();
+        if (pickedDate.isBefore(selectedStartDate)) {
+          if (context.mounted) {
+            ShowSnackBar.error(
+                context: context, showMessage: 'End date cannot be earlier than the start date!');
+          }
+        } else {
+          selectedEndDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+          );
+          endDateController.text = DateTimeUtils.formatDate(selectedEndDate!).toString();
+        }
       }
       notifyListeners();
     }
@@ -390,5 +417,24 @@ class CircularsProvider extends ChangeNotifier {
       debugPrint("pickedFiles: ${File(path)}");
       notifyListeners();
     }
+  }
+}
+
+class StudentListModel {
+  String? STUDENT_ID;
+  String? ADM_NO;
+
+  StudentListModel({this.ADM_NO, this.STUDENT_ID});
+
+  StudentListModel.fromJson(Map<String, dynamic> json) {
+    STUDENT_ID = json['STUDENT_ID'];
+    ADM_NO = json['ADM_NO'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['ADM_NO'] = ADM_NO;
+    data['STUDENT_ID'] = STUDENT_ID;
+    return data;
   }
 }

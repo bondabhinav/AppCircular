@@ -45,7 +45,7 @@ class AttendanceProvider extends ChangeNotifier {
   List<int> get selectedSectionIds => _selectedSectionIds;
 
   List<Map<String, dynamic>> lstSectionCircular = [];
-  List<Map<String, dynamic>> lstStudentCircular = [];
+  List<StudentListModel> lstStudentCircular = [];
 
   final List<int> _studentIds = [];
 
@@ -67,7 +67,9 @@ class AttendanceProvider extends ChangeNotifier {
       _studentIds.clear();
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
-        lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+      //  lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+        lstStudentCircular
+            .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID.toString(), ADM_NO: item.aDMNO.toString()));
       }
     } else {
       _studentIds.clear();
@@ -129,7 +131,15 @@ class AttendanceProvider extends ChangeNotifier {
     if (_selectAll) {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+    //    lstStudentCircular.add({"STUDENT_ID": studentId});
+
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
+
       } else {
         _studentIds.remove(studentId);
         lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
@@ -138,7 +148,13 @@ class AttendanceProvider extends ChangeNotifier {
     } else {
       if (isChecked) {
         _studentIds.add(studentId);
-        lstStudentCircular.add({"STUDENT_ID": studentId});
+        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+          if (element.aDMSTUDENTID == studentId) {
+            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+          }
+          return false;
+        }).toList();
+     //   lstStudentCircular.add({"STUDENT_ID": studentId});
         if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
           _selectAll = true;
         }
@@ -224,8 +240,10 @@ class AttendanceProvider extends ChangeNotifier {
           _selectAll = true;
           studentResponse!.aDMSTUDREGISTRATION!.map((item) {
             _studentIds.add(item.aDMSTUDENTID!);
-            lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
-            studentAttendanceList.add(AttendanceDetail(studentId: item.aDMSTUDENTID!, present: 'P'));
+          //  lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
+              lstStudentCircular
+                  .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID!.toString(), ADM_NO: item.aDMNO));
+            studentAttendanceList.add(AttendanceDetail(studentId: item.aDMSTUDENTID!, present: 'P',adm_id: item.aDMNO!));
           }).toList();
         }
         loaderProvider.hideLoader();
@@ -317,3 +335,22 @@ class AttendanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+class StudentListModel {
+  String? STUDENT_ID;
+  String? ADM_NO;
+
+  StudentListModel({this.ADM_NO, this.STUDENT_ID});
+
+  StudentListModel.fromJson(Map<String, dynamic> json) {
+    STUDENT_ID = json['STUDENT_ID'];
+    ADM_NO = json['ADM_NO'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['ADM_NO'] = ADM_NO;
+    data['STUDENT_ID'] = STUDENT_ID;
+    return data;
+  }
+}
+
