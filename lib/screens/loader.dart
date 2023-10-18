@@ -88,14 +88,14 @@ class _LoaderRouteState extends State<LoaderRoute> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center(
+            const Center(
                 child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             )),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             Text(
               appName,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.normal,
                 fontSize: 22.0,
                 color: Colors.white,

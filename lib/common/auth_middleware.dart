@@ -16,34 +16,8 @@ class AuthGuard {
 //class AuthMiddleware extends RouteObserver<PageRoute<dynamic>> {
 class AuthMiddleware extends NavigatorObserver {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-  //late final BuildContext context;
-
-  //AuthMiddleware(this.context);
-
-  //final MyUrlProvider = Provider.of<UrlProvider>(context);
-
   @override
   Future<void> didPush(Route<dynamic> route, Route<dynamic>? previousRoute) async {
-    //context = navigatorKey.currentContext;
-
-    print('call');
-    print(route.settings.name);
-
-    // //Provider Value Get
-    // final urlAuth  = Provider.of<UrlProvider >(route!.navigator!.context, listen: false);
-    // final value = urlAuth.myValue;
-    // print(value);
-    //var store = getValueFromSharedPreferences();
-    //print(store);
-
-    //  final prefs = await SharedPreferences.getInstance();
-    // final data = prefs.getString('global_school_url');
-    //
-    //  print(data);
-
-    //await isUserIn() ? print("true1") : print("false1");
-
     if (route.settings.name == '/home' || route.settings.name == '/schoolUrl') {
       if ((await isUserIn())) {
         final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
@@ -106,8 +80,6 @@ class AuthMiddleware extends NavigatorObserver {
   @override
   Future<void> didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async {
     super.didPop(route, previousRoute);
-    print('pop122');
-    print(route.settings.name);
     if (route.settings.name == '/dashboard' ||
         route.settings.name == '/studentDashboard' ||
         route.settings.name == '/home' ||

@@ -12,13 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'firebase_options.dart';
+
 const notificationChannel = "FlexiApp";
 const notificationChannelId = "com.example.flexi";
 const notificationChannelDescription = "Notification channel description";
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint("Handling a background message");
   debugPrint("onBackgroundMessage: ${message.data}");
   FlutterAppBadger.updateBadgeCount(int.parse(message.data['count'].toString()));
@@ -36,7 +38,7 @@ class PushNotificationsManager {
   bool _initialized = false;
   bool _hasLaunched = false;
 
-  static final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
   String _fcmToken = "test";
 
   Future<void> init() async {
@@ -55,13 +57,13 @@ class PushNotificationsManager {
         _initialized = true;
       }
       NotificationAppLaunchDetails? appLaunchDetails =
-          (await _localNotifications.getNotificationAppLaunchDetails());
+          (await localNotifications.getNotificationAppLaunchDetails());
 
       var initializationSettings = _getPlatformSettings();
-      await _localNotifications.initialize(initializationSettings,
+      await localNotifications.initialize(initializationSettings,
           onDidReceiveNotificationResponse: (NotificationResponse? notificationResponse) {
         clickHandle(notificationResponse!.payload!);
-       // handleNotificationTap(notificationResponse!);
+        // handleNotificationTap(notificationResponse!);
       });
 
       _hasLaunched = appLaunchDetails!.didNotificationLaunchApp;
@@ -80,7 +82,7 @@ class PushNotificationsManager {
     }
   }
 
-  static clickHandle(String payload) {
+  static clickHandle(String payload, {bool fromBackgroundOrTerminate = false}) {
     final encodedData = payload;
     // Split the payload into key-value pairs using commas and remove curly braces
     final keyValuePairs = encodedData.split(', ');
@@ -107,14 +109,16 @@ class PushNotificationsManager {
           MaterialPageRoute(
               builder: (context) => AssignmentDetailScreen(
                   sessionId: int.parse(event['SESSION_ID'].toString()),
-                  assignmentId: int.parse(event['APP_ASSIGNMENT_ID'].toString()))));
+                  assignmentId: int.parse(event['APP_ASSIGNMENT_ID'].toString()),
+                  notificationId: int.parse(event['NOTIFICATION_ID'].toString()))));
     } else if (event['TYPE'].toString() == 'CIRCULAR') {
       Navigator.push(
           AuthMiddleware.navigatorKey.currentContext!,
           MaterialPageRoute(
               builder: (context) => StudentCircularDetailScreen(
                   sessionId: int.parse(event['SESSION_ID'].toString()),
-                  id: int.parse(event['APP_CIRCULAR_ID'].toString()))));
+                  id: int.parse(event['APP_CIRCULAR_ID'].toString()),
+                  notificationId: int.parse(event['NOTIFICATION_ID'].toString()))));
     } else if (event['TYPE'].toString() == 'ATTENDANCE') {
       Navigator.push(AuthMiddleware.navigatorKey.currentContext!,
           MaterialPageRoute(builder: (context) => const StudentNotificationScreen()));
@@ -135,15 +139,15 @@ class PushNotificationsManager {
   }
 
   void _createNotificationChannel() async {
-    var androidNotificationChannel = const AndroidNotificationChannel(
-      notificationChannelId,
+    var androidNotificationChannel = AndroidNotificationChannel(
+      DateTime.now().millisecondsSinceEpoch.toString(),
       notificationChannel,
       showBadge: true,
       importance: Importance.high,
       playSound: true,
       enableVibration: true,
     );
-    await _localNotifications
+    await localNotifications
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(androidNotificationChannel);
   }
@@ -161,7 +165,7 @@ class PushNotificationsManager {
         _fcmToken = event;
         debugPrint("firebase token :- $_fcmToken");
       });
-      FirebaseMessaging.onMessage.listen((event) {
+      FirebaseMessaging.onMessage.listen((event) async {
         try {
           _showNotification(event);
           NotificationCountHandler.updateNotificationCount(int.parse(event.data['count'].toString()));
@@ -205,36 +209,19 @@ class PushNotificationsManager {
             ? 'Tap to open assignment'
             : event['TYPE'].toString() == 'CIRCULAR'.toString()
                 ? 'Tap to open circular'
-                :event['TYPE'].toString() == 'ATTENDANCE'? 'Your child is absent today':'Tap to open',
+                : event['TYPE'].toString() == 'ATTENDANCE'
+                    ? 'Your child is absent today'
+                    : 'Tap to open',
         contentTitle: event['TYPE'].toString() == 'ASSIGNMENT'
             ? 'Assignment'
             : event['TYPE'].toString() == 'CIRCULAR'
                 ? 'Circular'
-                : event['TYPE'].toString() == 'ATTENDANCE'?'Attendance':'New Notification');
+                : event['TYPE'].toString() == 'ATTENDANCE'
+                    ? 'Attendance'
+                    : 'New Notification');
 
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      _notificationId.toString(),
-      notificationChannel,
-      playSound: true,
-      icon: 'mipmap/ic_launcher',
-      vibrationPattern: vibrationPattern,
-      importance: Importance.max,
-      priority: Priority.high,
-      styleInformation: bigTextStyleInformation,
-      channelShowBadge: true,
-      enableVibration: true,
-    );
-    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails(
-      presentAlert: true,
-      presentSound: true,
-      badgeNumber: 0,
-      presentBadge: true,
-    );
-    var platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
-
-    await _localNotifications.show(
-        0,
+    await localNotifications.show(
+        event.hashCode,
         event['TYPE'].toString() == 'ASSIGNMENT'
             ? 'Assignment'
             : event['TYPE'].toString() == 'CIRCULAR'
@@ -244,14 +231,33 @@ class PushNotificationsManager {
             ? 'Tap to open assignment'
             : event['TYPE'].toString() == 'CIRCULAR'
                 ? 'Tap to open circular'
-                :event['TYPE'].toString() == 'ATTENDANCE'? 'Your child is absent today':'Tap to open',
-        platformChannelSpecifics,
+                : event['TYPE'].toString() == 'ATTENDANCE'
+                    ? 'Your child is absent today'
+                    : 'Tap to open',
+        NotificationDetails(
+            android: AndroidNotificationDetails(
+              _notificationId.toString(),
+              notificationChannel,
+              playSound: true,
+              icon: 'mipmap/ic_launcher',
+              vibrationPattern: vibrationPattern,
+              importance: Importance.max,
+              priority: Priority.high,
+              styleInformation: bigTextStyleInformation,
+              channelShowBadge: true,
+              enableVibration: true,
+            ),
+            iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentSound: true,
+                badgeNumber: int.parse(event['count'].toString()),
+                presentBadge: true)),
         payload: remoteMessage.data.toString());
   }
 
   Future<bool?> _requestIOSPermissions() async {
     var platformImplementation =
-        _localNotifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        localNotifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
     bool? permission = false;
     if (platformImplementation != null) {
       permission = (await platformImplementation.requestPermissions(alert: true, badge: true, sound: true));

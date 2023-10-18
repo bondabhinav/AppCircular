@@ -295,7 +295,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                 context: context,
                                 initialDate: DateTime.parse(Constants.startDate),
                                 firstDate: DateTime.parse(Constants.startDate),
-                                lastDate: DateTime.parse(Constants.endDate),
+                                lastDate: DateTime.parse(Constants.lastDate),
                               );
                               if (pickedDate != null) {
                                 model.updateStartDate(pickedDate);
@@ -319,7 +319,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                   context: context,
                                   initialDate: DateTime.parse(Constants.startDate),
                                   firstDate: DateTime.parse(Constants.startDate),
-                                  lastDate: DateTime.parse(Constants.endDate),
+                                  lastDate: DateTime.parse(Constants.lastDate),
                                 );
                                 if (pickedDate != null) {
                                   if (pickedDate.isBefore(model.selectedStartDate)) {

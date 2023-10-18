@@ -97,14 +97,12 @@ class LoginProvider extends ChangeNotifier {
   }
 
   Future<void> assignUserProvider() async {
-    //var userInfo = await WebService.getUserDetails();
-
     final prefs = await SharedPreferences.getInstance();
     final userDetails = prefs.getString('user_details');
 
-    if (userDetails != '') {
-      var userInfo = jsonDecode(userDetails!);
-      print(userInfo);
+    if (userDetails != '' && userDetails != null) {
+      var userInfo = jsonDecode(userDetails);
+      debugPrint(userInfo.toString());
 
       final empLogo = prefs.getString('global_school_logo');
       String profileLogo = "${empLogo!}employee/" + userInfo['PHOTO'];
@@ -114,11 +112,7 @@ class LoginProvider extends ChangeNotifier {
       _employeeCode = userInfo['EMPLOYEE_CODE'] ?? '';
       _depName = toTitleCase(userInfo['DEPARTMENT_NAME']);
       _designation = userInfo['DESIGNATION_DESC'];
-      //_photo = userInfo['PHOTO'] ?? '';
       _photo = profileLogo ?? '';
-
-      //_session = '';
-
       notify();
     }
   }

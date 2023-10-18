@@ -5,29 +5,24 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
-import 'package:flexischool/common/config.dart';
-import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/common/auth_middleware.dart';
 import 'package:flexischool/models/student/assignment_detail_response.dart';
-import 'package:flexischool/models/student/student_assignment_model.dart';
-import 'package:flexischool/models/student/student_circular_doc_list_respnose.dart';
-import 'package:flexischool/models/student/student_circular_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
+import 'package:flexischool/providers/student/student_dashboard_provider.dart';
+import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/utils/notification_service.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get_it/get_it.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:quill_json_to_html/json_to_html.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 final GetIt getIt = GetIt.instance;
 
 class AssignmentDetailProvider extends ChangeNotifier {
   AssignmentDetailResponse? assignmentDetailResponse;
-  final QuillController _controller = QuillController.basic();
   final loaderProvider = getIt<LoaderProvider>();
   final apiService = ApiService();
 
@@ -36,7 +31,7 @@ class AssignmentDetailProvider extends ChangeNotifier {
     return QuillJsonToHTML.encodeJson(jsonData);
   }
 
-  Future<void> fetchAssignmentDetailData(int assignmentId, int sessionId) async {
+  Future<void> fetchAssignmentDetailData(int assignmentId, int sessionId, int? notificationId) async {
     try {
       loaderProvider.showLoader();
       var data = {"APP_ASSIGNMENT_ID": assignmentId, "SESSION_ID": sessionId};
@@ -44,6 +39,16 @@ class AssignmentDetailProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         assignmentDetailResponse = AssignmentDetailResponse.fromJson(response.data);
         loaderProvider.hideLoader();
+        if (notificationId != null) {
+          Provider.of<StudentNotificationProvider>(AuthMiddleware.navigatorKey.currentContext!,listen: false)
+              .notificationUpdate(notificationId)
+              .then((value) {
+            if (value.success ?? false) {
+              Provider.of<StudentDashboardProvider>(AuthMiddleware.navigatorKey.currentContext!,listen: false)
+                  .getNotificationCount();
+            }
+          });
+        }
         notifyListeners();
       } else {
         assignmentDetailResponse = AssignmentDetailResponse();

@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 class StudentCircularDetailScreen extends StatefulWidget {
   final int id;
   final int sessionId;
+  final int? notificationId;
 
-  const StudentCircularDetailScreen({Key? key, required this.id, required this.sessionId}) : super(key: key);
+  const StudentCircularDetailScreen({Key? key, required this.id, required this.sessionId,this.notificationId}) : super(key: key);
 
   @override
   State<StudentCircularDetailScreen> createState() => _StudentCircularDetailScreenState();
@@ -20,7 +21,7 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
   @override
   void initState() {
     studentCircularDetailProvider = StudentCircularDetailProvider();
-    studentCircularDetailProvider?.fetchStudentCircularDetail(widget.id,widget.sessionId);
+    studentCircularDetailProvider?.fetchStudentCircularDetail(widget.id,widget.sessionId,widget.notificationId);
     super.initState();
   }
 

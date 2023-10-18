@@ -11,6 +11,7 @@ import 'package:flexischool/notification_count_handler.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,14 +71,13 @@ class StudentDashboardProvider extends ChangeNotifier {
     var requestedData = {"STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID};
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(
-        url: Api.notificationCountApi,
-        data: body,
-      );
+      final response = await apiService.post(url: Api.notificationCountApi, data: body);
       if (response.statusCode == 200) {
         notificationCountResponse = NotificationCountResponse.fromJson(response.data);
         NotificationCountHandler.updateNotificationCount(
             int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
+          FlutterAppBadger.updateBadgeCount(
+              int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
         notifyListeners();
       } else {}
     } catch (e) {
@@ -89,10 +89,7 @@ class StudentDashboardProvider extends ChangeNotifier {
     var requestedData = {"ADM_NO": WebService.studentLoginData?.table1?.first.aDMNO};
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(
-        url: Api.studentSessionApi,
-        data: body,
-      );
+      final response = await apiService.post(url: Api.studentSessionApi, data: body);
       if (response.statusCode == 200) {
         sessionListResponse = SessionListResponse.fromJson(response.data);
         notifyListeners();
@@ -130,15 +127,13 @@ class StudentDashboardProvider extends ChangeNotifier {
     var requestedData = {"APP_DEVICE_ID": appDeviceId};
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(
-        url: Api.removeFcmTokenApi,
-        data: body,
-      );
+      final response = await apiService.post(url: Api.removeFcmTokenApi, data: body);
       if (response.statusCode == 200) {
         sessionListResponse = SessionListResponse.fromJson(response.data);
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
+          FlutterAppBadger.removeBadge();
           Navigator.pushReplacementNamed(context, '/home');
         }
         notifyListeners();

@@ -7,6 +7,8 @@ import 'package:flexischool/firebase_options.dart';
 import 'package:flexischool/notification_helper.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/providers/student/student_dashboard_provider.dart';
+import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/utils/locator.dart';
 import 'package:flexischool/utils/notification_service.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,7 @@ import 'providers/url_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WebService.init();
+  Constants.isSupportBadgeOrNot();
   FirebaseApp app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint('Initialized default app $app from Android resource');
   await PushNotificationsManager().init();
@@ -40,7 +43,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UrlProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
-        ChangeNotifierProvider(create: (_) => LoaderProvider())
+        ChangeNotifierProvider(create: (_) => LoaderProvider()),
+        ChangeNotifierProvider(create: (_) => StudentDashboardProvider()),
+        ChangeNotifierProvider(create: (_) => StudentNotificationProvider()),
       ],
       child: MaterialApp(
           title: Constants.appName,

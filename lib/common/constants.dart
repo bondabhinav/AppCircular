@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:intl/intl.dart';
 
 class Constants {
@@ -9,7 +11,8 @@ class Constants {
   static String currentDate = getCurrentDate();
   static String startDate = '';
   static String endDate = '';
-
+  static String lastDate = '';
+  static bool isAppBadgeSupported = false;
 
   static String getCurrentDate() {
     DateTime now = DateTime.now();
@@ -20,6 +23,16 @@ class Constants {
   static String getFormattedDate(String date) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(date));
     return formattedDate;
+  }
+
+  static Future<void> isSupportBadgeOrNot() async {
+    if (await FlutterAppBadger.isAppBadgeSupported()) {
+      isAppBadgeSupported = true;
+      debugPrint('if part isAppBadgeSupported==> $isAppBadgeSupported');
+    } else {
+      isAppBadgeSupported = false;
+      debugPrint('else part isAppBadgeSupported==> $isAppBadgeSupported');
+    }
   }
 }
 

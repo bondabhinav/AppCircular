@@ -177,7 +177,7 @@ class CircularsProvider extends ChangeNotifier {
         "CIRCULAR_DESCRIPTION": descriptionController.text,
         "EMPLOYEE_ID": teacherId,
         "ACTIVE": active.value ? "Y" : "N",
-        "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate!),
+        "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate),
         "END_DATE": DateFormat('yyyy-MM-dd').format(selectedEndDate!),
         "CLASS_ID": selectedClass,
         "CIRCULAR_SUBJECT": subjectController.text,
@@ -367,9 +367,9 @@ class CircularsProvider extends ChangeNotifier {
   Future<void> selectDate({required BuildContext context, required bool startDate}) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.parse(Constants.startDate),
+      initialDate:startDate? DateTime.parse(Constants.startDate): DateTime.parse(Constants.endDate),
       firstDate: DateTime.parse(Constants.startDate),
-      lastDate: DateTime.parse(Constants.endDate),
+      lastDate: DateTime.parse(Constants.lastDate),
     );
 
     if (pickedDate != null) {

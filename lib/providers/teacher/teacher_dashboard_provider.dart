@@ -5,6 +5,7 @@ import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/models/teacher/teacher_session_response.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TeacherDashboardProvider extends ChangeNotifier {
   final apiService = ApiService();
@@ -35,8 +36,10 @@ class TeacherDashboardProvider extends ChangeNotifier {
           Constants.sessionId = sessionData.sESSIONID!;
           _sessionYear =
               '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
-          Constants.startDate = sessionData.sTARTDATE!;
-          Constants.endDate = sessionData.eNDDATE!;
+
+          Constants.startDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+          Constants.endDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+          Constants.lastDate = sessionData.eNDDATE!;
         }
         notifyListeners();
         debugPrint('session id----> ${Constants.sessionId}');
@@ -52,8 +55,17 @@ class TeacherDashboardProvider extends ChangeNotifier {
     var sessionData = teacherSessionResponse?.sessionDD?.firstWhere((data) => data.sESSIONID == newValue);
     if (sessionData != null) {
       _sessionYear = '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
-      Constants.startDate = sessionData.sTARTDATE!;
-      Constants.endDate = sessionData.eNDDATE!;
+      // Constants.startDate = sessionData.sTARTDATE!;
+      // Constants.endDate = sessionData.eNDDATE!;
+
+      if (sessionData.aCTIVE == 'Y') {
+        Constants.startDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+        Constants.endDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+      } else {
+        Constants.startDate = sessionData.sTARTDATE!;
+        Constants.endDate = sessionData.eNDDATE!;
+      }
+      Constants.lastDate = sessionData.eNDDATE!;
     }
     notifyListeners();
   }

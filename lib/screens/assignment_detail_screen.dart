@@ -1,4 +1,3 @@
-import 'package:flexischool/models/teacher/teacher_assignment_list_response.dart';
 import 'package:flexischool/providers/student/assignment_detail_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -7,9 +6,10 @@ import 'package:provider/provider.dart';
 class AssignmentDetailScreen extends StatefulWidget {
   final int assignmentId;
   final int sessionId;
+  final int? notificationId;
 
   const AssignmentDetailScreen(
-      {Key? key, required this.assignmentId, required this.sessionId})
+      {Key? key, required this.assignmentId, required this.sessionId, this.notificationId})
       : super(key: key);
 
   @override
@@ -22,7 +22,7 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
   @override
   void initState() {
     assignmentDetailProvider = AssignmentDetailProvider();
-      assignmentDetailProvider?.fetchAssignmentDetailData(widget.assignmentId,widget.sessionId);
+      assignmentDetailProvider?.fetchAssignmentDetailData(widget.assignmentId,widget.sessionId,widget.notificationId);
     super.initState();
   }
 

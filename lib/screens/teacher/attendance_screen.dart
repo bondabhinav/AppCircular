@@ -96,59 +96,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                       ),
                                     ),
                               const SizedBox(width: 5),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Date',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
-                                    InkWell(
-                                      onTap: () {
-                                        model.selectDate(context: context);
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.centerLeft,
-                                        height: 50,
-                                        padding: const EdgeInsets.only(left: 10),
-                                        margin: const EdgeInsets.only(top: 13, bottom: 10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10), border: Border.all()),
-                                        child: Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.calendar_month_outlined,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(model.date,
-                                                textAlign: TextAlign.left,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontFamily: "Montserrat Regular",
-                                                  color: Colors.black,
-                                                )),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
 
-                          (model.getSectionResponse == null ||
+                              (model.getSectionResponse == null ||
                                   model.getSectionResponse!.cLASSandSECTION!.isEmpty)
-                              ? const SizedBox.shrink()
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  ? const SizedBox.shrink()
+                                  : Expanded(
+                                    child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                     const Text('Section*',
                                         style: TextStyle(
                                           fontSize: 14,
@@ -169,9 +124,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                         hint: const Text('Select a class'),
                                         items: model.getSectionResponse?.cLASSandSECTION
                                             ?.map((item) => DropdownMenuItem(
-                                                  value: item.sECTIONID,
-                                                  child: Text(item.sECTIONDESC ?? ""),
-                                                ))
+                                          value: item.sECTIONID,
+                                          child: Text(item.sECTIONDESC ?? ""),
+                                        ))
                                             .toList(),
                                         onChanged: (int? value) {
                                           if (value != null) {
@@ -180,8 +135,68 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                         },
                                       ),
                                     ),
-                                  ],
+                                ],
+                              ),
+                                  ),
+
+                            ],
+                          ),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Date',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.normal,
+                                    fontFamily: "Montserrat Regular",
+                                    color: Colors.black,
+                                  )),
+                              InkWell(
+                                onTap: () {
+                                  model.selectDate(context: context);
+                                },
+                                child: Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 50,
+                                  padding: const EdgeInsets.only(left: 10),
+                                  margin: const EdgeInsets.only(top: 13, bottom: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10), border: Border.all()),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_month_outlined,
+                                        color: Colors.black,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(model.date,
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: "Montserrat Regular",
+                                            color: Colors.black,
+                                          )),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
+
+
+
+
+                          /// Custom calender
+
+
+
+
+
+
+
+
 
                           // (model.getSectionResponse == null ||
                           //         model.getSectionResponse!.cLASSandSECTION!.isEmpty)

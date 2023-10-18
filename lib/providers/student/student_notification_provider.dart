@@ -7,7 +7,6 @@ import 'package:flexischool/models/common_model.dart';
 import 'package:flexischool/models/student/notification_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quill_json_to_html/json_to_html.dart';
 
@@ -21,8 +20,6 @@ class StudentNotificationProvider extends ChangeNotifier {
   String? _message;
 
   String? get message => _message;
-
-  final QuillController _controller = QuillController.basic();
 
   String getContentAsHTML(String jsonString) {
     try {
@@ -70,22 +67,24 @@ class StudentNotificationProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> notificationUpdate(int? notificationId, int index) async {
+  Future<CommonResponse> notificationUpdate(int? notificationId) async {
+    CommonResponse? commonResponse;
     try {
       var data = {"NOTIFICATION_ID": notificationId};
       final response = await apiService.post(url: Api.notificationUpdateApi, data: data);
       if (response.statusCode == 200) {
-        final commonResponse = CommonResponse.fromJson(response.data);
-        if (commonResponse.success ?? false) {
-          if (notificationListResponse != null && notificationListResponse!.notification!.isNotEmpty) {
-            notificationListResponse?.notification![index].nOTIFICATIONFLAG = 'Y';
-          }
-        }
+        commonResponse = CommonResponse.fromJson(response.data);
         notifyListeners();
       } else {}
     } catch (e) {
       debugPrint('Failed to connect to the API ${e.toString()}');
       notifyListeners();
     }
+    return commonResponse!;
+  }
+
+  void updateNotificationStatus(int index) {
+    notificationListResponse?.notification![index].nOTIFICATIONFLAG = 'Y';
+    notifyListeners();
   }
 }
