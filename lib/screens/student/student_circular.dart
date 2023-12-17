@@ -8,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class StudentCircularScreen extends StatefulWidget {
-  const StudentCircularScreen({Key? key}) : super(key: key);
+  const StudentCircularScreen({super.key});
 
   @override
   State<StudentCircularScreen> createState() => _StudentCircularScreenState();
@@ -36,13 +36,10 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
               backgroundColor: Colors.white,
               appBar: AppBar(
                 leading: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Navigator.pop(context)),
                 centerTitle: true,
-                title: const Text('Circulars'),
+                title: const Text('Circulars', style: TextStyle(color: Colors.white)),
               ),
               body: Stack(
                 children: [
@@ -54,31 +51,15 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                         Container(
                           height: 45,
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(
-                              25.0,
-                            ),
-                          ),
+                              color: Colors.blueAccent, borderRadius: BorderRadius.circular(25.0)),
                           child: TabBar(
-                            controller: model.tabController,
-                            indicator: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                25.0,
-                              ),
-                              color: Colors.lightBlueAccent,
-                            ),
-                            indicatorPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            labelColor: Colors.white,
-                            unselectedLabelColor: Colors.white,
-                            tabs: const [
-                              Tab(
-                                text: 'Current',
-                              ),
-                              Tab(
-                                text: 'Previous',
-                              ),
-                            ],
-                          ),
+                              controller: model.tabController,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicator: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25.0), color: Colors.lightBlueAccent),
+                              labelColor: Colors.white,
+                              unselectedLabelColor: Colors.white,
+                              tabs: const [Tab(text: 'Current'), Tab(text: 'Previous')]),
                         ),
                         const SizedBox(height: 10),
                         Expanded(
@@ -92,10 +73,7 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                       ? Center(
                                           child: Text(
                                           model.message ?? "",
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                                         ))
                                       : ListView.builder(
                                           shrinkWrap: true,
@@ -361,9 +339,9 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
             children: [
               Flexible(
                 child: Container(
-               //   padding: const EdgeInsets.all(8),
+                  //   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(right: 10),
-                // decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
+                  // decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
                   child: Text(circular.aPPCIRCULARSUBJECT ?? "",
                       maxLines: 5,
                       style: const TextStyle(

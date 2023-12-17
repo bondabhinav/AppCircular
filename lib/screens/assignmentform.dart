@@ -57,7 +57,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
               children: [
                 Scaffold(
                   appBar: AppBar(
-                    title: const Text('Assignment Form'),
+                    centerTitle: true,
+                    title: const Text('Assignment Form', style: TextStyle(color: Colors.white)),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
                       color: Colors.white,
@@ -260,27 +261,45 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           const SizedBox(height: 15),
                           const Text("Assignment Details :",
                               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
-                          QuillToolbar.basic(
-                            controller: model.quillController,
-                            // embedButtons: FlutterQuillEmbeds.buttons(
-                            //   onImagePickCallback: model.onImagePickCallback,
-                            //   onVideoPickCallback: model.onVideoPickCallback,
-                            // ),
-                            showAlignmentButtons: true,
-                            //   afterButtonPressed: model.focusNode.requestFocus,
-                          ),
 
-                          Container(
-                            height: 300,
-                            decoration:
-                                BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all()),
-                            child: QuillEditor.basic(
-                              padding: const EdgeInsets.all(10),
-                              controller: model.quillController,
-                              autoFocus: false,
-                              readOnly: false,
+                          QuillProvider(
+                            configurations: QuillConfigurations(
+                                controller: model.quillController,
+                                sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en'))),
+                            child: Column(
+                              children: [
+                                const QuillToolbar(),
+                                Container(
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5), border: Border.all()),
+                                    child:
+                                        QuillEditor.basic(configurations: const QuillEditorConfigurations()))
+                              ],
                             ),
                           ),
+
+                          // QuillToolbar.basic(
+                          //   controller: model.quillController,
+                          //   // embedButtons: FlutterQuillEmbeds.buttons(
+                          //   //   onImagePickCallback: model.onImagePickCallback,
+                          //   //   onVideoPickCallback: model.onVideoPickCallback,
+                          //   // ),
+                          //   showAlignmentButtons: true,
+                          //   //   afterButtonPressed: model.focusNode.requestFocus,
+                          // ),
+                          //
+                          // Container(
+                          //   height: 300,
+                          //   decoration:
+                          //       BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all()),
+                          //   child: QuillEditor.basic(
+                          //     padding: const EdgeInsets.all(10),
+                          //     controller: model.quillController,
+                          //     autoFocus: false,
+                          //     readOnly: false,
+                          //   ),
+                          // ),
                           ListTile(
                             contentPadding: const EdgeInsets.all(0),
                             title: const Text('Start Date'),
@@ -302,7 +321,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               }
                             },
                           ),
-                          Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
+                          Container(height: 1, color: const Color(0xFFD3D3D3)),
+                          //divider
 
                           ListTile(
                             contentPadding: const EdgeInsets.all(0),
@@ -342,7 +362,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               }
                             },
                           ),
-                          Container(height: 1, color: const Color(0xFFD3D3D3)), //divider
+                          Container(height: 1, color: const Color(0xFFD3D3D3)),
+                          //divider
 
                           ValueListenableBuilder<bool>(
                               valueListenable: model.active,

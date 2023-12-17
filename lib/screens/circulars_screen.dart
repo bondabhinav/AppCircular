@@ -37,13 +37,10 @@ class _CircularsScreenState extends State<CircularsScreen> {
               backgroundColor: Colors.white,
               appBar: AppBar(
                 leading: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Navigator.pop(context)),
                 centerTitle: true,
-                title: const Text('Circulars'),
+                title: const Text('Circulars', style: TextStyle(color: Colors.white)),
               ),
               body: Stack(
                 children: [

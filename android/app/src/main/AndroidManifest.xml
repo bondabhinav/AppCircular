@@ -2,7 +2,7 @@
     package="com.example.flexischool">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="flexischool"
+        android:label="Flexi School"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">

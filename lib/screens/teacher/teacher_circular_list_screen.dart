@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 class TeacherCircularListScreen extends StatefulWidget {
   final int employeeId;
 
-  const TeacherCircularListScreen({Key? key, required this.employeeId}) : super(key: key);
+  const TeacherCircularListScreen({super.key, required this.employeeId});
 
   @override
   State<TeacherCircularListScreen> createState() => _TeacherCircularListScreenState();
@@ -39,13 +39,10 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
               backgroundColor: Colors.white,
               appBar: AppBar(
                 leading: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Navigator.pop(context)),
                 centerTitle: true,
-                title: const Text('Circulars'),
+                title: const Text('Circulars', style: TextStyle(color: Colors.white)),
                 actions: [
                   IconButton(
                     onPressed: () {
@@ -424,7 +421,7 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                           : null,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    Text(circular.aCTIVE == "Y"?'Active':'Inactive')
+                    Text(circular.aCTIVE == "Y" ? 'Active' : 'Inactive')
                   ],
                 ),
               ],

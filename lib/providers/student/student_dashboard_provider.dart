@@ -49,6 +49,10 @@ class StudentDashboardProvider extends ChangeNotifier {
       final response = await apiService.post(url: Api.studentDetailApi, data: data);
       if (response.statusCode == 200) {
         studentDetailResponse = StudentDetailResponse.fromJson(response.data);
+        if (studentDetailResponse!.getstudentData!.isNotEmpty) {
+          Constants.studentClassId = studentDetailResponse!.getstudentData!.first.cLASSID.toString();
+          Constants.studentSectionId = studentDetailResponse!.getstudentData!.first.cURRENTSECTIONID.toString();
+        }
         loaderProvider.hideLoader();
         if (studentDetailResponse!.getstudentData!.isEmpty) {
           _message = 'No detail found';
@@ -76,8 +80,8 @@ class StudentDashboardProvider extends ChangeNotifier {
         notificationCountResponse = NotificationCountResponse.fromJson(response.data);
         NotificationCountHandler.updateNotificationCount(
             int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
-          FlutterAppBadger.updateBadgeCount(
-              int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
+        FlutterAppBadger.updateBadgeCount(
+            int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
         notifyListeners();
       } else {}
     } catch (e) {

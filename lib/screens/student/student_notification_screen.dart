@@ -30,7 +30,7 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
     return Consumer<StudentNotificationProvider>(builder: (context, model, _) {
       return Scaffold(
           appBar: AppBar(
-            title: const Text('Notifications'),
+            title: const Text('Notifications',style: TextStyle(color: Colors.white)),
             leading: IconButton(
               color: Colors.white,
               icon: const Icon(Icons.arrow_back_ios),

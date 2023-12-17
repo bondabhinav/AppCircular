@@ -270,16 +270,6 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                 height: 40,
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: ElevatedButton(
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Submit'),
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.blue),
                       //padding: MaterialStateProperty.all(EdgeInsets.all(50)),
@@ -299,6 +289,18 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
 
                     //Navigator.pushNamed(context, "/login",arguments: " Login");
                   },
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Submit',
+                          style: TextStyle(
+                              color: Colors.white, fontFamily: 'Montserrat Regular', fontSize: 13.5)),
                 ),
               ),
               const SizedBox(

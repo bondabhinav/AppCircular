@@ -32,4 +32,11 @@ class Api {
   static String getAssignmentDatesApi = "${baseUrl}GetDateofAssinmentForCalendar/GetDateofAssinmentForCalendar";
   static String addFcmTokenApi = "${baseUrl}DeviceTokenAdd/AddDeviceToken";
   static String removeFcmTokenApi = "${baseUrl}Logout/LogoutDevice";
+  static String getEventApi = "${baseUrl}GetStudentCalendarbyclassandMonnth/GetStudentCalendarbyclassandMonnth";
+  static String markedAttendanceApi = "${baseUrl}GetStudentMarkedAttendanceDate/GetStudentMarkedAttendanceDate";
+  static String getStudentMarkedAttendanceApi = "${baseUrl}getattendancebycalendardate/getattendancebycalendardate";
+  static String editAttendanceApi = "${baseUrl}EditAttendance/EditAttendance";
+  static String studentAttendanceGraphApi = "${baseUrl}getattendanceGraphforstudent/getattendanceGraphforstudent";
+  static String absentPresentCalenderApi = "${baseUrl}getstudentattendanceonstudentside/getstudentattendanceonstudentside";
+  static String getOverallPercentageApi = "${baseUrl}getattendancePercentforstudent/getattendancePercentforstudent";
 }

@@ -9,7 +9,7 @@ class StudentCircularDetailScreen extends StatefulWidget {
   final int sessionId;
   final int? notificationId;
 
-  const StudentCircularDetailScreen({Key? key, required this.id, required this.sessionId,this.notificationId}) : super(key: key);
+  const StudentCircularDetailScreen({super.key, required this.id, required this.sessionId,this.notificationId});
 
   @override
   State<StudentCircularDetailScreen> createState() => _StudentCircularDetailScreenState();
@@ -40,7 +40,7 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                       ),
                       onPressed: () => Navigator.pop(context)),
                   centerTitle: true,
-                  title: const Text('Circulars'),
+                  title: const Text('Circulars',style: TextStyle(color: Colors.white)),
                 ),
                 body: Container(
                     padding: const EdgeInsets.all(10),

@@ -1,10 +1,13 @@
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
+import 'package:flexischool/screens/student/academic_calender_screen.dart';
 import 'package:flexischool/screens/student/student_assignment_screen.dart';
+import 'package:flexischool/screens/student/student_attendance_graph_screen.dart';
 import 'package:flexischool/screens/student/student_circular.dart';
 import 'package:flexischool/screens/teacher/attendance_screen.dart';
 import 'package:flexischool/screens/teacher/teacher_assignment_list_screen.dart';
 import 'package:flexischool/screens/teacher/teacher_circular_list_screen.dart';
+import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,70 +56,32 @@ class CustomUserAccountsDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LoginProvider loginStore = Provider.of<LoginProvider>(context);
-    return DrawerHeader(
-      decoration: const BoxDecoration(
-        color: Colors.blue,
-      ),
+    return Container(
+      padding: const EdgeInsets.only(top: 30, left: 20, bottom: 20),
+      decoration: const BoxDecoration(color: Colors.blue),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                backgroundImage: NetworkImage(loginStore.photo),
-                radius: 30,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '${loginStore.userName}',
+          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            CircleAvatar(backgroundImage: NetworkImage(loginStore.photo), radius: 30),
+            const SizedBox(width: 10),
+            Text('${loginStore.userName}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Montserrat Regular",
+                    color: Colors.white))
+          ]),
           const SizedBox(height: 5),
-          Text(
-            'Employee Code : ${loginStore.employeeCode}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.black,
-            ),
-          ),
-
-          //SizedBox(height: 5),
-          Text(
-            'Department : ${loginStore.depName}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.black,
-            ),
-          ),
-          Text(
-            'Designation : ${loginStore.designation}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.black,
-            ),
-          ),
-          //SizedBox(height: 5),
-          Text(
-            'Session : ${model.sessionYear}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.black,
-            ),
-          ),
+          Text('Employee Code : ${loginStore.employeeCode}',
+              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
+          Text('Department : ${loginStore.depName}',
+              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
+          Text('Designation : ${loginStore.designation}',
+              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
+          Text('Session : ${model.sessionYear}',
+              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
         ],
       ),
     );
@@ -124,7 +89,7 @@ class CustomUserAccountsDrawerHeader extends StatelessWidget {
 }
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  const Dashboard({super.key});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -155,9 +120,7 @@ class _DashboardState extends State<Dashboard> {
           return Consumer<TeacherDashboardProvider>(builder: (context, model, _) {
             return Scaffold(
               backgroundColor: Colors.white,
-              appBar: AppBar(
-                title: const Text('Dashboard'),
-              ),
+              appBar: AppBar(title: const Text('Dashboard', style: TextStyle(color: Colors.white))),
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
@@ -171,8 +134,7 @@ class _DashboardState extends State<Dashboard> {
                             leading: const Icon(Icons.access_time),
                             minLeadingWidth: 10,
                             horizontalTitleGap: 10,
-                            onTap: () {},
-                          ),
+                            onTap: () {}),
                     // ListTile(
                     //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                     //   title: const Text('Profile'),
@@ -191,14 +153,29 @@ class _DashboardState extends State<Dashboard> {
                     //   horizontalTitleGap: 10,
                     //   onTap: () {},
                     // ),
+
                     ListTile(
-                      visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                      title: const Text('Change Password'),
-                      leading: const Icon(Icons.lock),
-                      minLeadingWidth: 10,
-                      horizontalTitleGap: 10,
-                      onTap: () {},
-                    ),
+                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                        title: const Text('Privacy Policy'),
+                        leading: const Icon(Icons.lock),
+                        minLeadingWidth: 10,
+                        horizontalTitleGap: 10,
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const WebViewScreen(url: 'https://privacy.sapinfotek.com/',title:'Privacy Policy')));
+                        }),
+
+                    // ListTile(
+                    //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    //   title: const Text('Change Password'),
+                    //   leading: const Icon(Icons.lock),
+                    //   minLeadingWidth: 10,
+                    //   horizontalTitleGap: 10,
+                    //   onTap: () {},
+                    // ),
                     ListTile(
                       visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                       title: const Text('Logout'),
@@ -222,7 +199,7 @@ class _DashboardState extends State<Dashboard> {
 class DashboardWidget extends StatefulWidget {
   final TeacherDashboardProvider model;
 
-  const DashboardWidget({Key? key, required this.model}) : super(key: key);
+  const DashboardWidget({super.key, required this.model});
 
   @override
   State<DashboardWidget> createState() => _DashboardWidgetState();
@@ -386,7 +363,7 @@ class DashBoardList extends StatelessWidget {
             shrinkWrap: true,
             itemCount: dashboards.length,
             itemBuilder: (context, index) {
-              return GestureDetector(
+              return InkWell(
                 child: Card(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 4,
@@ -395,10 +372,7 @@ class DashBoardList extends StatelessWidget {
                     children: <Widget>[
                       Image.network(iconPath! + dashboards[index].IMAGE, height: 80),
                       const SizedBox(height: 10.0),
-                      Text(
-                        dashboards[index].MENUNAME,
-                        style: cardTextStyle,
-                      )
+                      Text(dashboards[index].MENUNAME, style: cardTextStyle)
                     ],
                   ),
                 ),
@@ -430,6 +404,11 @@ class DashBoardList extends StatelessWidget {
                                       employeeId: employeeId,
                                     )));
                       }
+                    } else {
+                      if (context.mounted) {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => const StudentAttendanceGraphScreen()));
+                      }
                     }
                   } else if (dashboards[index].MENUNAME.toString().toLowerCase() == 'assignments') {
                     if (type == 'T') {
@@ -449,6 +428,13 @@ class DashBoardList extends StatelessWidget {
                                 builder: (context) => StudentAssignmentCalenderWithList(
                                       employeeId: employeeId,
                                     )));
+                      }
+                    }
+                  } else if (dashboards[index].MENUNAME.toString().toLowerCase() == 'academic') {
+                    if (type == 'S') {
+                      if (context.mounted) {
+                        Navigator.push(
+                            context, MaterialPageRoute(builder: (context) => const AcademicCalenderScreen()));
                       }
                     }
                   }

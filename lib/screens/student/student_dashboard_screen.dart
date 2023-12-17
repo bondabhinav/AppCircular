@@ -9,12 +9,13 @@ import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/screens/dashboard.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
+import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
-  const StudentDashboardScreen({Key? key}) : super(key: key);
+  const StudentDashboardScreen({super.key});
 
   @override
   State<StudentDashboardScreen> createState() => _StudentDashboardScreenState();
@@ -87,67 +88,57 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         builder: (context, snapshot) {
           return Consumer<StudentDashboardProvider>(builder: (context, model, _) {
             return Scaffold(
-              appBar: AppBar(
-                title: const Text('Dashboard'),
-                actions: [
-                  Stack(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.notifications),
-                        onPressed: () {
-                          PushNotificationsManager.localNotifications.cancelAll();
-                          // if (model.notificationCountResponse != null &&
-                          //     model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! >
-                          //         0) {
-                          Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) => const StudentNotificationScreen()))
-                              .then((value) {
-                            model.getNotificationCount();
-                          });
-                          // }
-                        },
-                        iconSize: 25,
+              appBar: AppBar(title: const Text('Dashboard', style: TextStyle(color: Colors.white)), actions: [
+                Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications),
+                      color: Colors.white,
+                      onPressed: () {
+                        PushNotificationsManager.localNotifications.cancelAll();
+                        // if (model.notificationCountResponse != null &&
+                        //     model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! >
+                        //         0) {
+                        Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => const StudentNotificationScreen()))
+                            .then((value) {
+                          model.getNotificationCount();
+                        });
+                        // }
+                      },
+                      iconSize: 25,
+                    ),
+                    if (snapshot.data != 0)
+                      Positioned(
+                        right: 5,
+                        top: 5,
+                        child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                            child: (snapshot.hasData)
+                                ? Text(snapshot.data.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold))
+                                : const SizedBox.shrink()),
                       ),
-                      if (snapshot.data != 0)
-                        Positioned(
-                          right: 5,
-                          top: 5,
-                          child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              child: (snapshot.hasData)
-                                  ? Text(
-                                      snapshot.data.toString(),
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink()),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ]),
               drawer: (model.studentDetailResponse == null)
                   ? const SizedBox.shrink()
                   : Drawer(
                       child: ListView(padding: EdgeInsets.zero, children: [
                       studentHeader(model.studentDetailResponse!, model),
-                      // (model.sessionListResponse == null)
-                      //     ? const SizedBox()
-                      //     : ListTile(
-                      //         visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                      //         title: sessionDropDown(model),
-                      //         leading: const Icon(Icons.access_time),
-                      //         minLeadingWidth: 10,
-                      //         horizontalTitleGap: 10,
-                      //         onTap: () {},
-                      //       ),
+                      (model.sessionListResponse == null)
+                          ? const SizedBox()
+                          : ListTile(
+                              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                              title: sessionDropDown(model),
+                              leading: const Icon(Icons.access_time),
+                              minLeadingWidth: 10,
+                              horizontalTitleGap: 10,
+                              onTap: () {},
+                            ),
                       // ListTile(
                       //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                       //   title: const Text('Profile'),
@@ -165,13 +156,26 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                       //   onTap: () {},
                       // ),
                       ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Change Password'),
-                        leading: const Icon(Icons.lock),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () {},
-                      ),
+                          visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                          title: const Text('Privacy Policy'),
+                          leading: const Icon(Icons.lock),
+                          minLeadingWidth: 10,
+                          horizontalTitleGap: 10,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const WebViewScreen(
+                                        url: 'https://privacy.sapinfotek.com/', title: 'Privacy Policy')));
+                          }),
+                      // ListTile(
+                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      //   title: const Text('Change Password'),
+                      //   leading: const Icon(Icons.lock),
+                      //   minLeadingWidth: 10,
+                      //   horizontalTitleGap: 10,
+                      //   onTap: () {},
+                      // ),
                       ListTile(
                         visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                         title: const Text('Logout'),
@@ -320,33 +324,35 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
   }
 
   Widget sessionDropDown(StudentDashboardProvider model) {
-    debugPrint('check length ==> ${model.sessionListResponse?.table1!.length}');
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(right: 20.0),
-      child: DropdownButton(
-          items: model.sessionListResponse?.table1!.map((item) {
-            var itemDate = '${(item.sTARTDATE)?.substring(0, 4)}-${item.eNDDATE!.substring(0, 4)}';
-            return DropdownMenuItem(
-              value: item.sESSIONID,
-              child: Text(itemDate),
-            );
-          }).toList(),
-          value: model.selectedSessionDropDownValue,
-          isExpanded: true,
-          elevation: 16,
-          alignment: Alignment.center,
-          onChanged: (dynamic newValue) {
-            model.updateSession(newValue);
-            debugPrint('session id ---> ${Constants.sessionId}');
-          }),
-    );
+    return (model.sessionListResponse == null || model.sessionListResponse?.table1 == null)
+        ? const SizedBox.shrink()
+        : Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(right: 20.0),
+            child: DropdownButton(
+                items: model.sessionListResponse?.table1!.map((item) {
+                  var itemDate = '${(item.sTARTDATE)?.substring(0, 4)}-${item.eNDDATE!.substring(0, 4)}';
+                  return DropdownMenuItem(
+                    value: item.sESSIONID,
+                    child: Text(itemDate),
+                  );
+                }).toList(),
+                value: model.selectedSessionDropDownValue,
+                isExpanded: true,
+                elevation: 16,
+                alignment: Alignment.center,
+                onChanged: (dynamic newValue) {
+                  model.updateSession(newValue);
+                  debugPrint('session id ---> ${Constants.sessionId}');
+                }),
+          );
   }
 
   Widget studentHeader(StudentDetailResponse studentDetailResponse, StudentDashboardProvider model) {
     final data = studentDetailResponse.getstudentData?.first;
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      color: Colors.blue,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -367,7 +373,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: "Montserrat Regular",
-                  color: Colors.black,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -378,7 +384,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "Montserrat Regular",
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           Text(
@@ -386,7 +392,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "Montserrat Regular",
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           Text(
@@ -394,7 +400,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "Montserrat Regular",
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           Text(
@@ -402,7 +408,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "Montserrat Regular",
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
         ],
