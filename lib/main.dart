@@ -36,7 +36,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,52 +55,13 @@ class MyApp extends StatelessWidget {
           title: Constants.appName,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            fontFamily: GoogleFonts.lato().fontFamily,
-            primarySwatch: Colors.blue,
-            appBarTheme: const AppBarTheme(color: Colors.blue),
-          ),
+              fontFamily: GoogleFonts.lato().fontFamily,
+              primarySwatch: Colors.blue,
+              appBarTheme: const AppBarTheme(color: Colors.blue)),
           routes: routes,
           initialRoute: "/",
           navigatorKey: AuthMiddleware.navigatorKey,
           navigatorObservers: [authMiddleware]),
-    );
-  }
-}
-
-class TokenScreen extends StatefulWidget {
-  const TokenScreen({Key? key}) : super(key: key);
-
-  @override
-  State<TokenScreen> createState() => _TokenScreenState();
-}
-
-class _TokenScreenState extends State<TokenScreen> {
-  String token = '';
-
-  @override
-  void initState() {
-    getToken();
-    super.initState();
-  }
-
-  getToken() async {
-    token = (await FirebaseMessaging.instance.getToken())!;
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SelectableText(
-            token,
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
-      ),
     );
   }
 }

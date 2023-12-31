@@ -58,6 +58,7 @@ class UrlProvider extends ChangeNotifier {
           'school_url_response',
           json.encode(SchoolurlResponse.toJson()),
         );
+        debugPrint('res... $res');
 
         final schoolLogo = res['SCHOOL_URL'] + "/code/img/";
         await preferences.setString('global_school_url', res['API_URL']);

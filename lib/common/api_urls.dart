@@ -39,4 +39,6 @@ class Api {
   static String studentAttendanceGraphApi = "${baseUrl}getattendanceGraphforstudent/getattendanceGraphforstudent";
   static String absentPresentCalenderApi = "${baseUrl}getstudentattendanceonstudentside/getstudentattendanceonstudentside";
   static String getOverallPercentageApi = "${baseUrl}getattendancePercentforstudent/getattendancePercentforstudent";
+  static String getClassForAttendanceApi = "${baseUrl}GetClassforAttendance/GetClassandSectionforAttendance";
+  static String getSectionForAttendanceApi = "${baseUrl}GetSectionforAttendance/GetClassandSectionforAttendance";
 }

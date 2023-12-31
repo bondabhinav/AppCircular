@@ -318,6 +318,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         debugPrint('else logout');
         final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
         loginStore.userLogout();
+        FlutterAppBadger.removeBadge();
         Navigator.pushReplacementNamed(context, '/home');
       }
     }

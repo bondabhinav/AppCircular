@@ -122,7 +122,7 @@ packages:
     source: hosted
     version: "0.7.10"
   device_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: device_info_plus
       sha256: "0042cb3b2a76413ea5f8a2b40cec2a33e01d0c937e91f0f7c211fde4f7739ba6"
@@ -278,6 +278,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.3"
+  flutter_file_downloader:
+    dependency: "direct main"
+    description:
+      name: flutter_file_downloader
+      sha256: "5a38e93cc34f09978b0d569e917dc4f6f500802ee64328a65e12da9f3fa85b7b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter_html:
     dependency: "direct main"
     description:
@@ -541,14 +549,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
-  open_file:
+  open_filex:
     dependency: "direct main"
     description:
-      name: open_file
-      sha256: a5a32d44acb7c899987d0999e1e3cbb0a0f1adebbf41ac813ec6d2d8faa0af20
+      name: open_filex
+      sha256: a6c95237767c5647e68b71a476602fcf4f1bfc530c126265e53addae22ef5fc2
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.2"
+    version: "4.3.4"
   pasteboard:
     dependency: transitive
     description:

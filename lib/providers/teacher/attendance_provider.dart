@@ -189,7 +189,7 @@ class AttendanceProvider extends ChangeNotifier {
     try {
       loaderProvider.showLoader();
       var data = {"TEACHER_ID": teacherId, "SESSION_ID": Constants.sessionId};
-      final response = await apiService.post(url: Api.getClassApi, data: data);
+      final response = await apiService.post(url: Api.getClassForAttendanceApi, data: data);
       if (response.statusCode == 200) {
         getClassResponse = GetClassResponse.fromJson(response.data);
         if (getClassResponse.cLASSandSECTION!.isNotEmpty) {

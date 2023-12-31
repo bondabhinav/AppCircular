@@ -1,10 +1,14 @@
+import 'dart:io';
+
+import 'package:flexischool/common/api_urls.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/student/student_circular_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/student/student_circular_provider.dart';
 import 'package:flexischool/utils/date_formater.dart';
 import 'package:flexischool/widgets/custom_loader.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class StudentCircularScreen extends StatefulWidget {
@@ -114,17 +118,60 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                                               .fILENAME ??
                                                                           ""),
                                                                       trailing: IconButton(
-                                                                          onPressed: () {
-                                                                            model
-                                                                                .requestWritePermission(
-                                                                                    context)
-                                                                                .then((_) {
-                                                                              model.downloadFile(
-                                                                                  context,
-                                                                                  data.lstCircularFile![index]
-                                                                                          .fILENAME ??
-                                                                                      "");
+                                                                          onPressed: () async {
+                                                                            debugPrint('url....... ${"${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}"}');
+
+                                                                            DownloadPdf.downloadPdf(
+                                                                                "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                                data.lstCircularFile![index]
+                                                                                    .fILENAME!
+                                                                                    .split('/')
+                                                                                    .last,
+                                                                                context, (value) {
+                                                                              if (Platform.isAndroid) {
+                                                                                //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                              }
+                                                                            }, (file) async {
+                                                                              if (Platform.isIOS) {
+                                                                                //  await Share.shareXFiles([XFile(file.path)]);
+                                                                              }
                                                                             });
+
+                                                                            // final _localPath = (await _getSavedDir(data.lstCircularFile![index].fILENAME!))!;
+                                                                            //  final savedDir = Directory(_localPath);
+                                                                            //  if (!savedDir.existsSync()) {
+                                                                            //    await savedDir.create();
+                                                                            //  }
+                                                                            //
+                                                                            //
+                                                                            //  final taskId =
+                                                                            //      await FlutterDownloader.enqueue(
+                                                                            //          url:
+                                                                            //              "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                            //          savedDir:_localPath,
+                                                                            //          showNotification: true,
+                                                                            //          allowCellular: true,
+                                                                            //          saveInPublicStorage: true,
+                                                                            //          openFileFromNotification:
+                                                                            //              true);
+                                                                            //
+                                                                            //  if (taskId != null) {
+                                                                            //    debugPrint('task id $taskId');
+                                                                            //  }
+
+                                                                            // model.downloadFile(
+                                                                            //     context,
+                                                                            //     data.lstCircularFile![index]
+                                                                            //         .fILENAME ??
+                                                                            //         "");
+
+                                                                            // model.requestWritePermission(context).then((_) {
+                                                                            //   model.downloadFile(
+                                                                            //       context,
+                                                                            //       data.lstCircularFile![index]
+                                                                            //               .fILENAME ??
+                                                                            //           "");
+                                                                            // });
                                                                           },
                                                                           icon: const Icon(Icons.download)),
                                                                     ),
@@ -217,20 +264,36 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                                           ""),
                                                                       trailing: IconButton(
                                                                           onPressed: () async {
-                                                                            PermissionStatus status =
-                                                                                await Permission.storage
-                                                                                    .request();
-                                                                            if (status.isGranted) {
-                                                                              if (context.mounted) {
-                                                                                model.downloadFile(
-                                                                                    context,
-                                                                                    data
-                                                                                            .lstCircularFile![
-                                                                                                index]
-                                                                                            .fILENAME ??
-                                                                                        "");
+                                                                            DownloadPdf.downloadPdf(
+                                                                                "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                                data.lstCircularFile![index]
+                                                                                    .fILENAME!
+                                                                                    .split('/')
+                                                                                    .last,
+                                                                                context, (value) {
+                                                                              if (Platform.isAndroid) {
+                                                                                //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
                                                                               }
-                                                                            }
+                                                                            }, (file) async {
+                                                                              if (Platform.isIOS) {
+                                                                                //  await Share.shareXFiles([XFile(file.path)]);
+                                                                              }
+                                                                            });
+
+                                                                            // PermissionStatus status =
+                                                                            //     await Permission.storage
+                                                                            //         .request();
+                                                                            // if (status.isGranted) {
+                                                                            //   if (context.mounted) {
+                                                                            //     model.downloadFile(
+                                                                            //         context,
+                                                                            //         data
+                                                                            //                 .lstCircularFile![
+                                                                            //                     index]
+                                                                            //                 .fILENAME ??
+                                                                            //             "");
+                                                                            //   }
+                                                                            // }
                                                                           },
                                                                           icon: const Icon(Icons.download)),
                                                                     ),
@@ -470,5 +533,13 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
     //     ],
     //   ),
     // );
+  }
+
+  Future<String?> _getSavedDir(String fileName) async {
+    final externalStorageDirPath = (await getApplicationDocumentsDirectory());
+
+    final savePath = '${externalStorageDirPath.path}/$fileName';
+
+    return savePath;
   }
 }

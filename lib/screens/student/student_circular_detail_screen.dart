@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:flexischool/common/api_urls.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/student/student_circular_detail_response.dart';
 import 'package:flexischool/providers/student/student_circular_detail_provider.dart';
 import 'package:flexischool/utils/date_formater.dart';
@@ -9,7 +13,8 @@ class StudentCircularDetailScreen extends StatefulWidget {
   final int sessionId;
   final int? notificationId;
 
-  const StudentCircularDetailScreen({super.key, required this.id, required this.sessionId,this.notificationId});
+  const StudentCircularDetailScreen(
+      {super.key, required this.id, required this.sessionId, this.notificationId});
 
   @override
   State<StudentCircularDetailScreen> createState() => _StudentCircularDetailScreenState();
@@ -21,7 +26,8 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
   @override
   void initState() {
     studentCircularDetailProvider = StudentCircularDetailProvider();
-    studentCircularDetailProvider?.fetchStudentCircularDetail(widget.id,widget.sessionId,widget.notificationId);
+    studentCircularDetailProvider?.fetchStudentCircularDetail(
+        widget.id, widget.sessionId, widget.notificationId);
     super.initState();
   }
 
@@ -40,12 +46,21 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                       ),
                       onPressed: () => Navigator.pop(context)),
                   centerTitle: true,
-                  title: const Text('Circulars',style: TextStyle(color: Colors.white)),
+                  title: const Text('Circulars', style: TextStyle(color: Colors.white)),
                 ),
                 body: Container(
                     padding: const EdgeInsets.all(10),
-                    child: model.studentCircularDetailResponse != null
-                        ? listItem(
+                    child: (model.studentCircularDetailResponse == null ||
+                            model.studentCircularDetailResponse!.classlist == null ||
+                            model.studentCircularDetailResponse!.classlist!.isEmpty)
+                        ? const Center(
+                            child: Text('Data not found',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "Montserrat Regular",
+                                    color: Colors.black)))
+                        : listItem(
                             model: model,
                             circular: model.studentCircularDetailResponse!.classlist!.first,
                             documentOnTap: () {
@@ -69,10 +84,30 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                                                     title: Text(data.lstCircularFile![index].fILENAME ?? ""),
                                                     trailing: IconButton(
                                                         onPressed: () {
-                                                          model.requestWritePermission(context).then((_) {
-                                                            model.downloadFile(context,
-                                                                data.lstCircularFile![index].fILENAME ?? "");
+
+                                                          DownloadPdf.downloadPdf(
+                                                              "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                              data.lstCircularFile![index]
+                                                                  .fILENAME!
+                                                                  .split('/')
+                                                                  .last,
+                                                              context, (value) {
+                                                            if (Platform.isAndroid) {
+                                                              //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                            }
+                                                          }, (file) async {
+                                                            if (Platform.isIOS) {
+                                                              //  await Share.shareXFiles([XFile(file.path)]);
+                                                            }
                                                           });
+
+
+                                                          // model.requestWritePermission().then((value) {
+                                                          //   if (value) {
+                                                          //     model.downloadFile(context,
+                                                          //         data.lstCircularFile![index].fILENAME ?? "");
+                                                          //   }
+                                                          // });
                                                         },
                                                         icon: const Icon(Icons.download)),
                                                   ),
@@ -91,8 +126,7 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                                   },
                                 );
                               }
-                            })
-                        : const SizedBox()));
+                            })));
           });
         });
   }

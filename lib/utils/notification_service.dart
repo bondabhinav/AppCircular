@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 
 class NotificationService {
+
   static Future<void> initializeNotification() async {
     await AwesomeNotifications().initialize(
       null,
@@ -69,7 +72,16 @@ class NotificationService {
       ReceivedAction receivedAction) async {
     debugPrint('onActionReceivedMethod');
     final payload = receivedAction.payload ?? {};
-      OpenFile.open(payload['path']);
+    debugPrint('downloaded path --- > $payload');
+    debugPrint('downloaded path --- > ${payload['path']}');
+    final file = File(payload['path']!);
+    if (file.existsSync()) {
+      debugPrint('File exist at path: ${file.path}');
+      OpenFilex.open(file.path);
+    } else {
+      debugPrint('File does not exist at path: ');
+    }
+    //  OpenFile.open(payload['path']);
   }
 
   static Future<void> showNotification({

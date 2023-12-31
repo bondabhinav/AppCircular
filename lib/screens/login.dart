@@ -4,6 +4,7 @@ import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -112,6 +113,7 @@ class _LoginWidgetState extends State<LoginWidget> {
         if (response['status'] == true) {
           loginStore.loginInStatus = LoginStatus.loggedIn;
           loginStore.notify();
+          FlutterAppBadger.removeBadge();
 
           //print(loginStore.userName);
 

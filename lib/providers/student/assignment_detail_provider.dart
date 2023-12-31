@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -11,7 +12,6 @@ import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/utils/notification_service.dart';
-import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
@@ -40,11 +40,12 @@ class AssignmentDetailProvider extends ChangeNotifier {
         assignmentDetailResponse = AssignmentDetailResponse.fromJson(response.data);
         loaderProvider.hideLoader();
         if (notificationId != null) {
-          Provider.of<StudentNotificationProvider>(AuthMiddleware.navigatorKey.currentContext!,listen: false)
+          Provider.of<StudentNotificationProvider>(AuthMiddleware.navigatorKey.currentContext!, listen: false)
               .notificationUpdate(notificationId)
               .then((value) {
             if (value.success ?? false) {
-              Provider.of<StudentDashboardProvider>(AuthMiddleware.navigatorKey.currentContext!,listen: false)
+              Provider.of<StudentDashboardProvider>(AuthMiddleware.navigatorKey.currentContext!,
+                      listen: false)
                   .getNotificationCount();
             }
           });
@@ -63,14 +64,36 @@ class AssignmentDetailProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> requestWritePermission(BuildContext context) async {
-    PermissionStatus status = await Permission.storage.request();
-    if (status.isGranted) {
+  // Future<void> requestWritePermission(BuildContext context) async {
+  //   PermissionStatus status = await Permission.storage.request();
+  //   debugPrint('Assignment detail provider Permission status: $status');
+  //   if (status.isGranted) {
+  //   } else {
+  //     if (context.mounted) {
+  //       ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
+  //     }
+  //   }
+  // }
+
+  Future<bool> requestWritePermission() async {
+    final DeviceInfoPlugin info = DeviceInfoPlugin();
+    final AndroidDeviceInfo androidInfo = await info.androidInfo;
+    debugPrint('releaseVersion : ${androidInfo.version.release}');
+    final int androidVersion = int.parse(androidInfo.version.release);
+    bool havePermission = false;
+
+    if (androidVersion >= 13) {
+      final request = await [Permission.videos, Permission.photos].request();
+      havePermission = request.values.every((status) => status == PermissionStatus.granted);
     } else {
-      if (context.mounted) {
-        ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
-      }
+      final status = await Permission.storage.request();
+      havePermission = status.isGranted;
     }
+
+    if (!havePermission) {
+      await openAppSettings();
+    }
+    return havePermission;
   }
 
   Future<void> downloadFile(BuildContext context, String url) async {

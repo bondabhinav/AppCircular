@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/teacher/teacher_assignment_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/teacher/teacher_assignment_list_provider.dart';
@@ -152,15 +156,35 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                                                                           ""),
                                                                   trailing: IconButton(
                                                                       onPressed: () {
-                                                                        model
-                                                                            .requestWritePermission(context)
-                                                                            .then((_) {
-                                                                          model.downloadFile(
-                                                                              context,
-                                                                              data.lstCircularFile![index]
-                                                                                      .fILENAME ??
-                                                                                  "");
+                                                                        DownloadPdf.downloadPdf(
+                                                                            "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                            data.lstCircularFile![index]
+                                                                                .fILENAME!
+                                                                                .split('/')
+                                                                                .last,
+                                                                            context, (value) {
+                                                                          if (Platform.isAndroid) {
+                                                                            //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                          }
+                                                                        }, (file) async {
+                                                                          if (Platform.isIOS) {
+                                                                            //  await Share.shareXFiles([XFile(file.path)]);
+                                                                          }
                                                                         });
+
+
+
+                                                                        // model
+                                                                        //     .requestWritePermission()
+                                                                        //     .then((value) {
+                                                                        //   if (value) {
+                                                                        //     model.downloadFile(
+                                                                        //         context,
+                                                                        //         data.lstCircularFile![index]
+                                                                        //                 .fILENAME ??
+                                                                        //             "");
+                                                                        //   }
+                                                                        // });
                                                                       },
                                                                       icon: const Icon(Icons.download)),
                                                                 ),

@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:flexischool/common/api_urls.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/providers/student/assignment_detail_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -9,8 +13,7 @@ class AssignmentDetailScreen extends StatefulWidget {
   final int? notificationId;
 
   const AssignmentDetailScreen(
-      {Key? key, required this.assignmentId, required this.sessionId, this.notificationId})
-      : super(key: key);
+      {super.key, required this.assignmentId, required this.sessionId, this.notificationId});
 
   @override
   State<AssignmentDetailScreen> createState() => _AssignmentDetailScreenState();
@@ -22,7 +25,8 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
   @override
   void initState() {
     assignmentDetailProvider = AssignmentDetailProvider();
-      assignmentDetailProvider?.fetchAssignmentDetailData(widget.assignmentId,widget.sessionId,widget.notificationId);
+    assignmentDetailProvider?.fetchAssignmentDetailData(
+        widget.assignmentId, widget.sessionId, widget.notificationId);
     super.initState();
   }
 
@@ -53,9 +57,7 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
                 child: model.assignmentDetailResponse == null
                     ? const Center(child: CircularProgressIndicator())
                     : model.assignmentDetailResponse!.lstAssignment!.isEmpty
-                        ? const Center(
-                            child: Text('No assignment detail found'),
-                          )
+                        ? const Center(child: Text('No assignment detail found'))
                         : ListView(
                             padding: const EdgeInsets.all(15),
                             shrinkWrap: true,
@@ -107,12 +109,29 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
                                                                   title: Text(data![index].fILENAME ?? ""),
                                                                   trailing: IconButton(
                                                                       onPressed: () {
-                                                                        model
-                                                                            .requestWritePermission(context)
-                                                                            .then((_) {
-                                                                          model.downloadFile(context,
-                                                                              data[index].fILENAME ?? "");
+
+                                                                        DownloadPdf.downloadPdf(
+                                                                            "${Api.imageBaseUrl}/${data[index].fILENAME ?? ""}",
+                                                                            data[index].fILENAME!.split('/')
+                                                                                .last,
+                                                                            context, (value) {
+                                                                          if (Platform.isAndroid) {
+                                                                            //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                          }
+                                                                        }, (file) async {
+                                                                          if (Platform.isIOS) {
+                                                                            //  await Share.shareXFiles([XFile(file.path)]);
+                                                                          }
                                                                         });
+
+                                                                        // model
+                                                                        //     .requestWritePermission()
+                                                                        //     .then((value) {
+                                                                        //   if (value) {
+                                                                        //     model.downloadFile(context,
+                                                                        //         data[index].fILENAME ?? "");
+                                                                        //   }
+                                                                        // });
                                                                       },
                                                                       icon: const Icon(Icons.download)),
                                                                 ),

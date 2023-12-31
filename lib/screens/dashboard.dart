@@ -9,6 +9,7 @@ import 'package:flexischool/screens/teacher/teacher_assignment_list_screen.dart'
 import 'package:flexischool/screens/teacher/teacher_circular_list_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -99,7 +100,7 @@ class _DashboardState extends State<Dashboard> {
   void logout(BuildContext context) {
     final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
     loginStore.userLogout();
-
+    FlutterAppBadger.removeBadge();
     Navigator.pushReplacementNamed(context, '/home');
   }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -11,7 +12,6 @@ import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/student_assignment_model.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/utils/notification_service.dart';
-import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get_it/get_it.dart';
@@ -122,14 +122,36 @@ class StudentAssignmentProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> requestWritePermission(BuildContext context) async {
-    PermissionStatus status = await Permission.storage.request();
-    if (status.isGranted) {
+  // Future<void> requestWritePermission(BuildContext context) async {
+  //   PermissionStatus status = await Permission.storage.request();
+  //   debugPrint('Student assignment provider Permission status: $status');
+  //   if (status.isGranted) {
+  //   } else {
+  //     if (context.mounted) {
+  //       ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
+  //     }
+  //   }
+  // }
+
+  Future<bool> requestWritePermission() async {
+    final DeviceInfoPlugin info = DeviceInfoPlugin();
+    final AndroidDeviceInfo androidInfo = await info.androidInfo;
+    debugPrint('releaseVersion : ${androidInfo.version.release}');
+    final int androidVersion = int.parse(androidInfo.version.release);
+    bool havePermission = false;
+
+    if (androidVersion >= 13) {
+      final request = await [Permission.videos, Permission.photos].request();
+      havePermission = request.values.every((status) => status == PermissionStatus.granted);
     } else {
-      if (context.mounted) {
-        ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
-      }
+      final status = await Permission.storage.request();
+      havePermission = status.isGranted;
     }
+
+    if (!havePermission) {
+      await openAppSettings();
+    }
+    return havePermission;
   }
 
   Future<void> downloadFile(BuildContext context, String url) async {

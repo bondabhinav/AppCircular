@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -90,14 +91,36 @@ class TeacherCircularListProvider extends ChangeNotifier {
     return studentCircularDocumentListResponse;
   }
 
-  Future<void> requestWritePermission(BuildContext context) async {
-    PermissionStatus status = await Permission.storage.request();
-    if (status.isGranted) {
+  // Future<void> requestWritePermission(BuildContext context) async {
+  //   PermissionStatus status = await Permission.storage.request();
+  //   debugPrint('Teacher circular list provider Permission status: $status');
+  //   if (status.isGranted) {
+  //   } else {
+  //     if (context.mounted) {
+  //       ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
+  //     }
+  //   }
+  // }
+
+  Future<bool> requestWritePermission() async {
+    final DeviceInfoPlugin info = DeviceInfoPlugin();
+    final AndroidDeviceInfo androidInfo = await info.androidInfo;
+    debugPrint('releaseVersion : ${androidInfo.version.release}');
+    final int androidVersion = int.parse(androidInfo.version.release);
+    bool havePermission = false;
+
+    if (androidVersion >= 13) {
+      final request = await [Permission.videos, Permission.photos].request();
+      havePermission = request.values.every((status) => status == PermissionStatus.granted);
     } else {
-      if (context.mounted) {
-        ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
-      }
+      final status = await Permission.storage.request();
+      havePermission = status.isGranted;
     }
+
+    if (!havePermission) {
+      await openAppSettings();
+    }
+    return havePermission;
   }
 
   // Future<void> updateCircularFlag(String id) async {

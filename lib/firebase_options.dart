@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCnH8_XKS8a7ARcVM9v5Ll3Ac2AMM6dOL0',
-    appId: '1:905905139189:android:4d843074e1c0e0fb92c4bc',
+    appId: '1:905905139189:android:691a7da72053ca2f92c4bc',
     messagingSenderId: '905905139189',
     projectId: 'flexischoolapp',
     storageBucket: 'flexischoolapp.appspot.com',
@@ -59,12 +59,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB8jcuL62IfqTOfMobekbKYKsyiP4IQk34',
-    appId: '1:905905139189:ios:0888104f7da0b23092c4bc',
+    appId: '1:905905139189:ios:2ce21d707264878492c4bc',
     messagingSenderId: '905905139189',
     projectId: 'flexischoolapp',
     storageBucket: 'flexischoolapp.appspot.com',
     androidClientId: '905905139189-u2o0m3sbdbr0ug8abf88lvkdjsdi38co.apps.googleusercontent.com',
-    iosClientId: '905905139189-o75qt6kplv2j033mvp7lfa3jfd9vq4ur.apps.googleusercontent.com',
-    iosBundleId: 'com.example.flexischool',
+    iosBundleId: 'flexischoolerpapp.sapinfotek.com',
   );
 }
