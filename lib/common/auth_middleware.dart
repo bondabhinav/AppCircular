@@ -1,7 +1,5 @@
 import 'package:flexischool/common/webService.dart';
-import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthGuard {
@@ -16,102 +14,136 @@ class AuthGuard {
 //class AuthMiddleware extends RouteObserver<PageRoute<dynamic>> {
 class AuthMiddleware extends NavigatorObserver {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  @override
-  Future<void> didPush(Route<dynamic> route, Route<dynamic>? previousRoute) async {
-    if (route.settings.name == '/home' || route.settings.name == '/schoolUrl') {
-      if ((await isUserIn())) {
-        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
-        loginlAuth.assignUserProvider();
-        Future.delayed(Duration.zero, () async {
-          navigatorKey.currentState?.pushReplacementNamed('/dashboard');
-        });
-      } else if ((await isStudentUserIn())) {
-        final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
-        loginlAuth.assignUserProvider();
-        Future.delayed(Duration.zero, () async {
-          navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
-        });
-      } else if (!await isLoginType()) {
-        print('midlcall type');
-        Future.delayed(Duration.zero, () {
-          navigatorKey.currentState?.pushReplacementNamed('/home');
-        });
-      } else if (await isSchoolUrlIn()) {
-        print('midlcall');
-        Future.delayed(Duration.zero, () {
-          navigatorKey.currentState?.pushReplacementNamed('/login');
-        });
-      }
-    }
-
-    //await isSchoolUrlIn() ? print("true") : print("false");
-
-    //Share Pre Val
-    //final UrlProvider urlAuth =  Provider.of<UrlProvider>(route!.navigator!.context, listen: false);
-
-    // print(urlAuth.urInStatus);
-
-    //checkAuth(route, previousRoute);
-
-    super.didPush(route, previousRoute);
-    // if (route.settings.name == '/schoolUrl' && !AuthGuard.checkAuthenticationStatus()) {
-    //   // Redirect to the login screen if not logged in
-    //   navigator?.pushReplacementNamed('/login');
-    // }
-    //
-    //
-    // // Check if the pushed route requires authentication
-    // if (route.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
-    //   // Redirect to the login screen if not logged in
-    //   navigator?.pushReplacementNamed('/login');
-    // }
-  }
 
   // @override
-  // void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-  //   super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-  //   // Check if the replaced route requires authentication
-  //   if (newRoute?.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
-  //     // Redirect to the login screen if not logged in
-  //     navigator?.pushReplacementNamed('/login');
+  // Future<void> didPush(Route<dynamic> route, Route<dynamic>? previousRoute) async {
+  //   if (!await checkForUpdate(navigatorKey.currentContext!)) {
+  //     if (route.settings.name == '/home' || route.settings.name == '/schoolUrl') {
+  //       if ((await isUserIn())) {
+  //         final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
+  //         loginlAuth.assignUserProvider();
+  //         Future.delayed(Duration.zero, () async {
+  //           navigatorKey.currentState?.pushReplacementNamed('/dashboard');
+  //         });
+  //       } else if ((await isStudentUserIn())) {
+  //         final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
+  //         loginlAuth.assignUserProvider();
+  //         Future.delayed(Duration.zero, () async {
+  //           navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
+  //         });
+  //       } else if (!await isLoginType()) {
+  //         print('midlcall type');
+  //         Future.delayed(Duration.zero, () {
+  //           navigatorKey.currentState?.pushReplacementNamed('/home');
+  //         });
+  //       } else if (await isSchoolUrlIn()) {
+  //         print('midlcall');
+  //         Future.delayed(Duration.zero, () {
+  //           navigatorKey.currentState?.pushReplacementNamed('/login');
+  //         });
+  //       }
+  //     }
+  //   } else {
+  //     Navigator.pushReplacement(
+  //         navigatorKey.currentContext!,
+  //         MaterialPageRoute(
+  //             builder: (context) => Scaffold(
+  //                   body: Material(
+  //                     child: PopScope(
+  //                         child: Column(children: [
+  //                           const Text('Update Required'),
+  //                           const Text(
+  //                               'A new version of the app is available. Please update to continue using the app.'),
+  //                           TextButton(
+  //                             onPressed: () async {
+  //                               Navigator.pop(navigatorKey.currentContext!);
+  //                               if (await canLaunchUrl(Uri.parse(
+  //                                   'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com'))) {
+  //                                 await launchUrl(Uri.parse(
+  //                                     'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com'));
+  //                               } else {
+  //                                 throw 'Could not launch appStoreLink';
+  //                               }
+  //                             },
+  //                             child: const Text('Update Now'),
+  //                           ),
+  //                         ]),
+  //                         onPopInvoked: (_) {
+  //                           SystemNavigator.pop();
+  //                           return;
+  //                         }),
+  //                   ),
+  //                 )));
   //   }
+  //
+  //   //await isSchoolUrlIn() ? print("true") : print("false");
+  //
+  //   //Share Pre Val
+  //   //final UrlProvider urlAuth =  Provider.of<UrlProvider>(route!.navigator!.context, listen: false);
+  //
+  //   // print(urlAuth.urInStatus);
+  //
+  //   //checkAuth(route, previousRoute);
+  //
+  //   super.didPush(route, previousRoute);
+  //   // if (route.settings.name == '/schoolUrl' && !AuthGuard.checkAuthenticationStatus()) {
+  //   //   // Redirect to the login screen if not logged in
+  //   //   navigator?.pushReplacementNamed('/login');
+  //   // }
+  //   //
+  //   //
+  //   // // Check if the pushed route requires authentication
+  //   // if (route.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
+  //   //   // Redirect to the login screen if not logged in
+  //   //   navigator?.pushReplacementNamed('/login');
+  //   // }
   // }
   //
-  @override
-  Future<void> didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async {
-    super.didPop(route, previousRoute);
-    if (route.settings.name == '/dashboard' ||
-        route.settings.name == '/studentDashboard' ||
-        route.settings.name == '/home' ||
-        route.settings.name == '/schoolUrl' ||
-        route.settings.name == '/login') {
-      if ((await isUserIn())) {
-        print('popA');
-        final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
-        loginlAuth.assignUserProvider();
-
-        Future.delayed(Duration.zero, () async {
-          navigatorKey.currentState?.pushReplacementNamed('/dashboard');
-        });
-      } else if ((await isStudentUserIn())) {
-        final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
-        loginlAuth.assignUserProvider();
-        Future.delayed(Duration.zero, () async {
-          navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
-        });
-      } else if (await isSchoolUrlIn()) {
-        Future.delayed(Duration.zero, () {
-          navigatorKey.currentState?.pushReplacementNamed('/login');
-        });
-      }
-    }
-    // Check if the popped route requires authentication
-    //print('call back');
-    // if (previousRoute?.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
-    //   // Redirect to the login screen if not logged in
-    //   navigator?.pushReplacementNamed('/login');
-    // }
-  }
+  // // @override
+  // // void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+  // //   super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  // //   // Check if the replaced route requires authentication
+  // //   if (newRoute?.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
+  // //     // Redirect to the login screen if not logged in
+  // //     navigator?.pushReplacementNamed('/login');
+  // //   }
+  // // }
+  // //
+  // @override
+  // Future<void> didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async {
+  //   super.didPop(route, previousRoute);
+  //   if (route.settings.name == '/dashboard' ||
+  //       route.settings.name == '/studentDashboard' ||
+  //       route.settings.name == '/home' ||
+  //       route.settings.name == '/schoolUrl' ||
+  //       route.settings.name == '/login') {
+  //     if ((await isUserIn())) {
+  //       print('popA');
+  //       final loginlAuth = Provider.of<LoginProvider>(route!.navigator!.context, listen: false);
+  //       loginlAuth.assignUserProvider();
+  //
+  //       Future.delayed(Duration.zero, () async {
+  //         navigatorKey.currentState?.pushReplacementNamed('/dashboard');
+  //       });
+  //     } else if ((await isStudentUserIn())) {
+  //       final loginlAuth = Provider.of<LoginProvider>(route.navigator!.context, listen: false);
+  //       loginlAuth.assignUserProvider();
+  //       Future.delayed(Duration.zero, () async {
+  //         navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
+  //       });
+  //     } else if (await isSchoolUrlIn()) {
+  //       Future.delayed(Duration.zero, () {
+  //         navigatorKey.currentState?.pushReplacementNamed('/login');
+  //       });
+  //     }
+  //   }
+  //   // Check if the popped route requires authentication
+  //   //print('call back');
+  //   // if (previousRoute?.settings.name == '/profile' && !AuthGuard.checkAuthenticationStatus()) {
+  //   //   // Redirect to the login screen if not logged in
+  //   //   navigator?.pushReplacementNamed('/login');
+  //   // }
+  // }
 
   Future<bool> isSchoolUrlIn() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -158,7 +190,6 @@ class AuthMiddleware extends NavigatorObserver {
       Future.delayed(Duration.zero, () async {
         final newType = await WebService.getLoginType();
         if (newType == 'S') {
-
           navigatorKey.currentState?.pushReplacementNamed('/studentDashboard');
         } else {
           navigatorKey.currentState?.pushReplacementNamed('/dashboard');

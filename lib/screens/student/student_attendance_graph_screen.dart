@@ -57,131 +57,126 @@ class _StudentAttendanceGraphScreenState extends State<StudentAttendanceGraphScr
                                     fontFamily: "Montserrat Regular",
                                     color: Colors.black)),
                           )
-                        : Column(
-                            children: [
-                              const SizedBox(height: 70),
-                              AspectRatio(
-                                  aspectRatio: 1,
-                                  child: BarChart(BarChartData(
-                                      borderData: FlBorderData(
-                                        show: true,
-                                        border: const Border(
-                                          left: BorderSide(color: Colors.black, width: 2),
-                                          bottom: BorderSide(color: Colors.black, width: 2),
-                                        ),
+                        : Column(children: [
+                            const SizedBox(height: 70),
+                            AspectRatio(
+                                aspectRatio: 1,
+                                child: BarChart(BarChartData(
+                                    borderData: FlBorderData(
+                                      show: true,
+                                      border: const Border(
+                                        left: BorderSide(color: Colors.black, width: 2),
+                                        bottom: BorderSide(color: Colors.black, width: 2),
                                       ),
-                                      gridData: const FlGridData(
-                                          show: true, drawHorizontalLine: true, drawVerticalLine: false),
-                                      barTouchData: BarTouchData(
-                                          enabled: true,
-                                          handleBuiltInTouches: false,
-                                          touchCallback: (event, response) {
-                                            if (response != null &&
-                                                response.spot != null &&
-                                                event is FlTapUpEvent) {
-                                              setState(() {
-                                                final x = response.spot!.touchedBarGroup.x;
-                                                final isShowing = showingTooltip == x;
-                                                if (isShowing) {
-                                                  showingTooltip = -1;
-                                                } else {
-                                                  showingTooltip = x;
-                                                }
-                                                debugPrint('response ${response.spot!.touchedBarGroupIndex}');
+                                    ),
+                                    gridData: const FlGridData(
+                                        show: true, drawHorizontalLine: true, drawVerticalLine: false),
+                                    barTouchData: BarTouchData(
+                                        enabled: true,
+                                        handleBuiltInTouches: false,
+                                        touchCallback: (event, response) {
+                                          if (response != null &&
+                                              response.spot != null &&
+                                              event is FlTapUpEvent) {
+                                            setState(() {
+                                              final x = response.spot!.touchedBarGroup.x;
+                                              final isShowing = showingTooltip == x;
+                                              if (isShowing) {
+                                                showingTooltip = -1;
+                                              } else {
+                                                showingTooltip = x;
+                                              }
+                                              debugPrint('response ${response.spot!.touchedBarGroupIndex}');
 
-                                                List<String> monthNamesList =
-                                                    model.studentAttendanceGraphResponse!.getMonthNamesList();
+                                              List<String> monthNamesList =
+                                                  model.studentAttendanceGraphResponse!.getMonthNamesList();
 
-                                                String monthName =
-                                                    monthNamesList[response.spot!.touchedBarGroupIndex];
-                                                Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                AbsentPresentStudentCalenderScreen(
-                                                                    month: getMonthDigit(monthName))))
-                                                    .then((value) {
-                                                  model.fetchAttendanceGraphData();
-                                                });
+                                              String monthName =
+                                                  monthNamesList[response.spot!.touchedBarGroupIndex];
+                                              debugPrint('month name --- $monthName');
+                                              Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              AbsentPresentStudentCalenderScreen(
+                                                                  month: getMonthDigit(monthName))))
+                                                  .then((value) {
+                                                model.fetchAttendanceGraphData();
                                               });
+                                            });
+                                          }
+                                        },
+                                        mouseCursorResolver: (event, response) {
+                                          return response == null || response.spot == null
+                                              ? MouseCursor.defer
+                                              : SystemMouseCursors.click;
+                                        },
+                                        touchTooltipData: BarTouchTooltipData(
+                                            tooltipMargin: -10, tooltipBgColor: Colors.transparent)),
+                                    barGroups: getData(model.studentAttendanceGraphResponse!),
+                                    minY: 0,
+                                    maxY: 100,
+                                    titlesData: FlTitlesData(
+                                      rightTitles:
+                                          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          reservedSize: 30,
+                                          showTitles: true,
+                                          getTitlesWidget: (value, meta) {
+                                            for (int i = 0; i <= 100; i += 20) {
+                                              if (value == i) {
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(right: 5),
+                                                  child: Text(i.toString(),
+                                                      textAlign: TextAlign.right,
+                                                      style: const TextStyle(fontSize: 12)),
+                                                );
+                                              }
                                             }
+                                            return const Text("");
                                           },
-                                          mouseCursorResolver: (event, response) {
-                                            return response == null || response.spot == null
-                                                ? MouseCursor.defer
-                                                : SystemMouseCursors.click;
-                                          },
-                                          touchTooltipData: BarTouchTooltipData(
-                                              tooltipMargin: -10, tooltipBgColor: Colors.transparent)),
-                                      barGroups: getData(model.studentAttendanceGraphResponse!),
-                                      minY: 0,
-                                      maxY: 100,
-                                      titlesData: FlTitlesData(
-                                        rightTitles:
-                                            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                        topTitles:
-                                            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                        leftTitles: AxisTitles(
-                                          sideTitles: SideTitles(
-                                            reservedSize: 30,
-                                            showTitles: true,
+                                        ),
+                                        drawBelowEverything: true,
+                                      ),
+                                      bottomTitles: AxisTitles(
+                                        axisNameSize: 1,
+                                        drawBelowEverything: true,
+                                        sideTitles: SideTitles(
                                             getTitlesWidget: (value, meta) {
-                                              for (int i = 0; i <= 100; i += 20) {
-                                                if (value == i) {
-                                                  return Padding(
-                                                    padding: const EdgeInsets.only(right: 5),
-                                                    child: Text(i.toString(),
-                                                        textAlign: TextAlign.right,
-                                                        style: const TextStyle(fontSize: 12)),
-                                                  );
-                                                }
+                                              List<String> months = model.studentAttendanceGraphResponse!
+                                                  .toJson()
+                                                  .keys
+                                                  .toList();
+                                              if (value.toInt() >= 0 && value.toInt() < months.length) {
+                                                return Text(getShortMonth(months[value.toInt()]),
+                                                    style: const TextStyle(fontSize: 10));
                                               }
                                               return const Text("");
                                             },
-                                          ),
-                                          drawBelowEverything: true,
-                                        ),
-                                        bottomTitles: AxisTitles(
-                                          axisNameSize: 1,
-                                          drawBelowEverything: true,
-                                          sideTitles: SideTitles(
-                                              getTitlesWidget: (value, meta) {
-                                                List<String> months = model.studentAttendanceGraphResponse!
-                                                    .toJson()
-                                                    .keys
-                                                    .toList();
-                                                if (value.toInt() >= 0 && value.toInt() < months.length) {
-                                                  return Text(getShortMonth(months[value.toInt()]),
-                                                      style: const TextStyle(fontSize: 10));
-                                                }
-                                                return const Text("");
-                                              },
-                                              showTitles: true,
-                                              reservedSize: 30,
-                                              interval: 1),
-                                        ),
-                                      )))),
-                              if (model.overAllAttendanceResponse != null)
-                                Align(
+                                            showTitles: true,
+                                            reservedSize: 30,
+                                            interval: 1),
+                                      ),
+                                    )))),
+                            if (model.overAllAttendanceResponse != null)
+                              Align(
                                   alignment: Alignment.topLeft,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(top: 10, left: 20),
-                                    child: Row(
-                                      children: [
+                                      padding: const EdgeInsets.only(top: 10, left: 20),
+                                      child: Row(children: [
                                         const Text('Overall attendance:- '),
-                                        Text(
-                                          '${double.parse((model.overAllAttendanceResponse?.attendance ?? '').toString()).toStringAsFixed(2)}%',
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: 'Montserrat Regular'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                            ],
-                          ));
+                                        model.overAllAttendanceResponse?.attendance == null
+                                            ? const SizedBox()
+                                            : Text(
+                                                '${double.parse((model.overAllAttendanceResponse?.attendance ?? '').toString()).toStringAsFixed(2)}%',
+                                                style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'Montserrat Regular'))
+                                      ])))
+                          ]));
           });
         });
   }

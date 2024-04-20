@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/webService.dart';
@@ -82,6 +83,7 @@ class LoginProvider extends ChangeNotifier {
     prefs.remove("global_login_type");
     prefs.remove("student_data");
     prefs.remove("fcmId");
+    prefs.remove('teacher_data');
     WebService.studentLoginData = null;
     //prefs.remove("global_school_url");
 
@@ -219,11 +221,13 @@ class LoginProvider extends ChangeNotifier {
             try {
               var data = {
                 "ADM_NO": loginResponse.table1!.first.aDMNO!,
-                "DEVICE_TOKEN": PushNotificationsManager().fcmToken
+                "DEVICE_TOKEN": PushNotificationsManager().fcmToken.isEmpty
+                    ? FirebaseMessaging.instance.getToken()
+                    : PushNotificationsManager().fcmToken
               };
               final response = await apiService.post(url: Api.addFcmTokenApi, data: data);
               if (response.statusCode == 200) {
-             //   final responseData = json.decode(response.data);
+                //   final responseData = json.decode(response.data);
                 final addTokenResponse = AddTokenResponse.fromJson(response.data);
                 debugPrint('fcm token api response ${addTokenResponse.toString()}');
                 debugPrint('fcm token number ${addTokenResponse.nUMBER.toString()}');

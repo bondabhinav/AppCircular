@@ -1,5 +1,6 @@
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
+import 'package:flexischool/screens/change_password_screen.dart';
 import 'package:flexischool/screens/student/academic_calender_screen.dart';
 import 'package:flexischool/screens/student/student_assignment_screen.dart';
 import 'package:flexischool/screens/student/student_attendance_graph_screen.dart';
@@ -97,11 +98,13 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  void logout(BuildContext context) {
+  Future<void> logout(BuildContext context) async {
     final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
-    loginStore.userLogout();
+    await loginStore.userLogout();
     FlutterAppBadger.removeBadge();
-    Navigator.pushReplacementNamed(context, '/home');
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   TeacherDashboardProvider? teacherDashboardProvider;
@@ -165,18 +168,17 @@ class _DashboardState extends State<Dashboard> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      const WebViewScreen(url: 'https://privacy.sapinfotek.com/',title:'Privacy Policy')));
+                                  builder: (context) => const WebViewScreen(
+                                      url: 'https://privacy.sapinfotek.com/', title: 'Privacy Policy')));
                         }),
-
-                    // ListTile(
-                    //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                    //   title: const Text('Change Password'),
-                    //   leading: const Icon(Icons.lock),
-                    //   minLeadingWidth: 10,
-                    //   horizontalTitleGap: 10,
-                    //   onTap: () {},
-                    // ),
+                    ListTile(
+                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                        title: const Text('Change Password'),
+                        leading: const Icon(Icons.lock),
+                        minLeadingWidth: 10,
+                        horizontalTitleGap: 10,
+                        onTap: () => Navigator.push(
+                            context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
                     ListTile(
                       visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                       title: const Text('Logout'),

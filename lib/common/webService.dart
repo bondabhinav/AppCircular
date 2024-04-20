@@ -66,6 +66,20 @@ class WebService {
    return value;
   }
 
+  static getTeacherDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDetails = prefs.getString('teacher_data');
+    dynamic userInfo;
+    if (userDetails != null) {
+      userInfo = jsonDecode(userDetails);
+    }
+    return userInfo;
+  }
+
+  static setTeacherLoginDetails(dynamic loginResponse) async {
+    await _preferences?.setString("teacher_data", json.encode(loginResponse));
+  }
+
   static Future<StudentLoginResponse?> getStudentLoginDetails() async {
     try {
       final loginResponseString = await _preferences?.getString('student_data');

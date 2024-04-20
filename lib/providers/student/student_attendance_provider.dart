@@ -108,10 +108,12 @@ class StudentAttendanceProvider extends ChangeNotifier {
     try {
       var data = {"MONTH": month, "CLASS_ID": Constants.studentClassId, "SESSION_ID": Constants.sessionId};
       final response = await apiService.post(url: Api.getEventApi, data: data);
+      debugPrint('response ---- $response');
       if (response.statusCode == 200) {
         getEventResponse = GetEventResponse.fromJson(response.data);
         List<CalendarEvent> events = getEventResponse!.calendarDate;
         allEvents = _groupEventsByDate(events);
+        printAllEvents();
         notifyListeners();
       } else {}
     } catch (e) {
@@ -133,6 +135,16 @@ class StudentAttendanceProvider extends ChangeNotifier {
     }
     return groupedEvents;
   }
+
+  void printAllEvents() {
+    allEvents.forEach((date, events) {
+      debugPrint('Date: $date');
+      for (var event in events) {
+        debugPrint('  Event: ${event.eventName}, Start Date: ${event.startDate}, Type: ${event.type}');
+      }
+    });
+  }
+
 
   void updateMonth(DateTime dateTime) {
     month = dateTime.month;

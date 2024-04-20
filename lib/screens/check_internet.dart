@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../common/config.dart';
-import 'home.dart';
-
+import 'package:flexischool/app_update.dart';
+import 'package:flutter/material.dart';
 
 class CheckInternet extends StatelessWidget {
-  const CheckInternet({Key? key}) : super(key: key);
+  const CheckInternet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,40 +14,41 @@ class CheckInternet extends StatelessWidget {
           child: ElevatedButton(
             child: const Text("Check Internet Connection"),
             onPressed: () async {
-              final connectivityResult =
-              await Connectivity().checkConnectivity();
+              final connectivityResult = await Connectivity().checkConnectivity();
               if (connectivityResult == ConnectivityResult.none) {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (_) => NetworkErrorDialog(
-                    onPressed: () async {
-                      final connectivityResult =
-                      await Connectivity().checkConnectivity();
-                      if (connectivityResult == ConnectivityResult.none) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Please turn on your wifi or mobile data')));
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                );
+                if (context.mounted) {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (_) => NetworkErrorDialog(
+                      onPressed: () async {
+                        final connectivityResult = await Connectivity().checkConnectivity();
+                        if (connectivityResult == ConnectivityResult.none) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please turn on your wifi or mobile data')));
+                          }
+                        } else {
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        }
+                      },
+                    ),
+                  );
+                }
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(
-                        'You\'re connected to a ${connectivityResult.name} network')));
-
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const Home()),
-                // );
-                Navigator.pushNamed(context, "/home");
-
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('You\'re connected to a ${connectivityResult.name} network')));
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => const Home()),
+                  // );
+                  checkForUpdate(context);
+                  Navigator.pushNamed(context, "/home");
+                }
               }
-
             },
           ),
         ),
@@ -59,7 +58,7 @@ class CheckInternet extends StatelessWidget {
 }
 
 class NetworkErrorDialog extends StatelessWidget {
-  const NetworkErrorDialog({Key? key, this.onPressed}) : super(key: key);
+  const NetworkErrorDialog({super.key, this.onPressed});
 
   final Function()? onPressed;
 
@@ -71,9 +70,7 @@ class NetworkErrorDialog extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-              width: 100,
-              child: Image.asset('assets/images/no-wifi.png')),
+          SizedBox(width: 100, child: Image.asset('assets/images/no-wifi.png')),
           const SizedBox(height: 32),
           const Text(
             "Whoops!",
@@ -94,8 +91,8 @@ class NetworkErrorDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            child: const Text("Try Again"),
             onPressed: onPressed,
+            child: const Text("Try Again"),
           )
         ],
       ),

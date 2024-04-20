@@ -41,4 +41,8 @@ class Api {
   static String getOverallPercentageApi = "${baseUrl}getattendancePercentforstudent/getattendancePercentforstudent";
   static String getClassForAttendanceApi = "${baseUrl}GetClassforAttendance/GetClassandSectionforAttendance";
   static String getSectionForAttendanceApi = "${baseUrl}GetSectionforAttendance/GetClassandSectionforAttendance";
+  static String getStudentPasswordApi = "${baseUrl}GetStudentPasswordbyAdm_no/GetStudentPasswordbyAdm_no";
+  static String changeStudentPasswordApi = "${baseUrl}StudentPasswordUpdate/StudentPasswordUpdate";
+  static String getTeacherPasswordApi = "${baseUrl}GetEmployeePasswordbyEmployeeID/GetEmployeePasswordbyEmployeeID";
+  static String changeTeacherPasswordApi = "${baseUrl}EmployeePasswordUpdate/EmployeePasswordUpdate";
 }

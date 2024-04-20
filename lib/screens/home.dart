@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 //Home Screen
 class Home extends StatelessWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class Home extends StatelessWidget {
 
 //HomeScreen
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,7 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void loginType(type) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString('global_login_type', type);
-    Navigator.pushNamed(context, "/schoolUrl");
+  //  Navigator.pushNamed(context, "/schoolUrl");
+    Navigator.pushNamed(context, "/login");
   }
 
   @override
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     onTap: () {
                       //Navigator.pushNamed(context, "/schoolUrl");
-                      loginType('T');
+                   //   loginType('T');
                     },
                   ),
                   Card(
@@ -172,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: InkWell(
                       onTap: () {
                         //Navigator.pushNamed(context, "/schoolUrl");
-                        loginType('S');
+                      //  loginType('S');
                       },
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

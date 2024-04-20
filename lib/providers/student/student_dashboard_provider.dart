@@ -110,6 +110,7 @@ class StudentDashboardProvider extends ChangeNotifier {
     var sessionData = sessionListResponse?.table1?.firstWhere((data) => data.sESSIONID == newValue);
     if (sessionData != null) {
       _sessionYear = '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
+      Constants.sessionYear = _sessionYear!;
     }
     notifyListeners();
   }
@@ -118,6 +119,7 @@ class StudentDashboardProvider extends ChangeNotifier {
     final sessionData = WebService.studentLoginData?.table1?.first;
     _selectedSessionDropDownValue = sessionData?.sESSIONID!;
     _sessionYear = '${sessionData?.fROMSESSION} - ${sessionData?.tOSESSION}';
+    Constants.sessionYear = _sessionYear!;
     notifyListeners();
   }
 

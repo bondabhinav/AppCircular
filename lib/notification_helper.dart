@@ -39,7 +39,7 @@ class PushNotificationsManager {
   bool _hasLaunched = false;
 
   static final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
-  String _fcmToken = "test";
+  String _fcmToken = "";
 
   Future<void> init() async {
     if (!_initialized) {

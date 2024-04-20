@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 
 class Constants {
   static const String appName = 'Flexi School';
+  static const String applicationId = 'flexischoolerpapp.sapinfotek.com';
   static const int maxItems = 10;
-  static const String baseUrl = 'https://androidschool.sapinfotek.com/API/Version/';
+  // static const String baseUrl = 'https://androidschool.sapinfotek.com/API/Version/';
+  static const String baseUrl = 'http://androidschool.sapinfotek.in/API/Version/';
   static int sessionId = 0;
   static String studentClassId = '';
   static String studentSectionId = '';
@@ -15,6 +17,7 @@ class Constants {
   static String endDate = '';
   static String lastDate = '';
   static bool isAppBadgeSupported = false;
+  static String sessionYear = '';
 
   static String getCurrentDate() {
     DateTime now = DateTime.now();

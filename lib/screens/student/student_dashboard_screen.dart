@@ -7,6 +7,7 @@ import 'package:flexischool/notification_helper.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
+import 'package:flexischool/screens/change_password_screen.dart';
 import 'package:flexischool/screens/dashboard.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
@@ -168,14 +169,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                                     builder: (context) => const WebViewScreen(
                                         url: 'https://privacy.sapinfotek.com/', title: 'Privacy Policy')));
                           }),
-                      // ListTile(
-                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                      //   title: const Text('Change Password'),
-                      //   leading: const Icon(Icons.lock),
-                      //   minLeadingWidth: 10,
-                      //   horizontalTitleGap: 10,
-                      //   onTap: () {},
-                      // ),
+                      ListTile(
+                          visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                          title: const Text('Change Password'),
+                          leading: const Icon(Icons.lock),
+                          minLeadingWidth: 10,
+                          horizontalTitleGap: 10,
+                          onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
                       ListTile(
                         visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                         title: const Text('Logout'),

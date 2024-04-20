@@ -30,7 +30,7 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
     return Consumer<StudentNotificationProvider>(builder: (context, model, _) {
       return Scaffold(
           appBar: AppBar(
-            title: const Text('Notifications',style: TextStyle(color: Colors.white)),
+            title: const Text('Notifications', style: TextStyle(color: Colors.white)),
             leading: IconButton(
               color: Colors.white,
               icon: const Icon(Icons.arrow_back_ios),
@@ -111,26 +111,39 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
                                     ),
                                     const SizedBox(width: 8.0),
                                     Expanded(
-                                      child: Column(
+                                      child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                Text(
                                                   notificationItem?.nOTIFICATIONTYPE ?? "",
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16.0,
                                                   ),
                                                 ),
-                                              ),
-                                              dateItem(notificationItem!, model)
-                                            ],
+                                                description(notificationItem!, model),
+                                              ],
+                                            ),
                                           ),
-                                          const SizedBox(height: 4.0),
-                                          description(notificationItem, model),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                              dateItem(notificationItem, model),
+                                              if (notificationItem.aSSIGNMENT_STATUS
+                                                          .toString()
+                                                          .toUpperCase() ==
+                                                      'N' ||
+                                                  notificationItem.cIRCULAR_STATS.toString().toUpperCase() ==
+                                                      'N')
+                                                const Text('Deleted',
+                                                    style: TextStyle(color: Colors.redAccent))
+                                            ],
+                                          )
                                         ],
                                       ),
                                     ),

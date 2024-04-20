@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flexischool/app_update.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/firebase_options.dart';
 import 'package:flexischool/notification_helper.dart';
@@ -35,8 +35,61 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    //checkForUpdate(context);
+  }
+
+  Future<void> checkForUpdate(BuildContext context) async {
+    try {
+      final newVersion = NewVersionPlus(
+          iOSId: Constants.applicationId,
+          androidId: Constants.applicationId,
+          androidPlayStoreCountry: "es_ES");
+      final status = await newVersion.getVersionStatus();
+      if (status != null) {
+        debugPrint(status.releaseNotes);
+        debugPrint(status.appStoreLink);
+        debugPrint(status.localVersion);
+        debugPrint(status.storeVersion);
+        debugPrint(status.canUpdate.toString());
+        if (context.mounted) {
+          newVersion.showUpdateDialog(
+              context: context,
+              versionStatus: status,
+              dialogTitle: 'Custom Title',
+              dialogText: 'Custom Text',
+              launchModeVersion: LaunchModeVersion.external,
+              allowDismissal: true,
+              dismissAction: () {},
+              dismissButtonText: '');
+        }
+      }
+    } on Exception catch (e) {
+      debugPrint('Error checking for update: $e');
+    }
+    // try {
+    //   print('enter in checkForUpdate');
+    //   AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
+    //   if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+    //     print('enter in updateAvailable');
+    //     await InAppUpdate.performImmediateUpdate();
+    //   }else{
+    //     print('enter in update not Available');
+    //   }
+    // } catch (e) {
+    //   debugPrint('Error checking for update: $e');
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +114,8 @@ class MyApp extends StatelessWidget {
           routes: routes,
           initialRoute: "/",
           navigatorKey: AuthMiddleware.navigatorKey,
-          navigatorObservers: [authMiddleware]),
+        //  navigatorObservers: [authMiddleware]
+      ),
     );
   }
 }

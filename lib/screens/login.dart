@@ -88,7 +88,9 @@ class _LoginWidgetState extends State<LoginWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response)),
           );
-          Navigator.pushReplacementNamed(context, '/studentDashboard');
+         // Navigator.pushReplacementNamed(context, '/studentDashboard');
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/studentDashboard', (Route<dynamic> route) => false);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response)),
@@ -109,9 +111,10 @@ class _LoginWidgetState extends State<LoginWidget> {
     } else {
       loginStore.loginValidate(_usernameController.text, _passwordController.text).then((response) {
         //API Response
-        //print(response);
+        debugPrint('response--- $response');
         if (response['status'] == true) {
           loginStore.loginInStatus = LoginStatus.loggedIn;
+          WebService.setTeacherLoginDetails(response['data']);
           loginStore.notify();
           FlutterAppBadger.removeBadge();
 
@@ -121,7 +124,9 @@ class _LoginWidgetState extends State<LoginWidget> {
             SnackBar(content: Text(response['message'])),
           );
 
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          // Navigator.pushReplacementNamed(context, '/dashboard');
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false);
         } else {
           _errorMessage = response['message'];
           ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +167,9 @@ class _LoginWidgetState extends State<LoginWidget> {
       schoolUrl = data;
       print(schoolUrl);
     } else {
-      Navigator.pushReplacementNamed(context, '/schoolUrl');
+      // Navigator.pushReplacementNamed(context, '/schoolUrl');
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/schoolUrl', (Route<dynamic> route) => false);
     }
 
     final schoolLogo = prefs.getString('global_school_logo');
@@ -193,6 +200,7 @@ class _LoginWidgetState extends State<LoginWidget> {
           _is_logo_loading = false;
           _schoolName = responseSplit['SCHOOL_NAME'];
           _logo = (schoolLogo! + responseSplit['LOGO_PATH'])!;
+          debugPrint('_logo ---$_logo');
         });
 
         //print(responseSplit);
@@ -234,7 +242,9 @@ class _LoginWidgetState extends State<LoginWidget> {
         leading: IconButton(
             onPressed: () {
               WebService.clearAllPref();
-              Navigator.pushReplacementNamed(context, '/home');
+              // Navigator.pushReplacementNamed(context, '/home');
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
             },
             icon: const Icon(Icons.arrow_back_ios),
             color: Colors.black),
@@ -251,44 +261,28 @@ class _LoginWidgetState extends State<LoginWidget> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(10.0),
                 children: <Widget>[
+                  Text(_schoolName,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          //color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Montserrat Regular",
+                          fontSize: 25)),
+                  const SizedBox(height: 10),
                   Container(
                       alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        _schoolName,
-                        style: const TextStyle(
-                            //color: Colors.blue,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Montserrat Regular",
-                            fontSize: 25),
-                      )),
-                  Container(
-                      alignment: Alignment.center,
-                      //padding: const EdgeInsets.all(10),
                       child: _is_logo_loading
                           ? const SizedBox(
                               height: 16,
                               width: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: Colors.blue,
-                              ),
-                            )
-                          : Image.network(
-                              _logo,
-                              width: 150,
-                            )),
+                              child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blue))
+                          : Image.network(_logo, width: 150)),
                   Container(
                       alignment: Alignment.center,
                       //padding: const EdgeInsets.all(10),
-                      child: const Text(
-                        'Welcome',
-                        style: TextStyle(
-                            //color: Colors.blue,
-                            fontFamily: "Montserrat Regular",
-                            fontWeight: FontWeight.w500,
-                            fontSize: 20),
-                      )),
+                      child: const Text('Welcome',
+                          style: TextStyle(
+                              fontFamily: "Montserrat Regular", fontWeight: FontWeight.w500, fontSize: 20))),
                   Container(
                       alignment: Alignment.center,
                       padding: const EdgeInsets.all(10),
@@ -306,6 +300,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                     //margin: EdgeInsets.only(top:50.0),
                     child: TextFormField(
                       controller: _usernameController,
+                      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
@@ -378,11 +373,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                             ? const SizedBox(
                                 height: 16,
                                 width: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.5,
-                                  color: Colors.white,
-                                ),
-                              )
+                                child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.deepPurple))
                             : const Text('Login'),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {

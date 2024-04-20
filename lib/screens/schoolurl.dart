@@ -59,6 +59,8 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
     urlAuth.getUrl(_urlController.text).then((response) async {
       //API Response
 
+      debugPrint('response -- $response');
+
       if (response['status'] == true) {
         urlAuth.urlInStatus = UrlStatus.urlIn;
         urlAuth.notify();
@@ -67,7 +69,8 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
         //   SnackBar(content: Text(response['message'])),
         // );
 
-        Navigator.pushReplacementNamed(context, '/login');
+        //  Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         _errorMessage = response['message'];
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,141 +186,112 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
     var size = MediaQuery.of(context).size;
 
     return Center(
-      child: Container(
-        // decoration: BoxDecoration(
-        //   image: DecorationImage(
-        //     image: AssetImage("assets/images/pattern.jpg"),
-        //     fit: BoxFit.cover,
-        //   ),
-        // ),
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                height: size.height * .1,
-                margin: const EdgeInsets.only(top: 10.0),
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/sap.jpg"),
-                    //image: NetworkImage(
-                    //    'https://png.pngtree.com/background/20210712/original/pngtree-vector-school-building-background-design-picture-image_1180541.jpg'),
-                    //fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Container(
-                height: size.height * .2,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/school-clip-art-86.png"),
-                    //image: NetworkImage(
-                    //    'https://png.pngtree.com/background/20210712/original/pngtree-vector-school-building-background-design-picture-image_1180541.jpg'),
-                    //fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10.0),
-              const Text(
-                'Flexi School',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  fontSize: 20.0,
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(height: 10.0),
-              TextFormField(
-                controller: _urlController,
-                focusNode: noteFocus,
-                //initialValue: "https://swamivivekananddemo.sapinfotek.com",
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your school url here',
-                  border: OutlineInputBorder(),
-                  //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                  isDense: true,
-                  // Added this
-                  contentPadding: EdgeInsets.all(14),
-                  prefixIcon: Icon(Icons.public, size: 25),
-                  //labelText: 'Enter your school url here',
-                  filled: true,
-                  fillColor: Colors.white,
-                  errorStyle: TextStyle(
-                    fontFamily: "Montserrat Regular",
-                    fontSize: 14.0,
-                  ),
-                ),
-                validator: (value) {
-                  errorMessage('');
-                  if (value == null || value.isEmpty) {
-                    noteFocus.requestFocus();
-                    return 'Please enter school url';
-                  }
+        child: Container(
+            // decoration: BoxDecoration(
+            //   image: DecorationImage(
+            //     image: AssetImage("assets/images/pattern.jpg"),
+            //     fit: BoxFit.cover,
+            //   ),
+            // ),
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                  Container(
+                      height: size.height * .1,
+                      margin: const EdgeInsets.only(top: 10.0),
+                      decoration: const BoxDecoration(
+                          image: DecorationImage(image: AssetImage("assets/images/sap.jpg")
+                              //image: NetworkImage(
+                              //    'https://png.pngtree.com/background/20210712/original/pngtree-vector-school-building-background-design-picture-image_1180541.jpg'),
+                              //fit: BoxFit.cover,
+                              ))),
+                  Container(
+                      height: size.height * .2,
+                      decoration: const BoxDecoration(
+                          image: DecorationImage(image: AssetImage("assets/images/school-clip-art-86.png")
+                              //image: NetworkImage(
+                              //    'https://png.pngtree.com/background/20210712/original/pngtree-vector-school-building-background-design-picture-image_1180541.jpg'),
+                              //fit: BoxFit.cover,
+                              ))),
+                  const SizedBox(height: 10.0),
+                  const Text('Flexi School',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Montserrat Regular",
+                          fontSize: 20.0,
+                          color: Colors.blue)),
+                  const SizedBox(height: 10.0),
+                  TextFormField(
+                      controller: _urlController,
+                      focusNode: noteFocus,
+                      //initialValue: "https://swamivivekananddemo.sapinfotek.com",
+                      keyboardType: TextInputType.text,
+                      onTapOutside: (focusNode) => FocusManager.instance.primaryFocus?.unfocus(),
+                      decoration: const InputDecoration(
+                          hintText: 'Enter your school url here',
+                          border: OutlineInputBorder(),
+                          //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                          isDense: true,
+                          // Added this
+                          contentPadding: EdgeInsets.all(14),
+                          prefixIcon: Icon(Icons.public, size: 25),
+                          //labelText: 'Enter your school url here',
+                          filled: true,
+                          fillColor: Colors.white,
+                          errorStyle: TextStyle(fontFamily: "Montserrat Regular", fontSize: 14.0)),
+                      validator: (value) {
+                        errorMessage('');
+                        if (value == null || value.isEmpty) {
+                          noteFocus.requestFocus();
+                          return 'Please enter school url';
+                        }
 
-                  if (!isValidUrl(value)) {
-                    return 'Please enter a valid URL.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20.0),
-              Container(
-                width: 150.0,
-                height: 40,
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.blue),
-                      //padding: MaterialStateProperty.all(EdgeInsets.all(50)),
-                      textStyle:
-                          MaterialStateProperty.all(const TextStyle(fontSize: 18, color: Colors.white))),
-                  onPressed: () {
-                    //errorMessage('Test Error');
+                        if (!isValidUrl(value)) {
+                          return 'Please enter a valid URL.';
+                        }
+                        return null;
+                      }),
+                  const SizedBox(height: 20.0),
+                  Container(
+                      width: 150.0,
+                      height: 40,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Colors.blue),
+                              //padding: MaterialStateProperty.all(EdgeInsets.all(50)),
+                              textStyle: MaterialStateProperty.all(
+                                  const TextStyle(fontSize: 18, color: Colors.white))),
+                          onPressed: () {
+                            //errorMessage('Test Error');
 
-                    if (_formKey.currentState!.validate()) {
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   const SnackBar(content: Text('Processing Data')),
-                      // );
+                            if (_formKey.currentState!.validate()) {
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   const SnackBar(content: Text('Processing Data')),
+                              // );
 
-                      //_isLoading ? null : _submitForm();
-                      _isLoading ? null : _getUrl(context);
-                    }
+                              //_isLoading ? null : _submitForm();
+                              _isLoading ? null : _getUrl(context);
+                            }
 
-                    //Navigator.pushNamed(context, "/login",arguments: " Login");
-                  },
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Submit',
-                          style: TextStyle(
-                              color: Colors.white, fontFamily: 'Montserrat Regular', fontSize: 13.5)),
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              Text(
-                '$_errorMessage',
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                            //Navigator.pushNamed(context, "/login",arguments: " Login");
+                          },
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white))
+                              : const Text('Submit',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Montserrat Regular',
+                                      fontSize: 13.5)))),
+                  const SizedBox(height: 10.0),
+                  Text(_errorMessage,
+                      style: const TextStyle(
+                          fontSize: 14.0, fontFamily: "Montserrat Regular", color: Colors.red))
+                ])))));
   }
 }

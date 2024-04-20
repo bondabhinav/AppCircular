@@ -31,6 +31,8 @@ class NotificationData {
   String? aPPCIRCULARDESCRIPTION;
   String? aPPCIRCULARDATE;
   int? aPPCIRCULARID;
+  dynamic aSSIGNMENT_STATUS;
+  dynamic cIRCULAR_STATS;
 
   NotificationData(
       {this.nOTIFICATIONID,
@@ -41,7 +43,9 @@ class NotificationData {
       this.aPPASSIGNMENTID,
       this.aPPCIRCULARDESCRIPTION,
       this.aPPCIRCULARDATE,
-      this.aPPCIRCULARID});
+      this.aPPCIRCULARID,
+      this.cIRCULAR_STATS,
+        this.aSSIGNMENT_STATUS});
 
   NotificationData.fromJson(Map<String, dynamic> json) {
     nOTIFICATIONID = json['NOTIFICATION_ID'];
@@ -53,6 +57,8 @@ class NotificationData {
     aPPCIRCULARDESCRIPTION = json['APP_CIRCULAR_DESCRIPTION'];
     aPPCIRCULARDATE = json['APP_CIRCULAR_DATE'];
     aPPCIRCULARID = json['APP_CIRCULAR_ID'];
+    aSSIGNMENT_STATUS = json['ASSIGNMENT_STATUS'];
+    cIRCULAR_STATS = json['CIRCULAR_STATS'];
   }
 
   Map<String, dynamic> toJson() {
@@ -66,6 +72,8 @@ class NotificationData {
     data['APP_CIRCULAR_DESCRIPTION'] = aPPCIRCULARDESCRIPTION;
     data['APP_CIRCULAR_DATE'] = aPPCIRCULARDATE;
     data['APP_CIRCULAR_ID'] = aPPCIRCULARID;
+    data['ASSIGNMENT_STATUS'] = aSSIGNMENT_STATUS;
+    data['CIRCULAR_STATS'] = cIRCULAR_STATS;
     return data;
   }
 }
