@@ -1,3 +1,4 @@
+import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
 import 'package:flexischool/screens/change_password_screen.dart';
@@ -169,7 +170,7 @@ class _DashboardState extends State<Dashboard> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const WebViewScreen(
-                                      url: 'https://privacy.sapinfotek.com/', title: 'Privacy Policy')));
+                                      url: Constants.privacyPolicyUrl, title: 'Privacy Policy')));
                         }),
                     ListTile(
                         visualDensity: const VisualDensity(horizontal: 0, vertical: -4),

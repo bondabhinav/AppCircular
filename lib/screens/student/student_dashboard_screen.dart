@@ -167,7 +167,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const WebViewScreen(
-                                        url: 'https://privacy.sapinfotek.com/', title: 'Privacy Policy')));
+                                        url: Constants.privacyPolicyUrl, title: 'Privacy Policy')));
                           }),
                       ListTile(
                           visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
