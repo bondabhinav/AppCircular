@@ -132,7 +132,7 @@ class ChangePasswordProvider extends ChangeNotifier {
 
   Future<void> logout(BuildContext context) async {
     try {
-      String? appDeviceId = await WebService.getFcmData();
+      String? appDeviceId = await WebService.getAppDeviceId();
       if (context.mounted) {
         if (appDeviceId != null) {
           debugPrint('app Device Id $appDeviceId');

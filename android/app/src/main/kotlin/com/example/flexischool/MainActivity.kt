@@ -1,6 +1,5 @@
-package com.example.flexischool
+package flexischoolerpapp.sapinfotek.com
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity() {
-}
+class MainActivity: FlutterActivity(){}

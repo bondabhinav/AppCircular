@@ -1,3 +1,5 @@
+import 'package:flexischool/common/api_service.dart';
+import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
@@ -99,21 +101,13 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  Future<void> logout(BuildContext context) async {
-    final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
-    await loginStore.userLogout();
-    FlutterAppBadger.removeBadge();
-    if (context.mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-  }
-
   TeacherDashboardProvider? teacherDashboardProvider;
 
   @override
   void initState() {
     teacherDashboardProvider = TeacherDashboardProvider();
     teacherDashboardProvider?.getSessionData();
+    teacherDashboardProvider?.callRefreshApi();
     super.initState();
   }
 
@@ -186,9 +180,7 @@ class _DashboardState extends State<Dashboard> {
                       leading: const Icon(Icons.logout),
                       minLeadingWidth: 10,
                       horizontalTitleGap: 10,
-                      onTap: () {
-                        logout(context);
-                      },
+                      onTap: () => model.teacherLogout(context),
                     ),
                   ],
                 ),

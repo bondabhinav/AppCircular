@@ -127,6 +127,7 @@ class StudentDashboardProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _imageUrl = prefs.getString('global_school_logo')!;
     notifyListeners();
+    apiService.startContinueListening(data:{"ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(), "USER_TYPE": "S"},url:"${Api.baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO");
   }
 
   Future<void> logoutApi(BuildContext context, String appDeviceId) async {

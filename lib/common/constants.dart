@@ -3,7 +3,7 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:intl/intl.dart';
 
 class Constants {
-  static const String privacyPolicyUrl = 'http://privacy.sapinfotek.in/';
+  static const String privacyPolicyUrl = 'http://privacy.sapinfotek.in';
   static const String appName = 'Flexi School';
   static const String applicationId = 'flexischoolerpapp.sapinfotek.com';
   static const int maxItems = 10;

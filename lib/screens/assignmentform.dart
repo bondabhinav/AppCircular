@@ -262,22 +262,20 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           const Text("Assignment Details :",
                               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
 
-                          QuillProvider(
-                            configurations: QuillConfigurations(
-                                controller: model.quillController,
-                                sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en'))),
-                            child: Column(
-                              children: [
-                                const QuillToolbar(),
-                                Container(
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5), border: Border.all()),
-                                    child:
-                                        QuillEditor.basic(configurations: const QuillEditorConfigurations()))
-                              ],
-                            ),
-                          ),
+                          Column(children: [
+                            QuillToolbar.simple(
+                                configurations:
+                                QuillSimpleToolbarConfigurations(controller: model.quillController)),
+                            Container(
+                                height: 300,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5), border: Border.all()),
+                                child: QuillEditor.basic(
+                                    configurations: QuillEditorConfigurations(
+                                      controller: model.quillController,
+                                      padding: const EdgeInsets.all(16),
+                                    )))
+                          ]),
 
                           // QuillToolbar.basic(
                           //   controller: model.quillController,

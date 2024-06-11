@@ -260,23 +260,14 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       child: ElevatedButton(
                           style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Colors.blue),
+                              backgroundColor: WidgetStateProperty.all(Colors.blue),
                               //padding: MaterialStateProperty.all(EdgeInsets.all(50)),
-                              textStyle: MaterialStateProperty.all(
+                              textStyle: WidgetStateProperty.all(
                                   const TextStyle(fontSize: 18, color: Colors.white))),
                           onPressed: () {
-                            //errorMessage('Test Error');
-
                             if (_formKey.currentState!.validate()) {
-                              // ScaffoldMessenger.of(context).showSnackBar(
-                              //   const SnackBar(content: Text('Processing Data')),
-                              // );
-
-                              //_isLoading ? null : _submitForm();
                               _isLoading ? null : _getUrl(context);
                             }
-
-                            //Navigator.pushNamed(context, "/login",arguments: " Login");
                           },
                           child: _isLoading
                               ? const SizedBox(

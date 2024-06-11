@@ -42,27 +42,37 @@ class WebService {
     return loginType!;
   }
 
-  static getUserDetails() async {
-    //Get user Info
+  // static getUserDetails() async {
+  //   //Get user Info
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final userDetails = prefs.getString('user_details');
+  //   var userInfo = '';
+  //   if (userDetails != null) {
+  //     userInfo = jsonDecode(userDetails);
+  //   }
+  //   return userInfo;
+  // }
+
+  static Future<Map<String, dynamic>> getUserDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final userDetails = prefs.getString('user_details');
-    var userInfo = '';
     if (userDetails != null) {
-      userInfo = jsonDecode(userDetails);
+      return jsonDecode(userDetails) as Map<String, dynamic>;
+    } else {
+      throw Exception('User details not found');
     }
-    return userInfo;
   }
 
   static setStudentLoginDetails(StudentLoginResponse loginResponse) async {
     await _preferences?.setString("student_data", json.encode(loginResponse));
   }
 
-  static setFcmData(String fcmId) async {
-    await _preferences?.setString("fcmId", fcmId);
+  static setAppDeviceId(String appDeviceId) async {
+    await _preferences?.setString("appDeviceId", appDeviceId);
   }
 
-  static Future<String?> getFcmData() async {
-   final value = await _preferences?.get("fcmId").toString();
+  static Future<String?> getAppDeviceId() async {
+   final value = await _preferences?.get("appDeviceId").toString();
    return value;
   }
 
@@ -163,7 +173,7 @@ class WebService {
     //await Future.delayed(Duration(seconds: 2));
     var loginType = await getLoginType();
     debugPrint('Login type ****** $loginType');
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     var requestedData = {
       "Type": loginType,
     };

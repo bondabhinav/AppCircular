@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -11,6 +13,7 @@ import 'package:flexischool/notification_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unique_identifier/unique_identifier.dart';
 
 import '../models/user_model.dart';
 import '../utils/helpers.dart';
@@ -85,8 +88,6 @@ class LoginProvider extends ChangeNotifier {
     prefs.remove("fcmId");
     prefs.remove('teacher_data');
     WebService.studentLoginData = null;
-    //prefs.remove("global_school_url");
-
     _userName = '';
     _employee_id = 0;
     _employeeCode = 0;
@@ -94,7 +95,6 @@ class LoginProvider extends ChangeNotifier {
     _designation = '';
     _photo = '';
     _session = '';
-
     notify();
   }
 
@@ -124,63 +124,60 @@ class LoginProvider extends ChangeNotifier {
     debugPrint('enter login teacher');
     var result;
     var requestedData = {"USER_LOGIN": _uname.trim(), "USER_PASSWORD": _pass.trim()};
-
-    //Get School URL
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
-
     var body = json.encode(requestedData);
-
-    try {
-      final response = await http.post(
-        Uri.parse('${schoolBaseUrl!}EmployeeLogin/GetteacherLogin'),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          //"Authorization": token
-        },
-        body: body,
-      );
-
+   try {
+      final response = await http.post(Uri.parse('${schoolBaseUrl!}EmployeeLogin/GetteacherLogin'),
+          headers: {"Accept": "application/json", "Content-Type": "application/json"}, body: body);
+      log('teacher login response -- ${response.body}');
       if (response.statusCode == 200) {
-        // Handle successful response.
         final responseData = json.decode(response.body);
-        final responseSplit = responseData['Table1'][0];
-
-        print(responseSplit);
-        // print('test1');
+        final responseSplit = responseData['Table1'].first;
+        debugPrint('responseSplit------ $responseSplit');
         final loginResponse = User.fromJson(responseSplit);
-        //print('test');
         var res = loginResponse.toJson();
 
-        //Store Local
-        final preferences = await SharedPreferences.getInstance();
-        await preferences.setString(
-          'user_details',
-          json.encode(loginResponse.toJson()),
-        );
-        // await preferences.setString('global_school_url',res['API_URL']);
-
-        final empLogo = preferences.getString('global_school_logo');
-
-        String profileLogo = "${empLogo!}employee/" + res['PHOTO'];
-
-        //Store Local
-
-        _userName = res['USER_NAME'];
-        _employee_id = res['EMPLOYEE_ID'];
-        _employeeCode = res['EMPLOYEE_CODE'] ?? '';
-        _depName = toTitleCase(res['DEPARTMENT_NAME']);
-        _designation = res['DESIGNATION_DESC'];
-        _photo = profileLogo ?? '';
-
-        print(res['USER_NAME']);
-
-        return result = {
-          'status': true,
-          'message': 'You have successfully logged in!',
-          'data': json.encode(loginResponse.toJson())
+        final uniqueId = await UniqueIdentifier.serial;
+        final deviceInfoPlugin = DeviceInfoPlugin();
+        final androidInfo = await deviceInfoPlugin.androidInfo;
+        debugPrint('device name --- ${"${androidInfo.brand} ${androidInfo.model}"}');
+        var data = {
+          "EMPLOYEE_ID": loginResponse.EMPLOYEEID,
+          "DEVICE_TOKEN": '',
+          "TYPE": "T",
+          "DEVICE_NAME": "${androidInfo.brand} ${androidInfo.model}",
+          "UNIQUE_ID": uniqueId,
+          "START_DATE": DateTime.now().toString()
         };
+        debugPrint('add token api data $data');
+        final addDeviceDataResponse = await apiService.post(url: Api.addFcmTokenApi, data: data);
+        log('response of add device data -- ${addDeviceDataResponse.data}');
+        log('response of add device data numver -- ${addDeviceDataResponse.data['NUMBER']}');
+        if (addDeviceDataResponse.statusCode == 200) {
+          //Store Local
+          final preferences = await SharedPreferences.getInstance();
+          await WebService.setAppDeviceId(addDeviceDataResponse.data['NUMBER'].toString());
+          await preferences.setString('user_details', json.encode(loginResponse.toJson()));
+          // await preferences.setString('global_school_url',res['API_URL']);
+          final empLogo = preferences.getString('global_school_logo');
+          String profileLogo = "${empLogo!}employee/" + res['PHOTO'];
+          //Store Local
+          _userName = res['USER_NAME'];
+          _employee_id = res['EMPLOYEE_ID'];
+          _employeeCode = res['EMPLOYEE_CODE'] ?? '';
+          _depName = toTitleCase(res['DEPARTMENT_NAME']);
+          _designation = res['DESIGNATION_DESC'];
+          _photo = profileLogo ?? '';
+          print(res['USER_NAME']);
+          return result = {
+            'status': true,
+            'message': 'You have successfully logged in!',
+            'data': json.encode(loginResponse.toJson())
+          };
+        } else {
+          return result = {'status': false, 'message': 'Something went wrong', 'data': response};
+        }
       } else {
         //return 'Unexpected response: ${response.statusCode}';
 
@@ -191,8 +188,7 @@ class LoginProvider extends ChangeNotifier {
         };
       }
     } catch (e) {
-      // _errorMessage = 'Error: $e';
-      //return 'Something went wrong please try again.';
+     debugPrint('error -- $e');
       return result = {'status': false, 'message': 'Invalid Login Credentials.', 'data': ''};
     }
   }
@@ -219,19 +215,32 @@ class LoginProvider extends ChangeNotifier {
           debugPrint("check push notification ${PushNotificationsManager().fcmToken}");
           if (PushNotificationsManager().fcmToken.isNotEmpty) {
             try {
+              final uniqueId = await UniqueIdentifier.serial;
+              debugPrint('uniqueId -- $uniqueId');
+
+              final deviceInfoPlugin = DeviceInfoPlugin();
+              final androidInfo = await deviceInfoPlugin.androidInfo;
+
+              debugPrint('device name --- ${"${androidInfo.brand} ${androidInfo.model}"}');
+
               var data = {
                 "ADM_NO": loginResponse.table1!.first.aDMNO!,
                 "DEVICE_TOKEN": PushNotificationsManager().fcmToken.isEmpty
                     ? FirebaseMessaging.instance.getToken()
-                    : PushNotificationsManager().fcmToken
+                    : PushNotificationsManager().fcmToken,
+                "TYPE": "S",
+                "DEVICE_NAME": "${androidInfo.brand} ${androidInfo.model}",
+                "UNIQUE_ID": uniqueId,
+                "START_DATE": DateTime.now().toString()
               };
+              debugPrint('final api data $data');
               final response = await apiService.post(url: Api.addFcmTokenApi, data: data);
               if (response.statusCode == 200) {
                 //   final responseData = json.decode(response.data);
                 final addTokenResponse = AddTokenResponse.fromJson(response.data);
                 debugPrint('fcm token api response ${addTokenResponse.toString()}');
                 debugPrint('fcm token number ${addTokenResponse.nUMBER.toString()}');
-                WebService.setFcmData(addTokenResponse.nUMBER.toString());
+                WebService.setAppDeviceId(addTokenResponse.nUMBER.toString());
                 result = 'You have successfully logged in!';
               } else {
                 result = 'You have successfully logged in!';

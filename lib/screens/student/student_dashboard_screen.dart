@@ -183,9 +183,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                         leading: const Icon(Icons.logout),
                         minLeadingWidth: 10,
                         horizontalTitleGap: 10,
-                        onTap: () {
-                          logout(context, model);
-                        },
+                        onTap: () => logout(context, model),
                       ),
                     ])),
               body: (model.studentDetailResponse == null)
@@ -310,7 +308,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
   }
 
   Future<void> logout(BuildContext context, StudentDashboardProvider model) async {
-    String? appDeviceId = await WebService.getFcmData();
+    String? appDeviceId = await WebService.getAppDeviceId();
     if (mounted) {
       if (appDeviceId != null) {
         debugPrint('app Device Id $appDeviceId');

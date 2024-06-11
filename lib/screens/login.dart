@@ -321,6 +321,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                           noteFocus.requestFocus();
                           return 'Please enter user Id';
                         }
+                        return null;
                       },
                     ),
                   ),

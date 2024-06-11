@@ -3,9 +3,15 @@ import 'dart:convert';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/student/session_list_response.dart';
 import 'package:flexischool/models/teacher/teacher_session_response.dart';
+import 'package:flexischool/models/user_model.dart';
+import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TeacherDashboardProvider extends ChangeNotifier {
   final apiService = ApiService();
@@ -23,10 +29,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
     var requestedData = {"SCHOOL_ID": "1"};
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(
-        url: Api.getTeacherSessionApi,
-        data: body,
-      );
+      final response = await apiService.post(url: Api.getTeacherSessionApi, data: body);
       if (response.statusCode == 200) {
         teacherSessionResponse = TeacherSessionResponse.fromJson(response.data);
 
@@ -68,5 +71,32 @@ class TeacherDashboardProvider extends ChangeNotifier {
       Constants.lastDate = sessionData.eNDDATE!;
     }
     notifyListeners();
+  }
+
+  Future<void> teacherLogout(BuildContext context) async {
+    try {
+      final appDeviceId = await WebService.getAppDeviceId();
+      final response =
+          await apiService.post(url: Api.removeFcmTokenApi, data: {"APP_DEVICE_ID": appDeviceId});
+      if (response.statusCode == 200) {
+        final sessionListResponse = SessionListResponse.fromJson(response.data);
+        if (context.mounted) {
+          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          loginStore.userLogout();
+          FlutterAppBadger.removeBadge();
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {}
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> callRefreshApi() async {
+    final teacherData = await WebService.getUserDetails();
+    final data = User.fromJson(teacherData);
+    apiService.startContinueListening(
+        data: {"EMPLOYEE_ID": data.EMPLOYEEID.toString(), "USER_TYPE": "T"},
+        url: "${Api.baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO");
   }
 }

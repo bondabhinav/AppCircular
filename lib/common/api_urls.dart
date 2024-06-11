@@ -45,4 +45,5 @@ class Api {
   static String changeStudentPasswordApi = "${baseUrl}StudentPasswordUpdate/StudentPasswordUpdate";
   static String getTeacherPasswordApi = "${baseUrl}GetEmployeePasswordbyEmployeeID/GetEmployeePasswordbyEmployeeID";
   static String changeTeacherPasswordApi = "${baseUrl}EmployeePasswordUpdate/EmployeePasswordUpdate";
+  static String refreshApi = "${baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO";
 }
