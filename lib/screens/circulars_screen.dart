@@ -18,10 +18,31 @@ class CircularsScreen extends StatefulWidget {
 class _CircularsScreenState extends State<CircularsScreen> {
   CircularsProvider? circularsProvider;
   final loaderProvider = getIt<LoaderProvider>();
+  final _searchController = TextEditingController();
+  bool _isSearching = false;
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _isSearching = _searchController.text.isNotEmpty;
+      circularsProvider?.filteredStudents = circularsProvider!.studentResponse!.aDMSTUDREGISTRATION!
+          .where((student) =>
+              student.fIRSTNAME!.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+              student.aDMNO!.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   void initState() {
     circularsProvider = CircularsProvider();
+    _searchController.addListener(_onSearchChanged);
     circularsProvider?.fetchClassData(teacherId: widget.employeeId);
     circularsProvider?.fetchSectionData(teacherId: widget.employeeId);
     super.initState();
@@ -68,40 +89,35 @@ class _CircularsScreenState extends State<CircularsScreen> {
                               )),
                           const SizedBox(height: 5),
                           Container(
-                            decoration:
-                                BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-                            child: TextFormField(
-                              controller: model.subjectController,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.only(left: 10),
-                                border: InputBorder.none,
-                                hintText: 'Enter subject',
-                              ),
-                            ),
-                          ),
+                              decoration:
+                                  BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
+                              child: TextFormField(
+                                  controller: model.subjectController,
+                                  onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                  decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.only(left: 10),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter subject'))),
                           const SizedBox(height: 10),
                           const Text('Description*',
                               style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
-                              )),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black)),
                           const SizedBox(height: 5),
                           Container(
-                            decoration:
-                                BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-                            child: TextFormField(
-                              controller: model.descriptionController,
-                              maxLines: 5,
-                              maxLength: 4000,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                border: InputBorder.none,
-                                hintText: 'Enter description',
-                              ),
-                            ),
-                          ),
+                              decoration:
+                                  BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
+                              child: TextFormField(
+                                  controller: model.descriptionController,
+                                  maxLines: 5,
+                                  maxLength: 4000,
+                                  onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                  decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.all(10),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter description'))),
                           const SizedBox(height: 15),
                           model.getClassResponse.cLASSandSECTION == null
                               ? const SizedBox.shrink()
@@ -110,11 +126,10 @@ class _CircularsScreenState extends State<CircularsScreen> {
                                   children: [
                                     const Text('Class*',
                                         style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.normal,
+                                            fontFamily: "Montserrat Regular",
+                                            color: Colors.black)),
                                     const SizedBox(height: 5),
                                     Container(
                                       width: double.infinity,
@@ -144,170 +159,136 @@ class _CircularsScreenState extends State<CircularsScreen> {
                           (model.getSectionResponse == null ||
                                   model.getSectionResponse!.cLASSandSECTION!.isEmpty)
                               ? const SizedBox.shrink()
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 15),
-                                    const Text('Section',
-                                        style: TextStyle(
+                              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                  const SizedBox(height: 15),
+                                  const Text('Section',
+                                      style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,
                                           fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
-                                    const SizedBox(height: 5),
-                                    Container(
+                                          color: Colors.black)),
+                                  const SizedBox(height: 5),
+                                  Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                        border: Border.all(),
-                                      ),
+                                          borderRadius: BorderRadius.circular(5.0), border: Border.all()),
                                       child: LayoutBuilder(builder: (context, constraints) {
                                         return ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 0,
-                                            maxHeight: 200,
-                                          ).normalize(),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              children:
-                                                  model.getSectionResponse!.cLASSandSECTION!.map((item) {
-                                                final sectionId = item.sECTIONID;
-                                                final sectionDesc = item.sECTIONDESC;
-                                                return CheckboxListTile(
+                                            constraints: const BoxConstraints(minHeight: 0, maxHeight: 200)
+                                                .normalize(),
+                                            child: SingleChildScrollView(
+                                                child: Column(
+                                                    children: model.getSectionResponse!.cLASSandSECTION!
+                                                        .map((item) {
+                                              final sectionId = item.sECTIONID;
+                                              final sectionDesc = item.sECTIONDESC;
+                                              return CheckboxListTile(
                                                   title: Text(sectionDesc ?? ""),
                                                   value: model.selectedSectionIds.contains(sectionId),
                                                   onChanged: (bool? isChecked) {
                                                     model.updateSelectedSection(
                                                         sectionId!, isChecked ?? false);
-                                                  },
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  ],
-                                ),
+                                                  });
+                                            }).toList())));
+                                      }))
+                                ]),
                           const SizedBox(height: 15),
                           (model.studentResponse == null)
                               ? const SizedBox.shrink()
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Text('Student*',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.normal,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            )),
-                                        const Spacer(),
-                                        ElevatedButton(
-                                          onPressed: model.toggleSelectAll,
-                                          child: Text(model.selectAll ? 'Deselect All' : 'Select All'),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
+                              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                  Row(children: [
+                                    const Text('Student*',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.normal,
+                                            fontFamily: "Montserrat Regular",
+                                            color: Colors.black)),
+                                    const Spacer(),
+                                    ElevatedButton(
+                                        onPressed: model.toggleSelectAll,
+                                        child: Text(model.selectAll ? 'Deselect All' : 'Select All'))
+                                  ]),
+                                  const SizedBox(height: 5),
+                                  Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                        border: Border.all(),
-                                      ),
-                                      child: LayoutBuilder(builder: (context, constraints) {
-                                        return ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 0,
-                                            maxHeight: 200,
-                                          ).normalize(),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              children:
-                                                  model.studentResponse!.aDMSTUDREGISTRATION!.map((item) {
+                                          borderRadius: BorderRadius.circular(5.0), border: Border.all()),
+                                      child: Column(children: [
+                                        TextFormField(
+                                            controller: _searchController,
+                                            onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                            decoration: const InputDecoration(
+                                                hintText: 'Search Students ...',
+                                                border: OutlineInputBorder())),
+                                        const SizedBox(height: 5),
+                                        LayoutBuilder(builder: (context, constraints) {
+                                          return ConstrainedBox(
+                                              constraints: const BoxConstraints(minHeight: 0, maxHeight: 200)
+                                                  .normalize(),
+                                              child: SingleChildScrollView(
+                                                  child: Column(
+                                                      children: (_isSearching
+                                                              ? model.filteredStudents
+                                                              : model.studentResponse!.aDMSTUDREGISTRATION!)
+                                                          .map((item) {
                                                 final studentId = item.aDMSTUDENTID;
                                                 final student = "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
                                                 return CheckboxListTile(
-                                                  title: Text(student),
-                                                  value:
-                                                      model.selectAll || model.studentIds.contains(studentId),
-                                                  onChanged: (bool? isChecked) {
-                                                    model.updateStudentData(studentId!, isChecked ?? false);
-                                                  },
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                          Row(
-                            children: [
-                              const Text('Circulars Information Applicable To',
-                                  style: TextStyle(
+                                                    title: Text(student),
+                                                    value: model.selectAll ||
+                                                        model.studentIds.contains(studentId),
+                                                    onChanged: (bool? isChecked) {
+                                                      model.updateStudentData(studentId!, isChecked ?? false);
+                                                    });
+                                              }).toList())));
+                                        })
+                                      ]))
+                                ]),
+                          Row(children: [
+                            const Text('Circulars Information Applicable To',
+                                style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.normal,
                                     fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
-                              ValueListenableBuilder<bool>(
-                                  valueListenable: model.circularInfo,
-                                  builder: (BuildContext context, bool isChecked, Widget? child) {
-                                    return Checkbox(
+                                    color: Colors.black)),
+                            ValueListenableBuilder<bool>(
+                                valueListenable: model.circularInfo,
+                                builder: (BuildContext context, bool isChecked, Widget? child) {
+                                  return Checkbox(
                                       value: isChecked,
-                                      onChanged: (value) {
-                                        model.circularInfo.value = value!;
-                                      },
-                                    );
-                                  }),
-                              const Text('Parent',
-                                  style: TextStyle(
+                                      onChanged: (value) => model.circularInfo.value = value!);
+                                }),
+                            const Text('Parent',
+                                style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.normal,
                                     fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
-                            ],
-                          ),
+                                    color: Colors.black))
+                          ]),
                           Row(
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Start Date*',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
-                                    const SizedBox(height: 5),
-                                    InkWell(
-                                      onTap: () => model.selectDate(context: context, startDate: true),
-                                      child: Container(
-                                          height: 45,
-                                          alignment: Alignment.centerLeft,
-                                          padding: const EdgeInsets.only(left: 10),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(), borderRadius: BorderRadius.circular(8)),
-                                          child: Text(
-                                            model.startDateController.text,
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                const Text('Start Date*',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black)),
+                                const SizedBox(height: 5),
+                                InkWell(
+                                    onTap: () => model.selectDate(context: context, startDate: true),
+                                    child: Container(
+                                        height: 45,
+                                        alignment: Alignment.centerLeft,
+                                        padding: const EdgeInsets.only(left: 10),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(), borderRadius: BorderRadius.circular(8)),
+                                        child: Text(model.startDateController.text,
                                             style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.normal,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            ),
-                                          )),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                fontFamily: "Montserrat Regular",
+                                                color: Colors.black))))
+                              ])),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(

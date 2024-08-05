@@ -41,6 +41,7 @@ class CircularsProvider extends ChangeNotifier {
   final loaderProvider = getIt<LoaderProvider>();
   File? filePick;
   var path;
+  List<ADMSTUDREGISTRATION> filteredStudents = [];
 
   final startDateController = TextEditingController(text: Constants.getFormattedDate(Constants.startDate));
   final endDateController = TextEditingController(text: Constants.getFormattedDate(Constants.endDate));
@@ -78,6 +79,7 @@ class CircularsProvider extends ChangeNotifier {
     _selectAll = !_selectAll;
     if (_selectAll) {
       _studentIds.clear();
+      lstStudentCircular.clear();
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
         // lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
@@ -124,39 +126,69 @@ class CircularsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // void updateStudentData(int studentId, bool isChecked) {
+  //   if (_selectAll) {
+  //     if (isChecked) {
+  //       _studentIds.add(studentId);
+  //       // lstStudentCircular.add({"STUDENT_ID": studentId});
+  //       studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+  //         if (element.aDMSTUDENTID == studentId) {
+  //           lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+  //         }
+  //         return false;
+  //       }).toList();
+  //     } else {
+  //       _studentIds.remove(studentId);
+  //       lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
+  //       _selectAll = false;
+  //     }
+  //   } else {
+  //     if (isChecked) {
+  //       _studentIds.add(studentId);
+  //       // lstStudentCircular.add({"STUDENT_ID": studentId});
+  //       studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+  //         if (element.aDMSTUDENTID == studentId) {
+  //           lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+  //         }
+  //         return false;
+  //       }).toList();
+  //       if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
+  //         _selectAll = true;
+  //       }
+  //     } else {
+  //       lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
+  //       _studentIds.remove(studentId);
+  //     }
+  //   }
+  //
+  //   notifyListeners();
+  // }
+
   void updateStudentData(int studentId, bool isChecked) {
-    if (_selectAll) {
-      if (isChecked) {
+    if (isChecked) {
+      if (!_studentIds.contains(studentId)) {
         _studentIds.add(studentId);
-        // lstStudentCircular.add({"STUDENT_ID": studentId});
-        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
+        studentResponse!.aDMSTUDREGISTRATION!.forEach((element) {
           if (element.aDMSTUDENTID == studentId) {
-            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+            if (!lstStudentCircular.any((item) => item.STUDENT_ID == studentId.toString())) {
+              lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+            }
+            if (!lstSectionCircular.any((item) => item["STUDENT_ID"] == studentId)) {
+              lstSectionCircular.add({"STUDENT_ID": studentId});
+            }
           }
-          return false;
-        }).toList();
-      } else {
-        _studentIds.remove(studentId);
-        lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
-        _selectAll = false;
+        });
       }
     } else {
-      if (isChecked) {
-        _studentIds.add(studentId);
-        // lstStudentCircular.add({"STUDENT_ID": studentId});
-        studentResponse!.aDMSTUDREGISTRATION!.where((element) {
-          if (element.aDMSTUDENTID == studentId) {
-            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
-          }
-          return false;
-        }).toList();
-        if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
-          _selectAll = true;
-        }
-      } else {
-        lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
-        _studentIds.remove(studentId);
-      }
+      _studentIds.remove(studentId);
+      lstStudentCircular.removeWhere((item) => item.STUDENT_ID == studentId.toString());
+      lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
+    }
+
+    if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
+      _selectAll = true;
+    } else {
+      _selectAll = false;
     }
 
     notifyListeners();
@@ -260,6 +292,7 @@ class CircularsProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         studentResponse = StudentResponse.fromJson(response.data);
         if (studentResponse!.aDMSTUDREGISTRATION!.isNotEmpty) {
+          filteredStudents = studentResponse!.aDMSTUDREGISTRATION!;
           _studentIds.clear();
           lstStudentCircular.clear();
           _selectAll = true;

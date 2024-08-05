@@ -113,7 +113,7 @@ class NotificationService {
         category: category,
         payload: payload,
         bigPicture: bigPicture,
-        progress: progress,
+        progress: double.parse(progress.toString()),
       ),
       actionButtons: actionButtons,
       schedule: scheduled

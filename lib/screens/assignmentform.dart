@@ -39,12 +39,35 @@ class _AssignmentFormState extends State<AssignmentForm> {
   TeacherAssignmentProvider? teacherAssignmentProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
+  final _searchController = TextEditingController();
+  bool _isSearching = false;
+
   @override
   void initState() {
     teacherAssignmentProvider = TeacherAssignmentProvider();
+    _searchController.addListener(_onSearchChanged);
     teacherAssignmentProvider?.fetchClassData(teacherId: widget.employeeId);
     teacherAssignmentProvider?.fetchSectionData(teacherId: widget.employeeId);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _isSearching = _searchController.text.isNotEmpty;
+      teacherAssignmentProvider?.filteredStudents = teacherAssignmentProvider!
+          .studentResponse!.aDMSTUDREGISTRATION!
+          .where((student) =>
+              student.fIRSTNAME!.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+              student.aDMNO!.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList();
+    });
   }
 
   @override
@@ -207,53 +230,69 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        const Text('Student*',
+                                    Row(children: [
+                                      InkWell(
+                                        onTap: () {
+                                          for (var student in model.lstStudentCircular) {
+                                            print('STUDENT_ID: ${student.STUDENT_ID}, ADM_NO: ${student.ADM_NO}');
+                                          }
+                                        },
+                                        child: const Text('Student*',
                                             style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.normal,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            )),
-                                        const Spacer(),
-                                        ElevatedButton(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                fontFamily: "Montserrat Regular",
+                                                color: Colors.black)),
+                                      ),
+                                      const Spacer(),
+                                      ElevatedButton(
                                           onPressed: model.toggleSelectAll,
-                                          child: Text(model.selectAll ? 'Deselect All' : 'Select All'),
-                                        ),
-                                      ],
-                                    ),
+                                          child: Text(model.selectAll ? 'Deselect All' : 'Select All'))
+                                    ]),
                                     const SizedBox(height: 5),
                                     Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                        border: Border.all(),
+                                          borderRadius: BorderRadius.circular(5.0), border: Border.all()),
+                                      child: Column(
+                                        children: [
+                                          TextFormField(
+                                              controller: _searchController,
+                                              // onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                              decoration: const InputDecoration(
+                                                  hintText: 'Search Students ...',
+                                                  border: OutlineInputBorder())),
+                                          const SizedBox(height: 5),
+                                          LayoutBuilder(builder: (context, constraints) {
+                                            return ConstrainedBox(
+                                              constraints: const BoxConstraints(
+                                                minHeight: 0,
+                                                maxHeight: 200,
+                                              ).normalize(),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  children: (_isSearching
+                                                          ? model.filteredStudents
+                                                          : model.studentResponse!.aDMSTUDREGISTRATION!)
+                                                      .map((item) {
+                                                    final studentId = item.aDMSTUDENTID;
+                                                    final student =
+                                                        "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
+                                                    return CheckboxListTile(
+                                                      title: Text(student),
+                                                      value: model.selectAll ||
+                                                          model.studentIds.contains(studentId),
+                                                      onChanged: (bool? isChecked) {
+                                                        model.updateStudentData(
+                                                            studentId!, isChecked ?? false);
+                                                      },
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ],
                                       ),
-                                      child: LayoutBuilder(builder: (context, constraints) {
-                                        return ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 0,
-                                            maxHeight: 200,
-                                          ).normalize(),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              children:
-                                                  model.studentResponse!.aDMSTUDREGISTRATION!.map((item) {
-                                                final studentId = item.aDMSTUDENTID;
-                                                final student = "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
-                                                return CheckboxListTile(
-                                                  title: Text(student),
-                                                  value:
-                                                      model.selectAll || model.studentIds.contains(studentId),
-                                                  onChanged: (bool? isChecked) {
-                                                    model.updateStudentData(studentId!, isChecked ?? false);
-                                                  },
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ),
-                                        );
-                                      }),
                                     ),
                                   ],
                                 ),
@@ -265,16 +304,16 @@ class _AssignmentFormState extends State<AssignmentForm> {
                           Column(children: [
                             QuillToolbar.simple(
                                 configurations:
-                                QuillSimpleToolbarConfigurations(controller: model.quillController)),
+                                    QuillSimpleToolbarConfigurations(controller: model.quillController)),
                             Container(
                                 height: 300,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5), border: Border.all()),
                                 child: QuillEditor.basic(
                                     configurations: QuillEditorConfigurations(
-                                      controller: model.quillController,
-                                      padding: const EdgeInsets.all(16),
-                                    )))
+                                  controller: model.quillController,
+                                  padding: const EdgeInsets.all(16),
+                                )))
                           ]),
 
                           // QuillToolbar.basic(
