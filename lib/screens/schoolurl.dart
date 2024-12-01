@@ -7,7 +7,7 @@ import '../common/config.dart';
 
 //Get School Url Screen
 class Schoolurl extends StatelessWidget {
-  const Schoolurl({Key? key}) : super(key: key);
+  const Schoolurl({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +16,19 @@ class Schoolurl extends StatelessWidget {
       //  title: const Text('Flexi School'),
       // ),
       //backgroundColor: Color(0xfffff8ef),
-      body: SchoolurlWidget(),
+      body: SchoolUrlWidget(),
     );
   }
 }
 
-class SchoolurlWidget extends StatefulWidget {
-  const SchoolurlWidget({Key? key}) : super(key: key);
+class SchoolUrlWidget extends StatefulWidget {
+  const SchoolUrlWidget({super.key});
 
   @override
-  State<SchoolurlWidget> createState() => _SchoolurlWidgetState();
+  State<SchoolUrlWidget> createState() => _SchoolUrlWidgetState();
 }
 
-class _SchoolurlWidgetState extends State<SchoolurlWidget> {
+class _SchoolUrlWidgetState extends State<SchoolUrlWidget> {
   //Form Declaration
   final FocusNode noteFocus = FocusNode();
   final _formKey = GlobalKey<FormState>();
@@ -226,18 +226,14 @@ class _SchoolurlWidgetState extends State<SchoolurlWidget> {
                   TextFormField(
                       controller: _urlController,
                       focusNode: noteFocus,
-                      //initialValue: "https://swamivivekananddemo.sapinfotek.com",
                       keyboardType: TextInputType.text,
                       onTapOutside: (focusNode) => FocusManager.instance.primaryFocus?.unfocus(),
                       decoration: const InputDecoration(
                           hintText: 'Enter your school url here',
                           border: OutlineInputBorder(),
-                          //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                           isDense: true,
-                          // Added this
                           contentPadding: EdgeInsets.all(14),
                           prefixIcon: Icon(Icons.public, size: 25),
-                          //labelText: 'Enter your school url here',
                           filled: true,
                           fillColor: Colors.white,
                           errorStyle: TextStyle(fontFamily: "Montserrat Regular", fontSize: 14.0)),

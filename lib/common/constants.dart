@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:intl/intl.dart';
 
 class Constants {
@@ -7,6 +7,7 @@ class Constants {
   static const String appName = 'Flexi School';
   static const String applicationId = 'flexischoolerpapp.sapinfotek.com';
   static const int maxItems = 10;
+
   // static const String baseUrl = 'https://androidschool.sapinfotek.com/API/Version/';
   static const String baseUrl = 'http://androidschool.sapinfotek.in/API/Version/';
   static int sessionId = 0;
@@ -32,7 +33,8 @@ class Constants {
   }
 
   static Future<void> isSupportBadgeOrNot() async {
-    if (await FlutterAppBadger.isAppBadgeSupported()) {
+    final isSupported = await FlutterNativeBadge.getBadgeCount() == 1;
+    if (isSupported) {
       isAppBadgeSupported = true;
       debugPrint('if part isAppBadgeSupported==> $isAppBadgeSupported');
     } else {

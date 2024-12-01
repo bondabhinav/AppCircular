@@ -168,7 +168,7 @@ class CircularsProvider extends ChangeNotifier {
     if (isChecked) {
       if (!_studentIds.contains(studentId)) {
         _studentIds.add(studentId);
-        studentResponse!.aDMSTUDREGISTRATION!.forEach((element) {
+        for (var element in studentResponse!.aDMSTUDREGISTRATION!) {
           if (element.aDMSTUDENTID == studentId) {
             if (!lstStudentCircular.any((item) => item.STUDENT_ID == studentId.toString())) {
               lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
@@ -177,7 +177,7 @@ class CircularsProvider extends ChangeNotifier {
               lstSectionCircular.add({"STUDENT_ID": studentId});
             }
           }
-        });
+        }
       }
     } else {
       _studentIds.remove(studentId);

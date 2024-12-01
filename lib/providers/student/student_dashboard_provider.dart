@@ -11,7 +11,7 @@ import 'package:flexischool/notification_count_handler.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,7 +80,7 @@ class StudentDashboardProvider extends ChangeNotifier {
         notificationCountResponse = NotificationCountResponse.fromJson(response.data);
         NotificationCountHandler.updateNotificationCount(
             int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
-        FlutterAppBadger.updateBadgeCount(
+        FlutterNativeBadge.setBadgeCount(
             int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
         notifyListeners();
       } else {}
@@ -140,7 +140,7 @@ class StudentDashboardProvider extends ChangeNotifier {
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
-          FlutterAppBadger.removeBadge();
+          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
           Navigator.pushReplacementNamed(context, '/home');
         }
         notifyListeners();

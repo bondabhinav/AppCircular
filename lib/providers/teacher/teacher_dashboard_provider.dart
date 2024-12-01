@@ -9,7 +9,7 @@ import 'package:flexischool/models/teacher/teacher_session_response.dart';
 import 'package:flexischool/models/user_model.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -83,7 +83,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
-          FlutterAppBadger.removeBadge();
+          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {}

@@ -7,7 +7,7 @@ import 'package:flexischool/common/auth_middleware.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:http/http.dart' as http;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:provider/provider.dart';
@@ -101,7 +101,7 @@ class ApiService {
   }
 
   Timer? _timer;
-  final Duration _interval = const Duration(seconds: 5);
+  final Duration _interval = const Duration(seconds: 20);
   late dynamic uniqueId;
 
   Future<void> startContinueListening({required Map<String, String> data, required String url}) async {
@@ -141,7 +141,7 @@ class ApiService {
       final LoginProvider loginStore =
           Provider.of<LoginProvider>(AuthMiddleware.navigatorKey.currentContext!, listen: false);
       loginStore.userLogout();
-      FlutterAppBadger.removeBadge();
+      FlutterNativeBadge.clearBadgeCount(requestPermission: true);
       Navigator.pushReplacementNamed(AuthMiddleware.navigatorKey.currentContext!, '/home');
     } else {
       debugPrint('Unique ID found in the device list');

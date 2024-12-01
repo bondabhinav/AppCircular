@@ -9,8 +9,8 @@ import 'package:flexischool/screens/assignment_detail_screen.dart';
 import 'package:flexischool/screens/student/student_circular_detail_screen.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 
 import 'firebase_options.dart';
 
@@ -23,7 +23,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint("Handling a background message");
   debugPrint("onBackgroundMessage: ${message.data}");
-  FlutterAppBadger.updateBadgeCount(int.parse(message.data['count'].toString()));
+  FlutterNativeBadge.setBadgeCount(int.parse(message.data['count'].toString()));
   PushNotificationsManager()._showNotification(message);
 }
 
@@ -128,13 +128,12 @@ class PushNotificationsManager {
   _getPlatformSettings() {
     var initializationSettingsAndroid = const AndroidInitializationSettings('mipmap/ic_launcher');
 
-    DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+    DarwinInitializationSettings initializationSettingsIOS = const DarwinInitializationSettings(
         requestSoundPermission: true,
         requestBadgePermission: true,
         requestAlertPermission: true,
         defaultPresentSound: true,
-        defaultPresentBadge: true,
-        onDidReceiveLocalNotification: (id, title, body, payload) {});
+        defaultPresentBadge: true);
     return InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
   }
 
@@ -169,7 +168,7 @@ class PushNotificationsManager {
         try {
           _showNotification(event);
           NotificationCountHandler.updateNotificationCount(int.parse(event.data['count'].toString()));
-          FlutterAppBadger.updateBadgeCount(int.parse(event.data['count'].toString()));
+          FlutterNativeBadge.setBadgeCount(int.parse(event.data['count'].toString()));
         } on Exception {
           debugPrint(Exception('Some error').toString());
         }

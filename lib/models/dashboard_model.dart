@@ -1,30 +1,31 @@
-class Dashboard {
-  Dashboard({
+class DashboardResponse {
+  final String MENUNAME;
+  final String? REMARKS;
+  final int SRLNO;
+  final String IMAGE;
+
+  DashboardResponse({
     required this.MENUNAME,
-    required this.REMARKS,
+    this.REMARKS,
     required this.SRLNO,
     required this.IMAGE,
   });
 
-  late final String MENUNAME;
-  late final String? REMARKS;
-  late final int SRLNO;
-  late final String? IMAGE;
-
-  factory Dashboard.fromJson(Map<String, dynamic> json) {
-    return Dashboard(
-        MENUNAME: json['MENU_NAME'] ?? '',
-        REMARKS: json['REMARKS'] ?? '',
-        SRLNO: json['SRL_NO'] ?? 0,
-        IMAGE: json['IMAGE'] ?? '');
+  factory DashboardResponse.fromJson(Map<String, dynamic> json) {
+    return DashboardResponse(
+      MENUNAME: json['MENU_NAME']?.toString() ?? '',
+      REMARKS: json['REMARKS']?.toString(),
+      SRLNO: json['SRL_NO'] is int ? json['SRL_NO'] : int.tryParse(json['SRL_NO']?.toString() ?? '0') ?? 0,
+      IMAGE: json['IMAGE']?.toString() ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['MENU_NAME'] = MENUNAME;
-    _data['REMARKS'] = REMARKS;
-    _data['SRL_NO'] = SRLNO;
-    _data['IMAGE'] = IMAGE;
-    return _data;
+    return {
+      'MENU_NAME': MENUNAME,
+      'REMARKS': REMARKS,
+      'SRL_NO': SRLNO,
+      'IMAGE': IMAGE,
+    };
   }
 }

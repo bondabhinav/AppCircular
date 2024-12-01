@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
@@ -13,7 +14,6 @@ import 'package:flexischool/screens/teacher/teacher_assignment_list_screen.dart'
 import 'package:flexischool/screens/teacher/teacher_circular_list_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -224,15 +224,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: <Widget>[
+                padding: const EdgeInsets.all(16.0),
+                child: Column(children: <Widget>[
                   Container(
-                    //height: 64,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
+                      //height: 64,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
                         CircleAvatar(
                           radius: 42,
                           backgroundImage: NetworkImage(loginStore.photo),
@@ -241,76 +238,62 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                           width: 16,
                         ),
                         Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              loginStore.userName,
-                              style: const TextStyle(
-                                  fontFamily: "Montserrat Medium", color: Colors.white, fontSize: 18),
-                            ),
-                            const SizedBox(height: 10.0),
-                            Text(
-                              'Employee Code : ${loginStore.employeeCode}',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                loginStore.userName,
+                                style: const TextStyle(
+                                    fontFamily: "Montserrat Medium", color: Colors.white, fontSize: 18),
                               ),
-                            ),
-                            //SizedBox(height: 10.0),
-                            Text(
-                              'Department : ${loginStore.depName}',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
+                              const SizedBox(height: 10.0),
+                              Text(
+                                'Employee Code : ${loginStore.employeeCode}',
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Designation : ${loginStore.designation}',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
+                              //SizedBox(height: 10.0),
+                              Text(
+                                'Department : ${loginStore.depName}',
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
                               ),
-                            ),
-                            //SizedBox(height: 10.0),
-                            Text(
-                              'Session : ${widget.model.sessionYear}',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
+                              Text(
+                                'Designation : ${loginStore.designation}',
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
+                              //SizedBox(height: 10.0),
+                              Text(
+                                'Session : ${widget.model.sessionYear}',
+                                style: const TextStyle(
+                                    fontSize: 14.0, fontFamily: "Montserrat Regular", color: Colors.black),
+                              )
+                            ])
+                      ])),
                   Expanded(
-                    child: FutureBuilder<List>(
-                      future: WebService.fetchDashboard(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Center(
-                            child: Text('Something went wrong please try again!'),
-                          );
-                        } else if (snapshot.hasData) {
-                          return DashBoardList(
-                              dashboards: snapshot.requireData, employeeId: loginStore.employeeId);
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                      child: FutureBuilder<List>(
+                          future: WebService.fetchDashboard(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return const Center(child: Text('Something went wrong please try again!'));
+                            } else if (snapshot.hasData) {
+                              return DashBoardList(
+                                  dashboards: snapshot.requireData, employeeId: loginStore.employeeId);
+                            } else {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                          }))
+                ])),
           ),
         ],
       ),
@@ -359,19 +342,16 @@ class DashBoardList extends StatelessWidget {
             shrinkWrap: true,
             itemCount: dashboards.length,
             itemBuilder: (context, index) {
+              debugPrint('dashboards[index].IMAGE: $iconPath!${dashboards[index].IMAGE}');
               return InkWell(
                 child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 4,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.network(iconPath! + dashboards[index].IMAGE, height: 80),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 4,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                      CachedNetworkImage(imageUrl: iconPath! + dashboards[index].IMAGE, height: 80),
                       const SizedBox(height: 10.0),
                       Text(dashboards[index].MENUNAME, style: cardTextStyle)
-                    ],
-                  ),
-                ),
+                    ])),
                 onTap: () async {
                   final type = await WebService.getLoginType();
                   if (dashboards[index].MENUNAME.toString().toLowerCase() == 'circulars') {

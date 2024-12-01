@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/dashboard_model.dart';
 import 'package:flexischool/models/student/student_detail_response.dart';
 import 'package:flexischool/notification_count_handler.dart';
 import 'package:flexischool/notification_helper.dart';
@@ -12,7 +13,7 @@ import 'package:flexischool/screens/dashboard.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:provider/provider.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
@@ -23,13 +24,13 @@ class StudentDashboardScreen extends StatefulWidget {
 }
 
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> with WidgetsBindingObserver {
-  StudentDashboardProvider? studentDashboardProvider;
+  late StudentDashboardProvider studentDashboardProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
   @override
   void initState() {
     studentDashboardProvider = Provider.of<StudentDashboardProvider>(context, listen: false);
-    studentDashboardProvider?.getStudentImageUrl();
+    studentDashboardProvider.getStudentImageUrl();
     WidgetsBinding.instance.addObserver(this);
     FirebaseMessaging.instance.getInitialMessage().then((value) {
       if (value != null) {
@@ -39,10 +40,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     if (WebService.studentLoginData != null) {
       Constants.sessionId = WebService.studentLoginData!.table1!.first.sESSIONID!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        studentDashboardProvider?.getNotificationCount();
-        studentDashboardProvider?.assignSessionValue();
-        studentDashboardProvider?.getSessionData();
-        studentDashboardProvider?.fetchStudentDetail();
+        studentDashboardProvider.getNotificationCount();
+        studentDashboardProvider.assignSessionValue();
+        studentDashboardProvider.getSessionData();
+        studentDashboardProvider.fetchStudentDetail();
       });
     }
     super.initState();
@@ -66,20 +67,24 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (state == AppLifecycleState.resumed) {
         debugPrint('didChangeAppLifecycleState resume ------------ ${state.name}');
-        await studentDashboardProvider?.getNotificationCount();
-        FlutterAppBadger.updateBadgeCount(int.parse(studentDashboardProvider!
-            .notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!
-            .toString()));
+        await studentDashboardProvider.getNotificationCount();
+        setBadgeCount();
       } else if (state == AppLifecycleState.inactive) {
-        FlutterAppBadger.updateBadgeCount(int.parse(studentDashboardProvider!
-            .notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!
-            .toString()));
+        setBadgeCount();
       } else if (state == AppLifecycleState.paused) {
-        FlutterAppBadger.updateBadgeCount(int.parse(studentDashboardProvider!
-            .notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!
-            .toString()));
+        setBadgeCount();
       }
     });
+  }
+
+  void setBadgeCount() {
+    try {
+      FlutterNativeBadge.setBadgeCount(int.parse(studentDashboardProvider!
+          .notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!
+          .toString()));
+    } catch (e) {
+      debugPrint('error in badge count $e');
+    }
   }
 
   @override
@@ -89,220 +94,189 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         builder: (context, snapshot) {
           return Consumer<StudentDashboardProvider>(builder: (context, model, _) {
             return Scaffold(
-              appBar: AppBar(title: const Text('Dashboard', style: TextStyle(color: Colors.white)), actions: [
-                Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications),
-                      color: Colors.white,
-                      onPressed: () {
-                        PushNotificationsManager.localNotifications.cancelAll();
-                        // if (model.notificationCountResponse != null &&
-                        //     model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! >
-                        //         0) {
-                        Navigator.push(context,
-                                MaterialPageRoute(builder: (context) => const StudentNotificationScreen()))
-                            .then((value) {
-                          model.getNotificationCount();
-                        });
-                        // }
-                      },
-                      iconSize: 25,
-                    ),
-                    if (snapshot.data != 0)
-                      Positioned(
-                        right: 5,
-                        top: 5,
-                        child: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                            child: (snapshot.hasData)
-                                ? Text(snapshot.data.toString(),
-                                    style: const TextStyle(
-                                        fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold))
-                                : const SizedBox.shrink()),
-                      ),
-                  ],
-                ),
-              ]),
-              drawer: (model.studentDetailResponse == null)
-                  ? const SizedBox.shrink()
-                  : Drawer(
-                      child: ListView(padding: EdgeInsets.zero, children: [
-                      studentHeader(model.studentDetailResponse!, model),
-                      (model.sessionListResponse == null)
-                          ? const SizedBox()
-                          : ListTile(
-                              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                              title: sessionDropDown(model),
-                              leading: const Icon(Icons.access_time),
-                              minLeadingWidth: 10,
-                              horizontalTitleGap: 10,
-                              onTap: () {},
-                            ),
-                      // ListTile(
-                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                      //   title: const Text('Profile'),
-                      //   leading: const Icon(Icons.notifications_paused_rounded),
-                      //   minLeadingWidth: 10,
-                      //   horizontalTitleGap: 10,
-                      //   onTap: () {},
-                      // ),
-                      // ListTile(
-                      //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                      //   title: const Text('Change Session'),
-                      //   leading: const Icon(Icons.lock_reset),
-                      //   minLeadingWidth: 10,
-                      //   horizontalTitleGap: 10,
-                      //   onTap: () {},
-                      // ),
-                      ListTile(
-                          visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                          title: const Text('Privacy Policy'),
-                          leading: const Icon(Icons.lock),
-                          minLeadingWidth: 10,
-                          horizontalTitleGap: 10,
-                          onTap: () {
+                appBar:
+                    AppBar(title: const Text('Dashboard', style: TextStyle(color: Colors.white)), actions: [
+                  Stack(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.notifications),
+                          color: Colors.white,
+                          onPressed: () {
+                            PushNotificationsManager.localNotifications.cancelAll();
+                            // if (model.notificationCountResponse != null &&
+                            //     model.notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT! >
+                            //         0) {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const WebViewScreen(
-                                        url: Constants.privacyPolicyUrl, title: 'Privacy Policy')));
-                          }),
-                      ListTile(
-                          visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                          title: const Text('Change Password'),
-                          leading: const Icon(Icons.lock),
-                          minLeadingWidth: 10,
-                          horizontalTitleGap: 10,
-                          onTap: () => Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
-                      ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Logout'),
-                        leading: const Icon(Icons.logout),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () => logout(context, model),
-                      ),
-                    ])),
-              body: (model.studentDetailResponse == null)
-                  ? const Center(child: CircularProgressIndicator())
-                  : Stack(
-                      children: <Widget>[
+                                    builder: (context) => const StudentNotificationScreen())).then((value) {
+                              model.getNotificationCount();
+                            });
+                          },
+                          iconSize: 25),
+                      if (snapshot.data != 0)
+                        Positioned(
+                          right: 5,
+                          top: 5,
+                          child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                              child: (snapshot.hasData)
+                                  ? Text(snapshot.data.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold))
+                                  : const SizedBox.shrink()),
+                        ),
+                    ],
+                  ),
+                ]),
+                drawer: (model.studentDetailResponse == null)
+                    ? const SizedBox.shrink()
+                    : Drawer(
+                        child: ListView(padding: EdgeInsets.zero, children: [
+                        studentHeader(model.studentDetailResponse!, model),
+                        (model.sessionListResponse == null)
+                            ? const SizedBox()
+                            : ListTile(
+                                visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                                title: sessionDropDown(model),
+                                leading: const Icon(Icons.access_time),
+                                minLeadingWidth: 10,
+                                horizontalTitleGap: 10,
+                                onTap: () {},
+                              ),
+                        // ListTile(
+                        //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                        //   title: const Text('Profile'),
+                        //   leading: const Icon(Icons.notifications_paused_rounded),
+                        //   minLeadingWidth: 10,
+                        //   horizontalTitleGap: 10,
+                        //   onTap: () {},
+                        // ),
+                        // ListTile(
+                        //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                        //   title: const Text('Change Session'),
+                        //   leading: const Icon(Icons.lock_reset),
+                        //   minLeadingWidth: 10,
+                        //   horizontalTitleGap: 10,
+                        //   onTap: () {},
+                        // ),
+                        ListTile(
+                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            title: const Text('Privacy Policy'),
+                            leading: const Icon(Icons.lock),
+                            minLeadingWidth: 10,
+                            horizontalTitleGap: 10,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const WebViewScreen(
+                                          url: Constants.privacyPolicyUrl, title: 'Privacy Policy')));
+                            }),
+                        ListTile(
+                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            title: const Text('Change Password'),
+                            leading: const Icon(Icons.lock),
+                            minLeadingWidth: 10,
+                            horizontalTitleGap: 10,
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
+                        ListTile(
+                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            title: const Text('Logout'),
+                            leading: const Icon(Icons.logout),
+                            minLeadingWidth: 10,
+                            horizontalTitleGap: 10,
+                            onTap: () => logout(context, model))
+                      ])),
+                body: (model.studentDetailResponse == null)
+                    ? const Center(child: CircularProgressIndicator())
+                    : Stack(children: <Widget>[
                         Container(
-                          height: MediaQuery.sizeOf(context).height * .3,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                                alignment: Alignment.topCenter,
-                                image: AssetImage('assets/images/top_header_new.png')),
-                          ),
-                        ),
+                            height: MediaQuery.sizeOf(context).height * .3,
+                            decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                    alignment: Alignment.topCenter,
+                                    image: AssetImage('assets/images/top_header_new.png')))),
                         SafeArea(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 20),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      CircleAvatar(
-                                        radius: 42,
-                                        backgroundImage: WebService
-                                                    .studentLoginData?.table1?.first.sTUDPHOTO ==
-                                                null
-                                            ? null
-                                            : NetworkImage(
-                                                '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}'),
-                                        child: WebService.studentLoginData?.table1?.first.sTUDPHOTO == null
-                                            ? const Icon(
-                                                Icons.account_circle,
-                                                color: Colors.blue,
-                                                size: 84, // Adjust the size as needed
-                                              )
-                                            : null,
-                                      ),
-                                      const SizedBox(
-                                        width: 16,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            "${model.studentDetailResponse?.getstudentData?.first.fIRSTNAME} ${model.studentDetailResponse?.getstudentData?.first.lASTNAME}",
-                                            style: const TextStyle(
-                                                fontFamily: "Montserrat Medium",
-                                                color: Colors.white,
-                                                fontSize: 18),
-                                          ),
-                                          const SizedBox(height: 10.0),
-                                          Text(
-                                            'Admission no. : ${model.studentDetailResponse?.getstudentData?.first.aDMNO}',
-                                            style: const TextStyle(
-                                              fontSize: 14.0,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          //SizedBox(height: 10.0),
-                                          Text(
-                                            'Class : ${model.studentDetailResponse?.getstudentData?.first.cLASSDESC}',
-                                            style: const TextStyle(
-                                              fontSize: 14.0,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Section : ${model.studentDetailResponse?.getstudentData?.first.sECTIONDESC}',
-                                            style: const TextStyle(
-                                              fontSize: 14.0,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          //SizedBox(height: 10.0),
-                                          Text(
-                                            'Session :  ${model.sessionYear}',
-                                            style: const TextStyle(
-                                              fontSize: 14.0,
-                                              fontFamily: "Montserrat Regular",
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FutureBuilder<List>(
-                                    future: WebService.fetchDashboard(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasError) {
-                                        return const Center(
-                                          child: Text('Something went wrong please try again!'),
-                                        );
-                                      } else if (snapshot.hasData) {
-                                        return DashBoardList(dashboards: snapshot.requireData, employeeId: 0);
-                                      } else {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-            );
+                            child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(children: <Widget>[
+                                  Container(
+                                      margin: const EdgeInsets.only(bottom: 20),
+                                      child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            CircleAvatar(
+                                                radius: 42,
+                                                backgroundImage: WebService
+                                                            .studentLoginData?.table1?.first.sTUDPHOTO ==
+                                                        null
+                                                    ? null
+                                                    : NetworkImage(
+                                                        '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}'),
+                                                child: WebService.studentLoginData?.table1?.first.sTUDPHOTO ==
+                                                        null
+                                                    ? const Icon(Icons.account_circle,
+                                                        color: Colors.blue, size: 84)
+                                                    : null),
+                                            const SizedBox(width: 16),
+                                            Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: <Widget>[
+                                                  Text(
+                                                      "${model.studentDetailResponse?.getstudentData?.first.fIRSTNAME} ${model.studentDetailResponse?.getstudentData?.first.lASTNAME}",
+                                                      style: const TextStyle(
+                                                          fontFamily: "Montserrat Medium",
+                                                          color: Colors.white,
+                                                          fontSize: 18)),
+                                                  const SizedBox(height: 10.0),
+                                                  Text(
+                                                      'Admission no. : ${model.studentDetailResponse?.getstudentData?.first.aDMNO}',
+                                                      style: const TextStyle(
+                                                          fontSize: 14.0,
+                                                          fontFamily: "Montserrat Regular",
+                                                          color: Colors.black)),
+                                                  //SizedBox(height: 10.0),
+                                                  Text(
+                                                      'Class : ${model.studentDetailResponse?.getstudentData?.first.cLASSDESC}',
+                                                      style: const TextStyle(
+                                                          fontSize: 14.0,
+                                                          fontFamily: "Montserrat Regular",
+                                                          color: Colors.black)),
+                                                  Text(
+                                                      'Section : ${model.studentDetailResponse?.getstudentData?.first.sECTIONDESC}',
+                                                      style: const TextStyle(
+                                                          fontSize: 14.0,
+                                                          fontFamily: "Montserrat Regular",
+                                                          color: Colors.black)),
+                                                  //SizedBox(height: 10.0),
+                                                  Text('Session :  ${model.sessionYear}',
+                                                      style: const TextStyle(
+                                                          fontSize: 14.0,
+                                                          fontFamily: "Montserrat Regular",
+                                                          color: Colors.black))
+                                                ])
+                                          ])),
+                                  Expanded(
+                                      child: FutureBuilder<List<DashboardResponse>>(
+                                          future: WebService.fetchDashboard(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return const Center(child: CircularProgressIndicator());
+                                            } else if (snapshot.hasError) {
+                                              return Center(child: Text('Error: ${snapshot.error}'));
+                                            } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                                              return DashBoardList(dashboards: snapshot.data!, employeeId: 0);
+                                            } else {
+                                              return const Center(
+                                                  child: Text('No dashboard items available'));
+                                            }
+                                          }))
+                                ])))
+                      ]));
           });
         });
   }
@@ -312,13 +286,19 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     if (mounted) {
       if (appDeviceId != null) {
         debugPrint('app Device Id $appDeviceId');
-        model.logoutApi(context, appDeviceId);
+        if (context.mounted) {
+          model.logoutApi(context, appDeviceId);
+        }
       } else {
         debugPrint('else logout');
-        final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
-        loginStore.userLogout();
-        FlutterAppBadger.removeBadge();
-        Navigator.pushReplacementNamed(context, '/home');
+        if (context.mounted) {
+          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          loginStore.userLogout();
+        }
+        FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+        if (context.mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     }
   }

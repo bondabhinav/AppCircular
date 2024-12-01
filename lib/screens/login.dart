@@ -1,57 +1,48 @@
 import 'dart:convert';
 
+import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_native_badge/flutter_native_badge.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class LoginRoute extends StatelessWidget {
-  const LoginRoute({Key? key}) : super(key: key);
+  const LoginRoute({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      /*
-      appBar: AppBar(
-        title: const Text('Flexi School'),
-      ),*/
-      body: LoginWidget(),
-    );
+    return const Scaffold(backgroundColor: Colors.white, body: LoginWidget());
   }
 }
 
 class LoginWidget extends StatefulWidget {
-  const LoginWidget({Key? key}) : super(key: key);
+  const LoginWidget({super.key});
 
   @override
   State<LoginWidget> createState() => _LoginWidgetState();
 }
 
 class _LoginWidgetState extends State<LoginWidget> {
-  //Form Key
   final FocusNode noteFocus = FocusNode();
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
-  Duration _showDuration = const Duration(seconds: 2);
-  String _schoolName = '';
-  late String _logo = '';
+  final Duration _showDuration = const Duration(seconds: 2);
+  String? _schoolName;
+  String? _logo;
   String userType = '';
 
-  //TextField Controller
-  // TextEditingController _usernameController = TextEditingController(text: 'E00031');
-  // TextEditingController _passwordController = TextEditingController(text: 'OPJS123');
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  //Err Msg Declare
   bool _isLoading = false;
   String _errorMessage = '';
   bool _is_logo_loading = true;
+  bool _imageError = false;
 
   @override
   void dispose() {
@@ -63,9 +54,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   void _showPassword() {
     setState(() {
       Clipboard.setData(ClipboardData(text: _obscureText ? '' : '********'));
-      Future.delayed(_showDuration, () {
-        Clipboard.setData(const ClipboardData(text: ''));
-      });
+      Future.delayed(_showDuration, () => Clipboard.setData(const ClipboardData(text: '')));
     });
   }
 
@@ -85,68 +74,49 @@ class _LoginWidgetState extends State<LoginWidget> {
         if (response == 'You have successfully logged in!') {
           loginStore.loginInStatus = LoginStatus.loggedIn;
           loginStore.notify();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response)),
-          );
-         // Navigator.pushReplacementNamed(context, '/studentDashboard');
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/studentDashboard', (Route<dynamic> route) => false);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response)));
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/studentDashboard', (Route<dynamic> route) => false);
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response)),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response)));
+          }
         }
       }).catchError((e) {
         setState(() {
           _errorMessage = 'Invalid Login Credentials.';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorMessage)),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_errorMessage)));
         });
       }).whenComplete(() {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       });
     } else {
       loginStore.loginValidate(_usernameController.text, _passwordController.text).then((response) {
-        //API Response
         debugPrint('response--- $response');
         if (response['status'] == true) {
           loginStore.loginInStatus = LoginStatus.loggedIn;
           WebService.setTeacherLoginDetails(response['data']);
           loginStore.notify();
-          FlutterAppBadger.removeBadge();
-
-          //print(loginStore.userName);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response['message'])),
-          );
-
-          // Navigator.pushReplacementNamed(context, '/dashboard');
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false);
+          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response['message'])));
+            Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false);
+          }
         } else {
           _errorMessage = response['message'];
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorMessage)),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_errorMessage)));
+          }
         }
-
-        //API Response
       }).catchError((e) {
         setState(() {
-          // _errorMessage = 'Error: $e';
           _errorMessage = 'Invalid Login Credentials.';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorMessage)),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_errorMessage)));
         });
       }).whenComplete(() {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       });
     }
   }
@@ -165,264 +135,169 @@ class _LoginWidgetState extends State<LoginWidget> {
     String schoolUrl = "";
     if (data != null) {
       schoolUrl = data;
-      print(schoolUrl);
+      debugPrint("schoolUrl -- $schoolUrl");
     } else {
-      // Navigator.pushReplacementNamed(context, '/schoolUrl');
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/schoolUrl', (Route<dynamic> route) => false);
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/schoolUrl', (Route<dynamic> route) => false);
+      }
     }
 
     final schoolLogo = prefs.getString('global_school_logo');
 
-    //print(schoolLogo);
-
-    var requestedData = {
-      "SCHOOL_ID": 1,
-    };
+    var requestedData = {"SCHOOL_ID": 1};
     var body = json.encode(requestedData);
 
     try {
-      final response = await http.post(
-        Uri.parse('${schoolUrl}schoolsearchbyschoolid/schoolsearchbyschoolid'),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          //"Authorization": token
-        },
-        body: body,
-      );
+      final response = await ApiService()
+          .post(url: '${schoolUrl}schoolsearchbyschoolid/schoolsearchbyschoolid', data: body);
+      debugPrint('response.body --- ${response.data}');
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final responseSplit = responseData['schoolSearch'][0];
+        // final responseData = json.decode(response.data);
+        final responseSplit = response.data['schoolSearch'][0];
 
         setState(() {
           _is_logo_loading = false;
           _schoolName = responseSplit['SCHOOL_NAME'];
-          _logo = (schoolLogo! + responseSplit['LOGO_PATH'])!;
+          _logo = (schoolLogo! + responseSplit['LOGO_PATH']);
           debugPrint('_logo ---$_logo');
         });
-
-        //print(responseSplit);
       }
     } catch (e) {
-      //_errorMessage = 'Get School Logo Error: $e';
       _errorMessage = 'Something went wrong please try again.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_errorMessage)));
+      }
     }
-    ;
   }
 
   @override
   void initState() {
     super.initState();
-    checkSchoolUrl();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkSchoolUrl());
   }
 
   @override
   Widget build(BuildContext context) {
-    //final args = ModalRoute.of(context)!.settings.arguments as String;
-
-    //final LoginProvider LoginStore =  Provider.of<LoginProvider>(context);
-
-    //print(LoginStore.loginInStatus.name);
-
-    //LoginStore.loginInStatus = LoginStatus.loggedIn;
-    //LoginStore.notify();
-
-    // print(LoginStore.loginInStatus.name);
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-            onPressed: () {
-              WebService.clearAllPref();
-              // Navigator.pushReplacementNamed(context, '/home');
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-            },
-            icon: const Icon(Icons.arrow_back_ios),
-            color: Colors.black),
-      ),
-      body: Container(
-        alignment: Alignment.center,
-        margin: const EdgeInsets.only(top: 0.0),
-        //color: Colors.white,
-        child: Padding(
-            padding: const EdgeInsets.all(0),
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(10.0),
-                children: <Widget>[
-                  Text(_schoolName,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          //color: Colors.blue,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Montserrat Regular",
-                          fontSize: 25)),
-                  const SizedBox(height: 10),
-                  Container(
-                      alignment: Alignment.center,
-                      child: _is_logo_loading
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blue))
-                          : Image.network(_logo, width: 150)),
-                  Container(
-                      alignment: Alignment.center,
-                      //padding: const EdgeInsets.all(10),
-                      child: const Text('Welcome',
-                          style: TextStyle(
-                              fontFamily: "Montserrat Regular", fontWeight: FontWeight.w500, fontSize: 20))),
-                  Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        userType == 'S'
-                            ? 'Sign in as student to continue!'
-                            : 'Sign in as teacher to continue!',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: "Montserrat Regular",
-                        ),
-                      )),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    //margin: EdgeInsets.only(top:50.0),
-                    child: TextFormField(
-                      controller: _usernameController,
-                      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                        isDense: true,
-                        // Added this
-                        contentPadding: EdgeInsets.all(14),
-                        prefixIcon: Icon(Icons.account_circle, size: 25),
-                        labelText: 'User ID',
-                        errorStyle: TextStyle(
-                          fontFamily: "Montserrat Regular",
-                          fontSize: 14.0,
-                        ),
-                        //hintText: 'User ID',
-                      ),
-                      validator: (value) {
-                        errorMessage('');
-                        if (value == null || value.isEmpty) {
-                          noteFocus.requestFocus();
-                          return 'Please enter user Id';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                    child: TextFormField(
-                      //obscureText: true,
-                      obscureText: _obscureText,
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        //contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                        isDense: true,
-                        // Added this
-                        contentPadding: const EdgeInsets.all(14),
-                        prefixIcon: const Icon(Icons.lock, size: 25),
-                        labelText: 'Password',
-                        suffixIcon: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                            _showPassword();
-                          },
-                          child: Icon(
-                            _obscureText ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        errorStyle: const TextStyle(
-                          fontFamily: "Montserrat Regular",
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      validator: (value) {
-                        errorMessage('');
-                        if (value == null || value.isEmpty) {
-                          noteFocus.requestFocus();
-                          return 'Please enter Password';
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: ElevatedButton(
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 16,
-                                width: 16,
-                                child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.deepPurple))
-                            : const Text('Login'),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _isLoading ? null : _submitForm(context);
-                          }
-
-                          //Navigator.pushNamed(context, "/dashboard");
-                        },
-                      )),
-                  TextButton(
-                    onPressed: () {
-                      //forgot password screen
-                    },
-                    child:
-                        const Text('Forgot Password', style: TextStyle(decoration: TextDecoration.underline)),
-                  ),
-                  const SizedBox(
-                    height: 10.0,
-                  ),
-                  Text(
-                    '$_errorMessage',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.red,
-                    ),
-                  ),
-                  /*
-                  Row(
-                    children: <Widget>[
-                      const Text('Does not have account?'),
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+                onPressed: () {
+                  WebService.clearAllPref();
+                  Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+                },
+                icon: const Icon(Icons.arrow_back_ios),
+                color: Colors.black)),
+        body: Container(
+            alignment: Alignment.center,
+            margin: const EdgeInsets.only(top: 0.0),
+            child: Padding(
+                padding: const EdgeInsets.all(0),
+                child: Form(
+                    key: _formKey,
+                    child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(10.0), children: <Widget>[
+                      Text(_schoolName ?? '',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w500, fontFamily: "Montserrat Regular", fontSize: 25)),
+                      const SizedBox(height: 10),
+                      Container(
+                          alignment: Alignment.center,
+                          child: _logo != null
+                              ? CachedNetworkImage(imageUrl: _logo!, width: 150)
+                              : const SizedBox()),
+                      Container(
+                          alignment: Alignment.center,
+                          child: const Text('Welcome',
+                              style: TextStyle(
+                                  fontFamily: "Montserrat Regular",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20))),
+                      Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                              userType == 'S'
+                                  ? 'Sign in as student to continue!'
+                                  : 'Sign in as teacher to continue!',
+                              style: const TextStyle(fontSize: 16, fontFamily: "Montserrat Regular"))),
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          child: TextFormField(
+                              controller: _usernameController,
+                              onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(14),
+                                  prefixIcon: Icon(Icons.account_circle, size: 25),
+                                  labelText: 'User ID',
+                                  errorStyle: TextStyle(fontFamily: "Montserrat Regular", fontSize: 14.0)),
+                              validator: (value) {
+                                errorMessage('');
+                                if (value == null || value.isEmpty) {
+                                  noteFocus.requestFocus();
+                                  return 'Please enter user Id';
+                                }
+                                return null;
+                              })),
+                      Container(
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          child: TextFormField(
+                              obscureText: _obscureText,
+                              controller: _passwordController,
+                              decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.all(14),
+                                  prefixIcon: const Icon(Icons.lock, size: 25),
+                                  labelText: 'Password',
+                                  suffixIcon: GestureDetector(
+                                      onTap: () {
+                                        setState(() => _obscureText = !_obscureText);
+                                        _showPassword();
+                                      },
+                                      child: Icon(_obscureText ? Icons.visibility_off : Icons.visibility,
+                                          color: Colors.grey)),
+                                  errorStyle:
+                                      const TextStyle(fontFamily: "Montserrat Regular", fontSize: 14.0)),
+                              validator: (value) {
+                                errorMessage('');
+                                if (value == null || value.isEmpty) {
+                                  noteFocus.requestFocus();
+                                  return 'Please enter Password';
+                                }
+                                return null;
+                              })),
+                      const SizedBox(height: 20.0),
+                      Container(
+                          height: 50,
+                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: ElevatedButton(
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 1.5, color: Colors.deepPurple))
+                                  : const Text('Login'),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  _isLoading ? null : _submitForm(context);
+                                }
+                              })),
                       TextButton(
-                        child: const Text(
-                          'Sign in',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        onPressed: () {
-
-                        },
-                      )
-                    ],
-                    mainAxisAlignment: MainAxisAlignment.center,
-                  ),*/
-                ],
-              ),
-            )),
-      ),
-    );
+                          onPressed: () {},
+                          child: const Text('Forgot Password',
+                              style: TextStyle(decoration: TextDecoration.underline))),
+                      const SizedBox(height: 10.0),
+                      Text(_errorMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontSize: 14.0, fontFamily: "Montserrat Regular", color: Colors.red)),
+                    ])))));
   }
 }

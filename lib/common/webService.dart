@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/models/student/student_login_response.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/dashboard_model.dart';
@@ -72,8 +72,8 @@ class WebService {
   }
 
   static Future<String?> getAppDeviceId() async {
-   final value = await _preferences?.get("appDeviceId").toString();
-   return value;
+    final value = await _preferences?.get("appDeviceId").toString();
+    return value;
   }
 
   static getTeacherDetails() async {
@@ -168,36 +168,30 @@ class WebService {
 
   //API Call : Dashboard
   //Dashboard API Call
-  static Future<List<Dashboard>> fetchDashboard() async {
-    var schoolBaseUrl = await getSchoolUrl();
-    //await Future.delayed(Duration(seconds: 2));
-    var loginType = await getLoginType();
-    debugPrint('Login type ****** $loginType');
-    await Future.delayed(const Duration(seconds: 1));
-    var requestedData = {
-      "Type": loginType,
-    };
+  static Future<List<DashboardResponse>> fetchDashboard() async {
+    try {
+      var schoolBaseUrl = await getSchoolUrl();
+      var loginType = await getLoginType();
+      debugPrint('Login type ****** $loginType');
 
-    var body = json.encode(requestedData);
+      var requestedData = {"Type": loginType};
+      var body = json.encode(requestedData);
 
-    final response = await http.post(
-      Uri.parse('${schoolBaseUrl!}DashboardForTeacher/DashboardForTeacher'),
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        //"Authorization": token
-      },
-      body: body,
-    );
-    final responseData = json.decode(response.body);
-    log("dashboard data ===> $responseData");
-    final responseSplit = responseData['lstDashobaord'];
-    return compute(parseDashboard, json.encode(responseSplit));
-  }
+      final response = await ApiService()
+          .post(url: '${schoolBaseUrl!}DashboardForTeacher/DashboardForTeacher', data: body);
 
-  // A function that converts a response body into a List<Dashboard>.
-  static List<Dashboard> parseDashboard(String responseBody) {
-    final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-    return parsed.map<Dashboard>((json) => Dashboard.fromJson(json)).toList();
+      final responseData = response.data;
+      log("dashboard data ===> $responseData");
+
+      if (responseData['lstDashobaord'] != null) {
+        final List<dynamic> dashboardList = responseData['lstDashobaord'];
+        return dashboardList.map((json) => DashboardResponse.fromJson(json)).toList();
+      } else {
+        throw Exception('Dashboard data is null');
+      }
+    } catch (e) {
+      debugPrint('Error fetching dashboard: $e');
+      throw Exception('Failed to load dashboard data: $e');
+    }
   }
 }
