@@ -234,7 +234,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                       InkWell(
                                         onTap: () {
                                           for (var student in model.lstStudentCircular) {
-                                            print('STUDENT_ID: ${student.STUDENT_ID}, ADM_NO: ${student.ADM_NO}');
+                                            print(
+                                                'STUDENT_ID: ${student.STUDENT_ID}, ADM_NO: ${student.ADM_NO}');
                                           }
                                         },
                                         child: const Text('Student*',

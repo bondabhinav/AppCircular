@@ -215,11 +215,13 @@ class CircularsProvider extends ChangeNotifier {
         "CIRCULAR_SUBJECT": subjectController.text,
         "IS_APPLICABLETOPARENT": circularInfo.value ? "Y" : "N",
         "lstsectionCircular": lstSectionCircular,
-        "lstStudentCircular": lstStudentCircular,
-        "lstStudentCircularinfo": docList,
+        "lstStudentCircular": lstStudentCircular.map((e) => e.toJson()).toList(), // Convert objects to JSON
+        "lstStudentCircularinfo": docList.map((e) => e.toJson()).toList(), // Convert objects to JSON
         "SESSION_ID": Constants.sessionId
       };
-      log("Data======> $data");
+
+      log("Data======> ${jsonEncode(data)}"); // Convert the entire map to a JSON string
+
       final response = await apiService.post(url: Api.addCircularApi, data: data);
       if (response.statusCode == 200) {
         commonResponse = CommonResponse.fromJson(response.data);

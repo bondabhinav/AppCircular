@@ -155,22 +155,45 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                                                       data.lstCircularFile![index].fILENAME ??
                                                                           ""),
                                                                   trailing: IconButton(
-                                                                      onPressed: () {
-                                                                        DownloadPdf.downloadPdf(
+                                                                      onPressed: () async {
+                                                                        await DownloadPdf.downloadPdf(
                                                                             "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
                                                                             data.lstCircularFile![index]
                                                                                 .fILENAME!
                                                                                 .split('/')
                                                                                 .last,
-                                                                            context, (value) {
-                                                                          if (Platform.isAndroid) {
-                                                                            //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                          }
-                                                                        }, (file) async {
-                                                                          if (Platform.isIOS) {
-                                                                            //  await Share.shareXFiles([XFile(file.path)]);
-                                                                          }
-                                                                        });
+                                                                            context,
+                                                                            (message) => debugPrint(
+                                                                                'download message -> $message'));
+
+                                                                        // DownloadPdf.downloadFileWithDio("${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                        //
+                                                                        //     data.lstCircularFile![index]
+                                                                        //             .fILENAME!
+                                                                        //             .split('/')
+                                                                        //             .last
+                                                                        //
+                                                                        //     , context, (p0) {
+                                                                        //
+                                                                        //     },(p0) {
+                                                                        //
+                                                                        //     },);
+
+                                                                        // DownloadPdf.downloadPdf(
+                                                                        //     "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                        //     data.lstCircularFile![index]
+                                                                        //         .fILENAME!
+                                                                        //         .split('/')
+                                                                        //         .last,
+                                                                        //     context, (value) {
+                                                                        //   if (Platform.isAndroid) {
+                                                                        //     //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                        //   }
+                                                                        // }, (file) async {
+                                                                        //   if (Platform.isIOS) {
+                                                                        //     //  await Share.shareXFiles([XFile(file.path)]);
+                                                                        //   }
+                                                                        // });
 
                                                                         // model
                                                                         //     .requestWritePermission()

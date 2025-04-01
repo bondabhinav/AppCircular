@@ -112,7 +112,7 @@ class _StudentAttendanceGraphScreenState extends State<StudentAttendanceGraphScr
                                               : SystemMouseCursors.click;
                                         },
                                         touchTooltipData: BarTouchTooltipData(
-                                            tooltipMargin: -10, tooltipBgColor: Colors.transparent)),
+                                            tooltipMargin: -10, getTooltipColor: (group) => Colors.transparent,)),
                                     barGroups: getData(model.studentAttendanceGraphResponse!),
                                     minY: 0,
                                     maxY: 100,

@@ -40,7 +40,7 @@ class CheckInternet extends StatelessWidget {
               } else {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('You\'re connected to a ${connectivityResult.name} network')));
+                      SnackBar(content: Text('You\'re connected to a ${connectivityResult..first.name} network')));
                   // Navigator.pushReplacement(
                   //   context,
                   //   MaterialPageRoute(builder: (context) => const Home()),

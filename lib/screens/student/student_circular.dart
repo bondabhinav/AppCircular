@@ -131,10 +131,6 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                                               if (Platform.isAndroid) {
                                                                                 //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
                                                                               }
-                                                                            }, (file) async {
-                                                                              if (Platform.isIOS) {
-                                                                                //  await Share.shareXFiles([XFile(file.path)]);
-                                                                              }
                                                                             });
 
                                                                             // final _localPath = (await _getSavedDir(data.lstCircularFile![index].fILENAME!))!;
@@ -273,10 +269,6 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                                                 context, (value) {
                                                                               if (Platform.isAndroid) {
                                                                                 //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                              }
-                                                                            }, (file) async {
-                                                                              if (Platform.isIOS) {
-                                                                                //  await Share.shareXFiles([XFile(file.path)]);
                                                                               }
                                                                             });
 

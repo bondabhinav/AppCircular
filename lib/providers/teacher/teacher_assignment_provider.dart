@@ -474,13 +474,13 @@ class TeacherAssignmentProvider extends ChangeNotifier {
       "ASSIGNMENT_DETAILS": getContent(),
       "EMPLOYEE_ID": employeeId,
       "ACTIVE": active.value ? "Y" : "N",
-      "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate!),
+      "START_DATE": DateFormat('yyyy-MM-dd').format(selectedStartDate),
       "END_DATE": DateFormat('yyyy-MM-dd').format(selectedEndDate!),
       "SUBJECT_ID": selectedSubject,
       "CLASS_ID": selectedClass,
       "lstsectionAssignment": lstSectionCircular,
-      "lstStudentAssignment": lstStudentCircular,
-      "lstStudentAssignmentinfo": docList,
+      "lstStudentAssignment": lstStudentCircular.map((student) => student.toJson()).toList(),
+      "lstStudentAssignmentinfo": docList.map((doc) => doc.toJson()).toList(),
       "SESSION_ID": Constants.sessionId
     };
 

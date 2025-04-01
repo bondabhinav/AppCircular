@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 import '/common/config.dart';
 import 'common/auth_middleware.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
   debugPrint('Initialized default app $app from Android resource');
   await PushNotificationsManager().init();
   await NotificationService.initializeNotification();
+  await FlutterDownloader.initialize(debug: true,ignoreSsl: true);
   setupLocator();
   debugPrint('fcm token ===> ${PushNotificationsManager().fcmToken}');
   runApp(const MyApp());

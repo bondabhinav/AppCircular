@@ -118,10 +118,6 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
                                                                           if (Platform.isAndroid) {
                                                                             //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
                                                                           }
-                                                                        }, (file) async {
-                                                                          if (Platform.isIOS) {
-                                                                            //  await Share.shareXFiles([XFile(file.path)]);
-                                                                          }
                                                                         });
 
                                                                         // model

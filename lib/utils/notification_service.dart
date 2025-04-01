@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 
 class NotificationService {
-
   static Future<void> initializeNotification() async {
     await AwesomeNotifications().initialize(
       null,
@@ -34,7 +33,7 @@ class NotificationService {
     );
 
     await AwesomeNotifications().isNotificationAllowed().then(
-          (isAllowed) async {
+      (isAllowed) async {
         if (!isAllowed) {
           await AwesomeNotifications().requestPermissionToSendNotifications();
         }
@@ -50,26 +49,22 @@ class NotificationService {
   }
 
   /// Use this method to detect when a new notification or a schedule is created
-  static Future<void> onNotificationCreatedMethod(
-      ReceivedNotification receivedNotification) async {
+  static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
     debugPrint('onNotificationCreatedMethod');
   }
 
   /// Use this method to detect every time that a new notification is displayed
-  static Future<void> onNotificationDisplayedMethod(
-      ReceivedNotification receivedNotification) async {
+  static Future<void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {
     debugPrint('onNotificationDisplayedMethod');
   }
 
   /// Use this method to detect if the user dismissed a notification
-  static Future<void> onDismissActionReceivedMethod(
-      ReceivedAction receivedAction) async {
+  static Future<void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {
     debugPrint('onDismissActionReceivedMethod');
   }
 
   /// Use this method to detect when the user taps on a notification or action button
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
     debugPrint('onActionReceivedMethod');
     final payload = receivedAction.payload ?? {};
     debugPrint('downloaded path --- > $payload');
@@ -84,21 +79,20 @@ class NotificationService {
     //  OpenFile.open(payload['path']);
   }
 
-  static Future<void> showNotification({
-    required final String title,
-    required final String body,
-    final String? summary,
-    final Map<String, String>? payload,
-    final ActionType actionType = ActionType.Default,
-    final NotificationLayout notificationLayout = NotificationLayout.Default,
-    final NotificationCategory? category,
-    final String? bigPicture,
-    final List<NotificationActionButton>? actionButtons,
-    final bool scheduled = false,
-    final int? interval,
-    final int? progress,
-    final channelId
-  }) async {
+  static Future<void> showNotification(
+      {required final String title,
+      required final String body,
+      final String? summary,
+      final Map<String, String>? payload,
+      final ActionType actionType = ActionType.Default,
+      final NotificationLayout notificationLayout = NotificationLayout.Default,
+      final NotificationCategory? category,
+      final String? bigPicture,
+      final List<NotificationActionButton>? actionButtons,
+      final bool scheduled = false,
+      final int? interval,
+      final int? progress,
+      final channelId}) async {
     assert(!scheduled || (scheduled && interval != null));
 
     await AwesomeNotifications().createNotification(
@@ -106,24 +100,23 @@ class NotificationService {
         id: channelId,
         channelKey: 'high_importance_channel',
         title: title,
-        body: 'Tap to open the downloaded file.',
+        body: body,
         actionType: actionType,
         notificationLayout: notificationLayout,
         summary: summary,
         category: category,
         payload: payload,
         bigPicture: bigPicture,
-        progress: double.parse(progress.toString()),
+        progress: progress != null ? double.parse(progress.toString()) : null,
       ),
       actionButtons: actionButtons,
       schedule: scheduled
           ? NotificationInterval(
-        repeats: false,
-        interval: interval,
-        timeZone:
-        await AwesomeNotifications().getLocalTimeZoneIdentifier(),
-        preciseAlarm: true,
-      )
+              repeats: false,
+              interval: Duration(seconds: interval ?? 0),
+              timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier(),
+              preciseAlarm: true,
+            )
           : null,
     );
   }
@@ -132,7 +125,6 @@ class NotificationService {
     await AwesomeNotifications().cancel(1);
   }
 }
-
 
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // import 'package:open_file/open_file.dart';

@@ -95,10 +95,6 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                                                             if (Platform.isAndroid) {
                                                               //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
                                                             }
-                                                          }, (file) async {
-                                                            if (Platform.isIOS) {
-                                                              //  await Share.shareXFiles([XFile(file.path)]);
-                                                            }
                                                           });
 
 
