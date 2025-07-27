@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
+// Removed: import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
@@ -159,7 +159,6 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
               body: "",
               summary: "",
               progress: progress,
-              notificationLayout: NotificationLayout.ProgressBar,
             );
           }
           //  NotificationService().showProgressNotification(progress, fileName);

@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/common/fcm_pending_navigation.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/dashboard_model.dart';
 import 'package:flexischool/models/student/student_detail_response.dart';
@@ -10,11 +11,13 @@ import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/screens/change_password_screen.dart';
 import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/student/fee_screen.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -32,11 +35,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     studentDashboardProvider = Provider.of<StudentDashboardProvider>(context, listen: false);
     studentDashboardProvider.getStudentImageUrl();
     WidgetsBinding.instance.addObserver(this);
-    FirebaseMessaging.instance.getInitialMessage().then((value) {
-      if (value != null) {
-        PushNotificationsManager.clickHandle(value.data.toString(), fromBackgroundOrTerminate: true);
-      }
-    });
+    // Initial message handling is now done globally in PushNotificationsManager
+    // FirebaseMessaging.instance.getInitialMessage().then((value) {
+    //   if (value != null) {
+    //     PushNotificationsManager.clickHandle(value.data.toString(), fromBackgroundOrTerminate: true);
+    //   }
+    // });
     if (WebService.studentLoginData != null) {
       Constants.sessionId = WebService.studentLoginData!.table1!.first.sESSIONID!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,6 +48,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         studentDashboardProvider.assignSessionValue();
         studentDashboardProvider.getSessionData();
         studentDashboardProvider.fetchStudentDetail();
+        studentDashboardProvider.fetchDashboard();
+        
+        // Mark app startup as complete for FCM navigation
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          FCMPendingNavigation.markAppStartupComplete();
+        });
       });
     }
     super.initState();
@@ -69,6 +79,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         debugPrint('didChangeAppLifecycleState resume ------------ ${state.name}');
         await studentDashboardProvider.getNotificationCount();
         setBadgeCount();
+        // Dashboard data is cached, so no need to fetch again
       } else if (state == AppLifecycleState.inactive) {
         setBadgeCount();
       } else if (state == AppLifecycleState.paused) {
@@ -77,14 +88,123 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     });
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   void setBadgeCount() {
     try {
-      FlutterNativeBadge.setBadgeCount(int.parse(studentDashboardProvider!
+      AppBadgePlus.updateBadge(int.parse(studentDashboardProvider!
           .notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!
           .toString()));
     } catch (e) {
       debugPrint('error in badge count $e');
     }
+  }
+
+  void _showFloatingNotificationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enable Floating Notifications'),
+          content: const Text(
+            'To receive floating notifications and sound alerts, you need to enable "Display over other apps" permission.\n\n'
+            'This will allow important notifications to appear on top of other apps, even when your phone is locked.\n\n'
+            'Would you like to enable this feature?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _requestFloatingNotificationPermission(context);
+              },
+              child: const Text('Enable'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _requestFloatingNotificationPermission(BuildContext context) async {
+    try {
+      // Check if permission is already granted
+      if (await Permission.systemAlertWindow.isGranted) {
+        _showPermissionStatusDialog(context, true);
+        return;
+      }
+
+      // Request the permission
+      final status = await Permission.systemAlertWindow.request();
+      
+      if (status.isGranted) {
+        _showPermissionStatusDialog(context, true);
+      } else if (status.isDenied) {
+        _showPermissionStatusDialog(context, false);
+      } else if (status.isPermanentlyDenied) {
+        _showSettingsDialog(context);
+      }
+    } catch (e) {
+      debugPrint('Error requesting floating notification permission: $e');
+      _showPermissionStatusDialog(context, false);
+    }
+  }
+
+  void _showPermissionStatusDialog(BuildContext context, bool isGranted) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isGranted ? 'Permission Granted!' : 'Permission Denied'),
+          content: Text(
+            isGranted
+                ? 'Floating notifications are now enabled. You will receive notifications on top of other apps.'
+                : 'Floating notifications could not be enabled. You can try again later from Settings.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Permission Required'),
+          content: const Text(
+            'To enable floating notifications, please go to Settings and manually enable "Display over other apps" permission for Flexi School.\n\n'
+            'Settings > Apps > Flexi School > Display over other apps',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -184,6 +304,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                                 MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
                         ListTile(
                             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            title: const Text('Floating Notifications'),
+                            leading: const Icon(Icons.notifications_active),
+                            minLeadingWidth: 10,
+                            horizontalTitleGap: 10,
+                            onTap: () => _showFloatingNotificationDialog(context)),
+                        ListTile(
+                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                             title: const Text('Logout'),
                             leading: const Icon(Icons.logout),
                             minLeadingWidth: 10,
@@ -212,12 +339,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                                                 radius: 42,
                                                 backgroundImage: WebService
                                                             .studentLoginData?.table1?.first.sTUDPHOTO ==
-                                                        null
+                                                        null || WebService.studentLoginData?.table1?.first.sTUDPHOTO?.isEmpty == true
                                                     ? null
                                                     : NetworkImage(
-                                                        '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}'),
+                                                        '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO}'),
                                                 child: WebService.studentLoginData?.table1?.first.sTUDPHOTO ==
-                                                        null
+                                                        null || WebService.studentLoginData?.table1?.first.sTUDPHOTO?.isEmpty == true
                                                     ? const Icon(Icons.account_circle,
                                                         color: Colors.blue, size: 84)
                                                     : null),
@@ -261,15 +388,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                                                 ])
                                           ])),
                                   Expanded(
-                                      child: FutureBuilder<List<DashboardResponse>>(
-                                          future: WebService.fetchDashboard(),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                      child: Consumer<StudentDashboardProvider>(
+                                          builder: (context, dashboardModel, _) {
+                                            if (dashboardModel.isDashboardLoading) {
                                               return const Center(child: CircularProgressIndicator());
-                                            } else if (snapshot.hasError) {
-                                              return Center(child: Text('Error: ${snapshot.error}'));
-                                            } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                                              return DashBoardList(dashboards: snapshot.data!, employeeId: 0);
+                                            } else if (dashboardModel.dashboardError != null) {
+                                              return Center(child: Text('Error: ${dashboardModel.dashboardError}'));
+                                            } else if (dashboardModel.dashboardData != null && dashboardModel.dashboardData!.isNotEmpty) {
+                                              return DashBoardList(dashboards: dashboardModel.dashboardData!, employeeId: 0);
                                             } else {
                                               return const Center(
                                                   child: Text('No dashboard items available'));
@@ -295,7 +421,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
         }
-        FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+        AppBadgePlus.updateBadge(0);
         if (context.mounted) {
           Navigator.pushReplacementNamed(context, '/home');
         }
@@ -333,65 +459,74 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       color: Colors.blue,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(
-                  '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO ?? ""}',
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: WebService.studentLoginData?.table1?.first.sTUDPHOTO == null ||
+                      WebService.studentLoginData?.table1?.first.sTUDPHOTO?.isEmpty == true
+                      ? null
+                      : NetworkImage(
+                          '${model.imageUrl}student/${WebService.studentLoginData?.table1?.first.sTUDPHOTO}',
+                        ),
+                  child: WebService.studentLoginData?.table1?.first.sTUDPHOTO == null ||
+                      WebService.studentLoginData?.table1?.first.sTUDPHOTO?.isEmpty == true
+                      ? const Icon(Icons.account_circle, color: Colors.blue, size: 60)
+                      : null,
                 ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '${data!.fIRSTNAME} ${data.lASTNAME}',
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.white,
+                const SizedBox(width: 10),
+                Text(
+                  '${data!.fIRSTNAME} ${data.lASTNAME}',
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Montserrat Regular",
+                    color: Colors.white,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              'Adm No. : ${data.aDMNO}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: "Montserrat Regular",
+                color: Colors.white,
               ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Adm No. : ${data.aDMNO}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.white,
             ),
-          ),
-          Text(
-            'Class : ${data.cLASSDESC}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.white,
+            Text(
+              'Class : ${data.cLASSDESC}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: "Montserrat Regular",
+                color: Colors.white,
+              ),
             ),
-          ),
-          Text(
-            'Section : ${data.sECTIONDESC}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.white,
+            Text(
+              'Section : ${data.sECTIONDESC}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: "Montserrat Regular",
+                color: Colors.white,
+              ),
             ),
-          ),
-          Text(
-            'Session : ${model.sessionYear}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: "Montserrat Regular",
-              color: Colors.white,
+            Text(
+              'Session : ${model.sessionYear}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: "Montserrat Regular",
+                color: Colors.white,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

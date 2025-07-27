@@ -46,4 +46,7 @@ class Api {
   static String getTeacherPasswordApi = "${baseUrl}GetEmployeePasswordbyEmployeeID/GetEmployeePasswordbyEmployeeID";
   static String changeTeacherPasswordApi = "${baseUrl}EmployeePasswordUpdate/EmployeePasswordUpdate";
   static String refreshApi = "${baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO";
+  static String getPaidFeesApi = "${baseUrl}GetPaidFeesForAPP/GetPaidFeesForAPP";
+  static String getUnpaidFeesApi = "${baseUrl}Fees/GetFees";
+  static String getPaymentDetailApi = "${baseUrl}GetPaidFeesForAPPbyReciptNo/GetPaidFeesForAPPbyReciptNo";
 }

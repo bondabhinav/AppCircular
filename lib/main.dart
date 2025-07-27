@@ -2,21 +2,25 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flexischool/app_update.dart';
+import 'package:flexischool/common/fcm_navigation_handler.dart';
+import 'package:flexischool/common/remote_config_service.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/debug_fcm_notifications.dart';
 import 'package:flexischool/firebase_options.dart';
 import 'package:flexischool/notification_helper.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/providers/student/fee_provider.dart';
+import 'package:flexischool/providers/student/payment_detail_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/providers/teacher/attendance_provider.dart';
 import 'package:flexischool/utils/locator.dart';
-import 'package:flexischool/utils/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 
 import '/common/config.dart';
 import 'common/auth_middleware.dart';
@@ -30,10 +34,21 @@ Future<void> main() async {
   FirebaseApp app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint('Initialized default app $app from Android resource');
   await PushNotificationsManager().init();
-  await NotificationService.initializeNotification();
-  await FlutterDownloader.initialize(debug: true,ignoreSsl: true);
+  // NotificationService is only for file downloads, not FCM notifications
+  // await NotificationService.initializeNotification();
+
+  // Initialize FCM debugging
+  FCMNotificationDebugger.initialize();
+  await FCMNotificationDebugger.printFCMSettings();
+  FCMNotificationDebugger.printNotificationTypesSummary();
+
+  // Print FCM navigation mapping for debugging
+  FCMNavigationHandler.printNavigationMapping();
+
+  await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   setupLocator();
   debugPrint('fcm token ===> ${PushNotificationsManager().fcmToken}');
+  await RemoteConfigService().initialize();
   runApp(const MyApp());
 }
 
@@ -105,17 +120,19 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => StudentDashboardProvider()),
         ChangeNotifierProvider(create: (_) => StudentNotificationProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => FeeProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentDetailProvider()),
       ],
       child: MaterialApp(
-          title: Constants.appName,
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-              fontFamily: GoogleFonts.lato().fontFamily,
-              primarySwatch: Colors.blue,
-              appBarTheme: const AppBarTheme(color: Colors.blue)),
-          routes: routes,
-          initialRoute: "/",
-          navigatorKey: AuthMiddleware.navigatorKey,
+        title: Constants.appName,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            fontFamily: GoogleFonts.lato().fontFamily,
+            primarySwatch: Colors.blue,
+            appBarTheme: const AppBarTheme(color: Colors.blue)),
+        routes: routes,
+        initialRoute: "/",
+        navigatorKey: AuthMiddleware.navigatorKey,
         //  navigatorObservers: [authMiddleware]
       ),
     );

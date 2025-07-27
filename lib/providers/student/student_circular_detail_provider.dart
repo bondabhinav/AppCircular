@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
+// Removed: import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
@@ -135,7 +135,6 @@ class StudentCircularDetailProvider extends ChangeNotifier {
               body: "",
               summary: "",
               progress: progress,
-              notificationLayout: NotificationLayout.ProgressBar,
             );
           }
           //  NotificationService().showProgressNotification(progress, fileName);

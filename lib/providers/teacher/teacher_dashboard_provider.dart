@@ -4,18 +4,22 @@ import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/models/dashboard_model.dart';
 import 'package:flexischool/models/student/session_list_response.dart';
 import 'package:flexischool/models/teacher/teacher_session_response.dart';
 import 'package:flexischool/models/user_model.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TeacherDashboardProvider extends ChangeNotifier {
   final apiService = ApiService();
   TeacherSessionResponse? teacherSessionResponse;
+  List<DashboardResponse>? dashboardData;
+  bool _isDashboardLoading = false;
+  String? _dashboardError;
 
   int? _selectedTeacherSessionDropDownValue;
 
@@ -24,6 +28,58 @@ class TeacherDashboardProvider extends ChangeNotifier {
   String _sessionYear = '';
 
   String get sessionYear => _sessionYear;
+
+  bool get isDashboardLoading => _isDashboardLoading;
+  String? get dashboardError => _dashboardError;
+
+  Future<void> fetchDashboard() async {
+    // Return cached data if available
+    if (dashboardData != null && dashboardData!.isNotEmpty) {
+      return;
+    }
+
+    try {
+      _isDashboardLoading = true;
+      _dashboardError = null;
+      notifyListeners();
+
+      var schoolBaseUrl = await WebService.getSchoolUrl();
+      var loginType = await WebService.getLoginType();
+      debugPrint('Login type ****** $loginType');
+
+      var requestedData = {"Type": loginType};
+      var body = json.encode(requestedData);
+
+      final response = await apiService.post(
+          url: '${schoolBaseUrl!}DashboardForTeacher/DashboardForTeacher', data: body);
+
+      final responseData = response.data;
+      debugPrint("dashboard data ===> $responseData");
+
+      if (responseData['lstDashobaord'] != null) {
+        final List<dynamic> dashboardList = responseData['lstDashobaord'];
+        dashboardData = dashboardList.map((json) => DashboardResponse.fromJson(json)).toList();
+        _dashboardError = null;
+      } else {
+        _dashboardError = 'Dashboard data is null';
+        dashboardData = [];
+      }
+    } catch (e) {
+      debugPrint('Error fetching dashboard: $e');
+      _dashboardError = 'Failed to load dashboard data: $e';
+      dashboardData = [];
+    } finally {
+      _isDashboardLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void clearDashboardCache() {
+    dashboardData = null;
+    _dashboardError = null;
+    _isDashboardLoading = false;
+    notifyListeners();
+  }
 
   Future<void> getSessionData() async {
     var requestedData = {"SCHOOL_ID": "1"};
@@ -55,6 +111,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
   void updateSession(newValue) {
     _selectedTeacherSessionDropDownValue = newValue!;
     Constants.sessionId = newValue;
+    clearDashboardCache(); // Clear dashboard cache when session changes
     var sessionData = teacherSessionResponse?.sessionDD?.firstWhere((data) => data.sESSIONID == newValue);
     if (sessionData != null) {
       _sessionYear = '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
@@ -70,6 +127,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
       }
       Constants.lastDate = sessionData.eNDDATE!;
     }
+    fetchDashboard(); // Fetch dashboard for new session
     notifyListeners();
   }
 
@@ -83,7 +141,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
-          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+          AppBadgePlus.updateBadge(0);
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {}

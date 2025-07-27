@@ -534,21 +534,41 @@ class AttendanceProvider extends ChangeNotifier {
   }
 
   Future<EditAttendanceResponse?> applyMarkedAttendance() async {
+    // Print detailed information about the data being sent
+    debugPrint('=== APPLY MARKED ATTENDANCE DEBUG ===');
+    debugPrint('submittedMarkedList length: ${submittedMarkedList.length}');
+    debugPrint('submittedMarkedList raw data: $submittedMarkedList');
+    
+    // Print each item in detail
+    for (int i = 0; i < submittedMarkedList.length; i++) {
+      debugPrint('Item $i: ${submittedMarkedList[i]}');
+      debugPrint('  - STUD_ATTENDANCE_DET_ID: ${submittedMarkedList[i]['STUD_ATTENDANCE_DET_ID']}');
+      debugPrint('  - PRESENT: ${submittedMarkedList[i]['PRESENT']}');
+    }
+    
+    // Create the final payload
+    final Map<String, dynamic> payload = {"lstAttendanceDetail": submittedMarkedList};
+    debugPrint('Final payload being sent: $payload');
+    debugPrint('Final payload JSON: ${payload.toString()}');
+    debugPrint('=== END DEBUG ===');
+    
     loaderProvider.showLoader();
     notifyListeners();
     try {
-      final response = await apiService
-          .post(url: Api.editAttendanceApi, data: {"lstAttendanceDetail": submittedMarkedList});
+      final response = await apiService.post(url: Api.editAttendanceApi, data: payload);
       if (response.statusCode == 200) {
         editAttendanceResponse = null;
         editAttendanceResponse = EditAttendanceResponse.fromJson(response.data);
         loaderProvider.hideLoader();
         notifyListeners();
       } else {
+        debugPrint('API call failed with status code: ${response.statusCode}');
+        debugPrint('Response data: ${response.data}');
         loaderProvider.hideLoader();
         notifyListeners();
       }
     } catch (e) {
+      debugPrint('Exception in applyMarkedAttendance: $e');
       loaderProvider.hideLoader();
       notifyListeners();
     }

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
+// Removed: import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flexischool/utils/notification_service.dart';
@@ -358,7 +358,6 @@ class DownloadPdf {
           body: "Starting download...",
           summary: "",
           progress: 0,
-          notificationLayout: NotificationLayout.ProgressBar,
         );
       }
       
@@ -386,7 +385,6 @@ class DownloadPdf {
                   body: "Progress: $currentProgress%", 
                   summary: "",
                   progress: currentProgress,
-                  notificationLayout: NotificationLayout.ProgressBar,
                 );
                 
                 // Update percentage stream safely
@@ -439,8 +437,6 @@ class DownloadPdf {
               body: "Image saved to gallery. Tap to open.",
               summary: "",
               payload: {"path": filePath},
-              notificationLayout: NotificationLayout.Default,
-              actionType: ActionType.Default,
             );
             
             messageCallBack?.call("Image saved to gallery successfully");
@@ -455,8 +451,6 @@ class DownloadPdf {
               body: "Image downloaded. Tap to open.",
               summary: "",
               payload: {"path": filePath},
-              notificationLayout: NotificationLayout.Default,
-              actionType: ActionType.Default,
             );
             
             messageCallBack?.call("Image downloaded but gallery save failed: $e");

@@ -1,224 +1,164 @@
 import 'dart:io';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:open_filex/open_filex.dart';
 
 class NotificationService {
+  static final NotificationService _instance = NotificationService._internal();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  factory NotificationService() {
+    return _instance;
+  }
+
+  NotificationService._internal();
+
   static Future<void> initializeNotification() async {
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelGroupKey: 'high_importance_channel',
-          channelKey: 'high_importance_channel',
-          channelName: 'Basic notifications',
-          channelDescription: 'Notification channel for basic tests',
-          defaultColor: const Color(0xFF9D50DD),
-          ledColor: Colors.white,
-          importance: NotificationImportance.Max,
-          channelShowBadge: true,
-          onlyAlertOnce: true,
-          playSound: true,
-          criticalAlerts: true,
-        )
-      ],
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupKey: 'high_importance_channel_group',
-          channelGroupName: 'Group 1',
-        )
-      ],
-      debug: true,
+    await NotificationService().initNotification();
+  }
+  
+  // Initialize for file downloads only (not FCM)
+  static Future<void> initializeForFileDownloads() async {
+    await NotificationService()._initForFileDownloads();
+  }
+
+  Future<void> _initForFileDownloads() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+        requestSoundPermission: true,
+        requestBadgePermission: true,
+        requestAlertPermission: true);
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
     );
 
-    await AwesomeNotifications().isNotificationAllowed().then(
-      (isAllowed) async {
-        if (!isAllowed) {
-          await AwesomeNotifications().requestPermissionToSendNotifications();
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse? notificationResponse) {
+        if (notificationResponse != null && notificationResponse.payload != null) {
+          _handleNotificationResponse(notificationResponse.payload!);
         }
       },
-    );
-
-    await AwesomeNotifications().setListeners(
-      onActionReceivedMethod: onActionReceivedMethod,
-      onNotificationCreatedMethod: onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: onDismissActionReceivedMethod,
+      onDidReceiveBackgroundNotificationResponse: backgroundNotificationHandler,
     );
   }
 
-  /// Use this method to detect when a new notification or a schedule is created
-  static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
-    debugPrint('onNotificationCreatedMethod');
+  Future<void> initNotification() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+        requestSoundPermission: true,
+        requestBadgePermission: true,
+        requestAlertPermission: true);
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse? notificationResponse) {
+        if (notificationResponse != null && notificationResponse.payload != null) {
+          _handleNotificationResponse(notificationResponse.payload!);
+        }
+      },
+      onDidReceiveBackgroundNotificationResponse: backgroundNotificationHandler,
+    );
   }
 
-  /// Use this method to detect every time that a new notification is displayed
-  static Future<void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {
-    debugPrint('onNotificationDisplayedMethod');
-  }
-
-  /// Use this method to detect if the user dismissed a notification
-  static Future<void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {
-    debugPrint('onDismissActionReceivedMethod');
-  }
-
-  /// Use this method to detect when the user taps on a notification or action button
-  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
-    debugPrint('onActionReceivedMethod');
-    final payload = receivedAction.payload ?? {};
-    debugPrint('downloaded path --- > $payload');
-    debugPrint('downloaded path --- > ${payload['path']}');
-    final file = File(payload['path']!);
-    if (file.existsSync()) {
-      debugPrint('File exist at path: ${file.path}');
-      OpenFilex.open(file.path);
-    } else {
-      debugPrint('File does not exist at path: ');
+  @pragma('vm:entry-point')
+  static void backgroundNotificationHandler(NotificationResponse details) {
+    if (details.payload != null) {
+      _instance._handleNotificationResponse(details.payload!);
     }
-    //  OpenFile.open(payload['path']);
   }
 
-  static Future<void> showNotification(
-      {required final String title,
-      required final String body,
-      final String? summary,
-      final Map<String, String>? payload,
-      final ActionType actionType = ActionType.Default,
-      final NotificationLayout notificationLayout = NotificationLayout.Default,
-      final NotificationCategory? category,
-      final String? bigPicture,
-      final List<NotificationActionButton>? actionButtons,
-      final bool scheduled = false,
-      final int? interval,
-      final int? progress,
-      final channelId}) async {
-    assert(!scheduled || (scheduled && interval != null));
+  void _handleNotificationResponse(String payload) {
+    debugPrint('NotificationService received payload: $payload');
+    
+    // Only handle file paths, not FCM notification data
+    if (payload.startsWith('/') || payload.contains('storage')) {
+      final file = File(payload);
+      if (file.existsSync()) {
+        debugPrint('Opening file at path: ${file.path}');
+        OpenFilex.open(file.path);
+      } else {
+        debugPrint('File does not exist at path: $payload');
+      }
+    } else {
+      debugPrint('Non-file payload received, ignoring: $payload');
+    }
+  }
 
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: channelId,
-        channelKey: 'high_importance_channel',
-        title: title,
-        body: body,
-        actionType: actionType,
-        notificationLayout: notificationLayout,
-        summary: summary,
-        category: category,
-        payload: payload,
-        bigPicture: bigPicture,
-        progress: progress != null ? double.parse(progress.toString()) : null,
-      ),
-      actionButtons: actionButtons,
-      schedule: scheduled
-          ? NotificationInterval(
-              repeats: false,
-              interval: Duration(seconds: interval ?? 0),
-              timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier(),
-              preciseAlarm: true,
-            )
-          : null,
+  static Future<void> showProgressNotification(int progress, String fileName) async {
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      '1',
+      'Download Progress',
+      channelDescription: 'Shows download progress',
+      importance: Importance.high,
+      priority: Priority.high,
+      showProgress: true,
+      maxProgress: 100,
+      progress: progress,
+      onlyAlertOnce: true,
+      styleInformation: BigTextStyleInformation('Downloading...',
+          contentTitle: '$progress% complete', summaryText: fileName),
+    );
+
+    NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _instance.flutterLocalNotificationsPlugin.show(
+      1,
+      'Downloading...',
+      '$progress% complete',
+      platformChannelSpecifics,
     );
   }
 
-  static cancelProgressNotification() async {
-    await AwesomeNotifications().cancel(1);
+  static Future<void> showNotification({
+    required String title,
+    required String body,
+    String? summary,
+    Map<String, String>? payload,
+    int? channelId,
+    int? progress,
+  }) async {
+    // Initialize for file downloads if not already initialized
+    await NotificationService.initializeForFileDownloads();
+    String? filePath = payload?['path'];
+    
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      channelId?.toString() ?? '0',
+      'Default Channel',
+      channelDescription: 'Default notification channel',
+      importance: Importance.max,
+      priority: Priority.high,
+      showProgress: progress != null,
+      progress: progress ?? 0,
+      maxProgress: 100,
+    );
+
+    NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _instance.flutterLocalNotificationsPlugin.show(
+      channelId ?? 0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: filePath,
+    );
+  }
+
+  static Future<void> cancelProgressNotification() async {
+    await _instance.flutterLocalNotificationsPlugin.cancel(1);
   }
 }
-
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:open_file/open_file.dart';
-//
-// class NotificationService {
-//   static final NotificationService _instance = NotificationService._internal();
-//   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-//
-//   factory NotificationService() {
-//     return _instance;
-//   }
-//
-//   NotificationService._internal();
-//
-//   Future<void> initNotification() async {
-//     const AndroidInitializationSettings initializationSettingsAndroid =
-//         AndroidInitializationSettings('notification_icon');
-//
-//     DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-//         requestSoundPermission: true,
-//         requestBadgePermission: true,
-//         requestAlertPermission: true,
-//         onDidReceiveLocalNotification: (id, title, body, payload) {});
-//
-//     InitializationSettings initializationSettings = InitializationSettings(
-//       android: initializationSettingsAndroid,
-//       iOS: initializationSettingsIOS,
-//     );
-//
-//     flutterLocalNotificationsPlugin.initialize(
-//       initializationSettings,
-//       onDidReceiveNotificationResponse: (NotificationResponse? notificationResponse) {
-//         if (notificationResponse != null) {
-//           _handleNotificationResponse(notificationResponse.payload!);
-//         }
-//       },
-//       onDidReceiveBackgroundNotificationResponse: (NotificationResponse? notificationResponse) {
-//         if (notificationResponse != null) {
-//           _handleNotificationResponse(notificationResponse.payload!);
-//         }
-//       },
-//     );
-//   }
-//
-//   void _handleNotificationResponse(String payload) {
-//     OpenFile.open(payload);
-//   }
-//
-//   void showProgressNotification(int progress, String fileName) async {
-//     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-//       '1',
-//       'Channel name',
-//       importance: Importance.high,
-//       priority: Priority.high,
-//       showProgress: true,
-//       maxProgress: 100,
-//       progress: progress,
-//       onlyAlertOnce: true,
-//       styleInformation: BigTextStyleInformation('Downloading...',
-//           contentTitle: '$progress% complete', summaryText: fileName),
-//     );
-//
-//     NotificationDetails platformChannelSpecifics =
-//         NotificationDetails(android: androidPlatformChannelSpecifics);
-//
-//     await flutterLocalNotificationsPlugin.show(
-//       1,
-//       'Downloading...',
-//       '$progress% complete',
-//       platformChannelSpecifics,
-//     );
-//   }
-//
-//   Future<void> showNotification(String filePath, String fileName) async {
-//     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-//       '0',
-//       'Channel name',
-//       importance: Importance.max,
-//       priority: Priority.high,
-//     );
-//
-//     const NotificationDetails platformChannelSpecifics =
-//         NotificationDetails(android: androidPlatformChannelSpecifics);
-//
-//     await flutterLocalNotificationsPlugin.show(
-//       0,
-//       fileName,
-//       'Tap to open the downloaded file.',
-//       platformChannelSpecifics,
-//       payload: filePath,
-//     );
-//   }
-//
-//   void cancelProgressNotification() {
-//     flutterLocalNotificationsPlugin.cancel(1);
-//   }
-// }

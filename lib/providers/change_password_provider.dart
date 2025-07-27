@@ -8,7 +8,7 @@ import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../common/api_urls.dart';
@@ -143,7 +143,7 @@ class ChangePasswordProvider extends ChangeNotifier {
           debugPrint('else logout');
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
-          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+          AppBadgePlus.updateBadge(0);
           setChangePasswordLoader(false);
           Navigator.pushReplacementNamed(context, '/home');
         }

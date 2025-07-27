@@ -5,7 +5,7 @@ import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -99,7 +99,7 @@ class _LoginWidgetState extends State<LoginWidget> {
           loginStore.loginInStatus = LoginStatus.loggedIn;
           WebService.setTeacherLoginDetails(response['data']);
           loginStore.notify();
-          FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+          AppBadgePlus.updateBadge(0);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response['message'])));
             Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false);
@@ -207,7 +207,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                       Container(
                           alignment: Alignment.center,
                           child: _logo != null
-                              ? CachedNetworkImage(imageUrl: _logo!, width: 150)
+                              ? CachedNetworkImage(
+                                  imageUrl: _logo!, 
+                                  width: 150,
+                                  errorWidget: (context, url, error) => const Icon(Icons.school, size: 150),
+                                  placeholder: (context, url) => const CircularProgressIndicator(),
+                                )
                               : const SizedBox()),
                       Container(
                           alignment: Alignment.center,

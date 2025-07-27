@@ -15,5 +15,5 @@ Map<String, WidgetBuilder> routes = {
   "/schoolUrl": (context) => const Schoolurl(),
   "/login": (context) => const LoginRoute(),
   "/dashboard": (context) => const Dashboard(),
-  "/studentDashboard": (context) => const StudentDashboardScreen()
+  "/studentDashboard": (context) => const StudentDashboardScreen(),
 };

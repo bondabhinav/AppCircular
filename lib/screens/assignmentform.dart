@@ -5,7 +5,7 @@ import 'package:flexischool/widgets/custom_loader.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flexischool/widgets/file_table.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:provider/provider.dart';
 import 'package:flexischool/utils/locator.dart';
 
@@ -303,18 +303,34 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
 
                           Column(children: [
-                            QuillToolbar.simple(
-                                configurations:
-                                    QuillSimpleToolbarConfigurations(controller: model.quillController)),
+                            QuillSimpleToolbar(
+                              controller: model.quillController,
+                              config: const QuillSimpleToolbarConfig(
+                                showAlignmentButtons: true,
+                                showBoldButton: true,
+                                showItalicButton: true,
+                                showUnderLineButton: true,
+                                showStrikeThrough: true,
+                                showColorButton: true,
+                                showBackgroundColorButton: true,
+                                showClearFormat: true,
+                                showHeaderStyle: true,
+                                showListNumbers: true,
+                                showListBullets: true,
+                                showListCheck: true,
+                                showCodeBlock: true,
+                                showIndent: true,
+                                showLink: true,
+                                showSearchButton: true,
+                              ),
+                            ),
                             Container(
                                 height: 300,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5), border: Border.all()),
                                 child: QuillEditor.basic(
-                                    configurations: QuillEditorConfigurations(
                                   controller: model.quillController,
-                                  padding: const EdgeInsets.all(16),
-                                )))
+                                ))
                           ]),
 
                           // QuillToolbar.basic(

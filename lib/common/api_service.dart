@@ -7,7 +7,7 @@ import 'package:flexischool/common/auth_middleware.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:provider/provider.dart';
@@ -141,7 +141,7 @@ class ApiService {
       final LoginProvider loginStore =
           Provider.of<LoginProvider>(AuthMiddleware.navigatorKey.currentContext!, listen: false);
       loginStore.userLogout();
-      FlutterNativeBadge.clearBadgeCount(requestPermission: true);
+      AppBadgePlus.updateBadge(0);
       Navigator.pushReplacementNamed(AuthMiddleware.navigatorKey.currentContext!, '/home');
     } else {
       debugPrint('Unique ID found in the device list');

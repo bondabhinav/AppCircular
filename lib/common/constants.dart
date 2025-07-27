@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_badge/flutter_native_badge.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:intl/intl.dart';
 
 class Constants {
@@ -33,7 +33,7 @@ class Constants {
   }
 
   static Future<void> isSupportBadgeOrNot() async {
-    final isSupported = await FlutterNativeBadge.getBadgeCount() == 1;
+    final isSupported = await AppBadgePlus.isSupported();
     if (isSupported) {
       isAppBadgeSupported = true;
       debugPrint('if part isAppBadgeSupported==> $isAppBadgeSupported');

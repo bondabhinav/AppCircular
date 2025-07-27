@@ -2,10 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
+import 'package:flexischool/common/fcm_pending_navigation.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/teacher/teacher_dashboard_provider.dart';
 import 'package:flexischool/screens/change_password_screen.dart';
 import 'package:flexischool/screens/student/academic_calender_screen.dart';
+import 'package:flexischool/screens/student/fee_screen.dart';
 import 'package:flexischool/screens/student/student_assignment_screen.dart';
 import 'package:flexischool/screens/student/student_attendance_graph_screen.dart';
 import 'package:flexischool/screens/student/student_circular.dart';
@@ -68,7 +70,15 @@ class CustomUserAccountsDrawerHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            CircleAvatar(backgroundImage: NetworkImage(loginStore.photo), radius: 30),
+            CircleAvatar(
+              backgroundImage: loginStore.photo.isNotEmpty 
+                  ? NetworkImage(loginStore.photo) 
+                  : null,
+              radius: 30,
+              child: loginStore.photo.isEmpty 
+                  ? const Icon(Icons.account_circle, color: Colors.blue, size: 60) 
+                  : null,
+            ),
             const SizedBox(width: 10),
             Text('${loginStore.userName}',
                 textAlign: TextAlign.left,
@@ -108,6 +118,15 @@ class _DashboardState extends State<Dashboard> {
     teacherDashboardProvider = TeacherDashboardProvider();
     teacherDashboardProvider?.getSessionData();
     teacherDashboardProvider?.callRefreshApi();
+    teacherDashboardProvider?.fetchDashboard();
+    
+    // Mark app startup as complete for FCM navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        FCMPendingNavigation.markAppStartupComplete();
+      });
+    });
+    
     super.initState();
   }
 
@@ -232,7 +251,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
                         CircleAvatar(
                           radius: 42,
-                          backgroundImage: NetworkImage(loginStore.photo),
+                          backgroundImage: loginStore.photo.isNotEmpty 
+                              ? NetworkImage(loginStore.photo) 
+                              : null,
+                          child: loginStore.photo.isEmpty 
+                              ? const Icon(Icons.account_circle, color: Colors.blue, size: 84) 
+                              : null,
                         ),
                         const SizedBox(
                           width: 16,
@@ -281,16 +305,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             ])
                       ])),
                   Expanded(
-                      child: FutureBuilder<List>(
-                          future: WebService.fetchDashboard(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return const Center(child: Text('Something went wrong please try again!'));
-                            } else if (snapshot.hasData) {
-                              return DashBoardList(
-                                  dashboards: snapshot.requireData, employeeId: loginStore.employeeId);
-                            } else {
+                      child: Consumer<TeacherDashboardProvider>(
+                          builder: (context, dashboardModel, _) {
+                            if (dashboardModel.isDashboardLoading) {
                               return const Center(child: CircularProgressIndicator());
+                            } else if (dashboardModel.dashboardError != null) {
+                              return Center(child: Text('Error: ${dashboardModel.dashboardError}'));
+                            } else if (dashboardModel.dashboardData != null && dashboardModel.dashboardData!.isNotEmpty) {
+                              return DashBoardList(
+                                  dashboards: dashboardModel.dashboardData!, employeeId: loginStore.employeeId);
+                            } else {
+                              return const Center(child: Text('No dashboard items available'));
                             }
                           }))
                 ])),
@@ -342,13 +367,17 @@ class DashBoardList extends StatelessWidget {
             shrinkWrap: true,
             itemCount: dashboards.length,
             itemBuilder: (context, index) {
-              debugPrint('dashboards[index].IMAGE: $iconPath!${dashboards[index].IMAGE}');
               return InkWell(
                 child: Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     elevation: 4,
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                      CachedNetworkImage(imageUrl: iconPath! + dashboards[index].IMAGE, height: 80),
+                      CachedNetworkImage(
+                        imageUrl: iconPath! + dashboards[index].IMAGE, 
+                        height: 80,
+                        errorWidget: (context, url, error) => const Icon(Icons.error, size: 80),
+                        placeholder: (context, url) => const CircularProgressIndicator(),
+                      ),
                       const SizedBox(height: 10.0),
                       Text(dashboards[index].MENUNAME, style: cardTextStyle)
                     ])),
@@ -414,6 +443,16 @@ class DashBoardList extends StatelessWidget {
                       }
                     }
                   }
+
+                  else if(dashboards[index].MENUNAME.toString().toLowerCase() == 'fees'){
+                    if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FeeScreen()),
+                      );
+                    }
+                  }
+
                 },
               );
             },
