@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flexischool/common/auth_middleware.dart';
 import 'package:flexischool/screens/assignment_detail_screen.dart';
+import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/home.dart';
+import 'package:flexischool/screens/login.dart';
+import 'package:flexischool/screens/schoolurl.dart';
 import 'package:flexischool/screens/student/fee_screen.dart';
 import 'package:flexischool/screens/student/student_circular_detail_screen.dart';
+import 'package:flexischool/screens/student/student_dashboard_screen.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flexischool/screens/student/student_attendance_graph_screen.dart';
 import 'package:flexischool/screens/student/academic_calender_screen.dart';
@@ -11,13 +16,13 @@ import 'package:flexischool/screens/student/student_circular.dart';
 
 class FCMNavigationHandler {
   
-  /// Map FCM PAGE values to named routes
-  static const Map<String, String> _pageToRouteMap = {
-    'DASHBOARD': '/dashboard',
-    'STUDENT_DASHBOARD': '/studentDashboard',
-    'HOME': '/home',
-    'LOGIN': '/login',
-    'SCHOOL_URL': '/schoolUrl',
+  /// Map FCM PAGE values to screen widgets
+  static final Map<String, Widget Function()> _pageToScreenMap = {
+    'DASHBOARD': () => const Dashboard(),
+    'STUDENT_DASHBOARD': () => const StudentDashboardScreen(),
+    'HOME': () => const Home(),
+    'LOGIN': () => const LoginRoute(),
+    'SCHOOL_URL': () => const Schoolurl(),
     // Add more as needed
   };
 
@@ -52,14 +57,26 @@ class FCMNavigationHandler {
       return;
     }
 
-    // First try named route navigation
-    if (_pageToRouteMap.containsKey(page.toUpperCase())) {
-      final routeName = _pageToRouteMap[page.toUpperCase()]!;
-      debugPrint("Navigating to named route: $routeName");
+    // First try direct screen navigation
+    if (_pageToScreenMap.containsKey(page.toUpperCase())) {
+      final screenBuilder = _pageToScreenMap[page.toUpperCase()]!;
+      final widget = screenBuilder();
+      debugPrint("Navigating to screen: ${widget.runtimeType}");
       
-      AuthMiddleware.navigatorKey.currentState?.pushNamed(routeName);
-      debugPrint("=== END FCM NAVIGATION ===");
-      return;
+      if (AuthMiddleware.navigatorKey.currentContext != null) {
+        Navigator.push(
+          AuthMiddleware.navigatorKey.currentContext!,
+          MaterialPageRoute(builder: (context) => widget),
+        );
+        debugPrint("=== END FCM NAVIGATION ===");
+        return;
+      } else {
+        debugPrint("Navigator context not available, retrying in 500ms...");
+        Future.delayed(const Duration(milliseconds: 500), () {
+          handleFCMNavigation(fcmData);
+        });
+        return;
+      }
     }
 
     // Then try widget-based navigation
@@ -195,17 +212,17 @@ class FCMNavigationHandler {
 
   /// Get available pages for debugging
   static List<String> getAvailablePages() {
-    final routes = _pageToRouteMap.keys.toList();
+    final screens = _pageToScreenMap.keys.toList();
     final widgets = _pageToWidgetMap.keys.toList();
-    return [...routes, ...widgets];
+    return [...screens, ...widgets];
   }
 
   /// Print navigation mapping for debugging
   static void printNavigationMapping() {
     debugPrint("=== FCM NAVIGATION MAPPING ===");
-    debugPrint("Available Named Routes:");
-    _pageToRouteMap.forEach((page, route) {
-      debugPrint("  $page -> $route");
+    debugPrint("Available Screens:");
+    _pageToScreenMap.forEach((page, screenBuilder) {
+      debugPrint("  $page -> ${screenBuilder.runtimeType}");
     });
     
     debugPrint("Available Widgets:");

@@ -1,6 +1,7 @@
 import 'package:flexischool/common/constants.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/teacher/teacher_assignment_provider.dart';
+import 'package:flexischool/screens/dashboard.dart';
 import 'package:flexischool/widgets/custom_loader.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flexischool/widgets/file_table.dart';
@@ -672,7 +673,10 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                   if (value.success ?? false) {
                                     ShowSnackBar.successToast(
                                         context: context, showMessage: 'Assignment created successfully');
-                                    Navigator.pushReplacementNamed(context, '/dashboard');
+                                                                                    Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const Dashboard()),
+                                                );
                                   } else {
                                     ShowSnackBar.error(context: context, showMessage: 'Something went wrong');
                                   }

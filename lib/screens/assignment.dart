@@ -1,3 +1,4 @@
+import 'package:flexischool/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class Assignment extends StatefulWidget {
@@ -12,7 +13,10 @@ class _AssignmentState extends State<Assignment> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
           return false;
         },
         child: Scaffold(
@@ -22,7 +26,10 @@ class _AssignmentState extends State<Assignment> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/dashboard');
+                Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
               },
             ),
           ),

@@ -11,6 +11,7 @@ import 'package:flexischool/models/student/student_detail_response.dart';
 import 'package:flexischool/notification_count_handler.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:get_it/get_it.dart';
@@ -198,20 +199,29 @@ class StudentDashboardProvider extends ChangeNotifier {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
           AppBadgePlus.updateBadge(0);
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
         }
         notifyListeners();
       } else {
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
         }
       }
     } catch (e) {
       final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
       loginStore.userLogout();
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
       debugPrint('Failed to connect to the API ${e.toString()}');
     }
   }

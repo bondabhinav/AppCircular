@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flexischool/screens/dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -145,7 +146,10 @@ class _NotificationAssignmentState extends State<NotificationAssignment> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Dashboard()),
+                  );
         return false;
       },
       child: Scaffold(
@@ -154,7 +158,10 @@ class _NotificationAssignmentState extends State<NotificationAssignment> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/dashboard');
+              Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Dashboard()),
+                  );
             },
           ),
           actions: [

@@ -9,6 +9,7 @@ import 'package:flexischool/models/student/session_list_response.dart';
 import 'package:flexischool/models/teacher/teacher_session_response.dart';
 import 'package:flexischool/models/user_model.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:intl/intl.dart';
@@ -142,7 +143,10 @@ class TeacherDashboardProvider extends ChangeNotifier {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();
           AppBadgePlus.updateBadge(0);
-          Navigator.pushReplacementNamed(context, '/home');
+                      Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
         }
       } else {}
     } on Exception catch (e) {

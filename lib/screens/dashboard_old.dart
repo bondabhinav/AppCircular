@@ -1,4 +1,5 @@
 import 'package:flexischool/screens/circulars_screen.dart';
+import 'package:flexischool/screens/loader.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -101,7 +102,10 @@ class _DashboardState extends State<Dashboard> {
               minLeadingWidth: 10,
               horizontalTitleGap: 10,
               onTap: () {
-                Navigator.pushNamed(context, "/", arguments: " Login");
+                Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoaderRoute()),
+          );
               },
             ),
           ],

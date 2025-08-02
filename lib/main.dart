@@ -15,6 +15,7 @@ import 'package:flexischool/providers/student/payment_detail_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/providers/student/student_notification_provider.dart';
 import 'package:flexischool/providers/teacher/attendance_provider.dart';
+import 'package:flexischool/screens/loader.dart';
 import 'package:flexischool/utils/locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,19 @@ import 'providers/url_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set preferred orientations
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  
+  // Enable edge-to-edge mode for Android 15 compatibility
+  // This uses only the brightness properties, avoiding deprecated color APIs
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
   WebService.init();
   Constants.isSupportBadgeOrNot();
   FirebaseApp app = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -110,8 +123,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final AuthMiddleware authMiddleware = AuthMiddleware();
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UrlProvider()),
@@ -130,8 +141,7 @@ class _MyAppState extends State<MyApp> {
             fontFamily: GoogleFonts.lato().fontFamily,
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(color: Colors.blue)),
-        routes: routes,
-        initialRoute: "/",
+        home: const LoaderRoute(),
         navigatorKey: AuthMiddleware.navigatorKey,
         //  navigatorObservers: [authMiddleware]
       ),

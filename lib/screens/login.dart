@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/home.dart';
+import 'package:flexischool/screens/schoolurl.dart';
+import 'package:flexischool/screens/student/student_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -41,8 +44,6 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   bool _isLoading = false;
   String _errorMessage = '';
-  bool _is_logo_loading = true;
-  bool _imageError = false;
 
   @override
   void dispose() {
@@ -77,7 +78,10 @@ class _LoginWidgetState extends State<LoginWidget> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response)));
             Navigator.of(context)
-                .pushNamedAndRemoveUntil('/studentDashboard', (Route<dynamic> route) => false);
+                                  .pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const StudentDashboardScreen()),
+                      (Route<dynamic> route) => false,
+                    );
           }
         } else {
           if (context.mounted) {
@@ -102,7 +106,10 @@ class _LoginWidgetState extends State<LoginWidget> {
           AppBadgePlus.updateBadge(0);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response['message'])));
-            Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false);
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const Dashboard()),
+              (Route<dynamic> route) => false,
+            );
           }
         } else {
           _errorMessage = response['message'];
@@ -138,7 +145,10 @@ class _LoginWidgetState extends State<LoginWidget> {
       debugPrint("schoolUrl -- $schoolUrl");
     } else {
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/schoolUrl', (Route<dynamic> route) => false);
+                  Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const Schoolurl()),
+              (Route<dynamic> route) => false,
+            );
       }
     }
 
@@ -157,7 +167,6 @@ class _LoginWidgetState extends State<LoginWidget> {
         final responseSplit = response.data['schoolSearch'][0];
 
         setState(() {
-          _is_logo_loading = false;
           _schoolName = responseSplit['SCHOOL_NAME'];
           _logo = (schoolLogo! + responseSplit['LOGO_PATH']);
           debugPrint('_logo ---$_logo');
@@ -185,9 +194,16 @@ class _LoginWidgetState extends State<LoginWidget> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-                onPressed: () {
-                  WebService.clearAllPref();
-                  Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+                onPressed: () async {
+                  // Only clear login type, not the school URL
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('global_login_type');
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const Home()),
+                      (Route<dynamic> route) => false,
+                    );
+                  }
                 },
                 icon: const Icon(Icons.arrow_back_ios),
                 color: Colors.black)),
@@ -211,7 +227,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                   imageUrl: _logo!, 
                                   width: 150,
                                   errorWidget: (context, url, error) => const Icon(Icons.school, size: 150),
-                                  placeholder: (context, url) => const CircularProgressIndicator(),
+                                  placeholder: (context, url) => Center(child: const CircularProgressIndicator()),
                                 )
                               : const SizedBox()),
                       Container(

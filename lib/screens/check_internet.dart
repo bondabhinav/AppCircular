@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flexischool/app_update.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flutter/material.dart';
 
 class CheckInternet extends StatelessWidget {
@@ -41,12 +42,11 @@ class CheckInternet extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('You\'re connected to a ${connectivityResult..first.name} network')));
-                  // Navigator.pushReplacement(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const Home()),
-                  // );
                   checkForUpdate(context);
-                  Navigator.pushNamed(context, "/home");
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                  );
                 }
               }
             },

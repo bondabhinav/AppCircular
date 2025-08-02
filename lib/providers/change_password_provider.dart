@@ -6,6 +6,7 @@ import 'package:flexischool/models/change_password_response.dart';
 import 'package:flexischool/models/common_model.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
@@ -145,7 +146,10 @@ class ChangePasswordProvider extends ChangeNotifier {
           loginStore.userLogout();
           AppBadgePlus.updateBadge(0);
           setChangePasswordLoader(false);
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
         }
       }
     } catch (e) {

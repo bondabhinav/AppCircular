@@ -5,6 +5,12 @@ import 'package:flexischool/app_update.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
+import 'package:flexischool/screens/check_internet.dart';
+import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/home.dart';
+import 'package:flexischool/screens/login.dart';
+import 'package:flexischool/screens/schoolurl.dart';
+import 'package:flexischool/screens/student/student_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +19,7 @@ import 'package:url_launcher/src/url_launcher_uri.dart';
 
 import '../common/config.dart';
 
-//Loader Screen
+// Loader Screen
 class LoaderRoute extends StatefulWidget {
   const LoaderRoute({super.key});
 
@@ -24,212 +30,244 @@ class LoaderRoute extends StatefulWidget {
 class _LoaderRouteState extends State<LoaderRoute> {
   late final String appName = Constants.appName;
 
-  Future<void> checkConnection() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      Future.delayed(const Duration(seconds: 3), () async {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const Home()),
-        // );
-        // if (mounted) {
-        //   Navigator.pushNamed(context, "/home");
-        // }
-
-        if (mounted) {
-          if (!await checkForUpdate(context)) {
-            if (!await isUserIn() && !await isStudentUserIn() && !await isSchoolUrlIn()) {
-              // Navigate to /schoolUrl
-              Navigator.pushReplacementNamed(context, '/schoolUrl');
-            } else if (!await isUserIn() && !await isStudentUserIn() && await isSchoolUrlIn()) {
-              // Check isLoginType
-              if (!await isLoginType()) {
-                // Navigate to /home
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                // Navigate to /login
-                Navigator.pushReplacementNamed(context, '/login');
-              }
-            } else {
-              final loginAuth = Provider.of<LoginProvider>(context, listen: false);
-              loginAuth.assignUserProvider();
-
-              if (await isUserIn()) {
-                // Navigate to /dashboard
-                Navigator.pushReplacementNamed(context, '/dashboard');
-              } else if (await isStudentUserIn()) {
-                // Navigate to /studentDashboard
-                Navigator.pushReplacementNamed(context, '/studentDashboard');
-              } else {
-                debugPrint('Last else');
-              }
-            }
-          } else {
-            if (mounted) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                            body: Material(
-                              child: PopScope(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                                    child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Center(
-                                            child: Text(
-                                              'Update Required',
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 20),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          const Text(
-                                              'A new version of the app is available. Please update to continue using the app.'),
-                                          const SizedBox(height: 20),
-                                          Center(
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                      backgroundColor: Colors.blue,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(10),
-                                                      )),
-                                                  onPressed: () async {
-                                                    SystemNavigator.pop();
-                                                    if (await canLaunchUrl(Uri.parse(
-                                                        'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com'))) {
-                                                      await launchUrl(Uri.parse(
-                                                          'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com'));
-                                                    } else {
-                                                      throw 'Could not launch appStoreLink';
-                                                    }
-                                                  },
-                                                  child: const Text(
-                                                    'Update Now',
-                                                    style: TextStyle(color: Colors.white),
-                                                  )),
-                                            ),
-                                          ),
-                                        ]),
-                                  ),
-                                  onPopInvoked: (_) {
-                                    SystemNavigator.pop();
-                                    return;
-                                  }),
-                            ),
-                          )));
-            }
-          }
-        }
-      });
-    } else {
-      Future.delayed(const Duration(seconds: 3), () {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const CheckInternet()),
-        // );
-        Navigator.pushNamed(context, "/checkInternet");
-      });
-    }
-  }
-
-  Future<bool> isSchoolUrlIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Retrieve the token from shared preferences
-    String? globalSchoolUrl = prefs.getString('global_school_url');
-    // Return true if the token exists, false otherwise
-    return globalSchoolUrl != null;
-  }
-
-  Future<bool> isLoginType() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Retrieve the token from shared preferences
-    String? globalLoginType = prefs.getString('global_login_type');
-    // Return true if the token exists, false otherwise
-    return globalLoginType != null;
-  }
-
-  Future<bool> isUserIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userDetails = prefs.getString('user_details');
-    // Return true if the token exists, false otherwise
-    return userDetails != null;
-  }
-
-  Future<bool> isStudentUserIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userDetails = prefs.getString('student_data');
-    // Return true if the token exists, false otherwise
-    return userDetails != null;
-  }
-
   @override
   void initState() {
     super.initState();
-    getLoginData();
-    getUrlData();
-    checkConnection();
-    // Future.delayed(const Duration(seconds: 3), () {
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => const CheckInternet()),
-    //   );
-    // });
+    _initializeApp();
   }
 
-  void getLoginData() async {
-    final data = await WebService.getStudentLoginDetails();
-    if (data != null) {
-      WebService.studentLoginData = data;
-      setState(() {});
-      log('user data ***** ${data.toJson().toString()}');
+  Future<void> _initializeApp() async {
+    // Load initial data
+    await _loadInitialData();
+    
+    // Check connection and navigate
+    await _checkConnectionAndNavigate();
+  }
+
+  Future<void> _loadInitialData() async {
+    // Load login data
+    final loginData = await WebService.getStudentLoginDetails();
+    if (loginData != null) {
+      WebService.studentLoginData = loginData;
+      if (mounted) setState(() {});
+      log('user data ***** ${loginData.toJson().toString()}');
     }
-  }
 
-  void getUrlData() async {
-    final data = await WebService.getSchoolUrl();
-    final imageUrlData = await WebService.getSchoolImageUrl();
-    if (data != null) {
-      Api.baseUrl = data;
-      setState(() {});
+    // Load URL data
+    final schoolUrl = await WebService.getSchoolUrl();
+    final imageUrl = await WebService.getSchoolImageUrl();
+    
+    if (schoolUrl != null) {
+      Api.baseUrl = schoolUrl;
+      if (mounted) setState(() {});
       log('baseUrl ***** ${Api.baseUrl}');
     }
 
-    if (imageUrlData != null) {
-      Api.imageBaseUrl = imageUrlData;
-      setState(() {});
+    if (imageUrl != null) {
+      Api.imageBaseUrl = imageUrl;
+      if (mounted) setState(() {});
       log('imageUrlData ***** ${Api.imageBaseUrl}');
     }
+  }
+
+  Future<void> _checkConnectionAndNavigate() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    
+    // Wait for 3 seconds before navigation
+    await Future.delayed(const Duration(seconds: 3));
+    
+    if (!mounted) return;
+
+    if (connectivityResult == ConnectivityResult.none) {
+      // No internet connection
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const CheckInternet()),
+      );
+    } else {
+      // Has internet connection
+      await _navigateBasedOnUserState();
+    }
+  }
+
+  Future<void> _navigateBasedOnUserState() async {
+    if (!mounted) return;
+
+    // Check if app update is required
+    if (await checkForUpdate(context)) {
+      _showUpdateRequiredScreen();
+      return;
+    }
+
+    // Get user states
+    final hasSchoolUrl = await _hasSchoolUrl();
+    final hasLoginType = await _hasLoginType();
+    final hasTeacherUser = await _hasTeacherUser();
+    final hasStudentUser = await _hasStudentUser();
+
+    // Navigate based on user state
+    if (!hasTeacherUser && !hasStudentUser && !hasSchoolUrl) {
+      // New user - go to school URL screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Schoolurl()),
+      );
+    } else if (!hasTeacherUser && !hasStudentUser && hasSchoolUrl) {
+      // Has school URL but not logged in
+      if (!hasLoginType) {
+        // Go to home to select login type
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+        );
+      } else {
+        // Go to login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginRoute()),
+        );
+      }
+    } else {
+      // User is logged in
+      final loginProvider = Provider.of<LoginProvider>(context, listen: false);
+      loginProvider.assignUserProvider();
+
+      if (hasTeacherUser) {
+        // Navigate to teacher dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Dashboard()),
+        );
+      } else if (hasStudentUser) {
+        // Navigate to student dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const StudentDashboardScreen()),
+        );
+      }
+    }
+  }
+
+  void _showUpdateRequiredScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _UpdateRequiredScreen(),
+      ),
+    );
+  }
+
+  // Helper methods to check user state
+  Future<bool> _hasSchoolUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('global_school_url') != null;
+  }
+
+  Future<bool> _hasLoginType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('global_login_type') != null;
+  }
+
+  Future<bool> _hasTeacherUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_details') != null;
+  }
+
+  Future<bool> _hasStudentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('student_data') != null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue,
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Center(
-                child: CircularProgressIndicator(
+      backgroundColor: Colors.blue,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Center(
+            child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            )),
-            const SizedBox(height: 10.0),
-            Text(
-              appName,
-              style: const TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: 22.0,
-                color: Colors.white,
-              ),
-            )
-          ],
-        ));
+            ),
+          ),
+          const SizedBox(height: 10.0),
+          Text(
+            appName,
+            style: const TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: 22.0,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Update Required Screen
+class _UpdateRequiredScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Material(
+        child: PopScope(
+          onPopInvoked: (_) {
+            SystemNavigator.pop();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Center(
+                  child: Text(
+                    'Update Required',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'A new version of the app is available. Please update to continue using the app.',
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () async {
+                        const playStoreUrl = 'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com';
+                        if (await canLaunchUrl(Uri.parse(playStoreUrl))) {
+                          await launchUrl(Uri.parse(playStoreUrl));
+                        } else {
+                          throw 'Could not launch Play Store';
+                        }
+                        SystemNavigator.pop();
+                      },
+                      child: const Text(
+                        'Update Now',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

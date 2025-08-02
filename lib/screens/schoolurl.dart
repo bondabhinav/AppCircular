@@ -1,4 +1,5 @@
 import 'package:flexischool/providers/url_provider.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,8 +70,10 @@ class _SchoolUrlWidgetState extends State<SchoolUrlWidget> {
         //   SnackBar(content: Text(response['message'])),
         // );
 
-        //  Navigator.pushReplacementNamed(context, '/login');
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+        );
       } else {
         _errorMessage = response['message'];
         ScaffoldMessenger.of(context).showSnackBar(

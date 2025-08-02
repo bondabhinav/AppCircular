@@ -11,6 +11,7 @@ import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/screens/change_password_screen.dart';
 import 'package:flexischool/screens/dashboard.dart';
+import 'package:flexischool/screens/home.dart';
 import 'package:flexischool/screens/student/fee_screen.dart';
 import 'package:flexischool/screens/student/student_notification_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
@@ -302,13 +303,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
                             horizontalTitleGap: 10,
                             onTap: () => Navigator.push(context,
                                 MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
-                        ListTile(
-                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                            title: const Text('Floating Notifications'),
-                            leading: const Icon(Icons.notifications_active),
-                            minLeadingWidth: 10,
-                            horizontalTitleGap: 10,
-                            onTap: () => _showFloatingNotificationDialog(context)),
+                        // ListTile(
+                        //     visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                        //     title: const Text('Floating Notifications'),
+                        //     leading: const Icon(Icons.notifications_active),
+                        //     minLeadingWidth: 10,
+                        //     horizontalTitleGap: 10,
+                        //     onTap: () => _showFloatingNotificationDialog(context)),
                         ListTile(
                             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                             title: const Text('Logout'),
@@ -423,7 +424,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> with Wi
         }
         AppBadgePlus.updateBadge(0);
         if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+                                          Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const Home()),
+                                );
         }
       }
     }
