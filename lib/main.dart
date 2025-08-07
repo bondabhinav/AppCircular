@@ -20,6 +20,8 @@ import 'package:flexischool/utils/locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -141,6 +143,16 @@ class _MyAppState extends State<MyApp> {
             fontFamily: GoogleFonts.lato().fontFamily,
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(color: Colors.blue)),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', 'US'), // English
+          // Add more locales as needed
+        ],
         home: const LoaderRoute(),
         navigatorKey: AuthMiddleware.navigatorKey,
         //  navigatorObservers: [authMiddleware]

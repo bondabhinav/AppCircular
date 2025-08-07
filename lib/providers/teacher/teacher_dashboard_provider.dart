@@ -133,12 +133,15 @@ class TeacherDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> teacherLogout(BuildContext context) async {
+    // Stop the continuous API call timer before logout
+    apiService.stop();
+    
     try {
       final appDeviceId = await WebService.getAppDeviceId();
       final response =
           await apiService.post(url: Api.removeFcmTokenApi, data: {"APP_DEVICE_ID": appDeviceId});
       if (response.statusCode == 200) {
-        final sessionListResponse = SessionListResponse.fromJson(response.data);
+        SessionListResponse.fromJson(response.data);
         if (context.mounted) {
           final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
           loginStore.userLogout();

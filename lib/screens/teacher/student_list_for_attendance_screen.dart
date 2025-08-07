@@ -15,14 +15,26 @@ class StudentListForAttendanceScreen extends StatefulWidget {
   State<StudentListForAttendanceScreen> createState() => _StudentListForAttendanceScreenState();
 }
 
-class _StudentListForAttendanceScreenState extends State<StudentListForAttendanceScreen> {
+class _StudentListForAttendanceScreenState extends State<StudentListForAttendanceScreen> 
+    with SingleTickerProviderStateMixin {
   AttendanceProvider? attendanceProvider;
   final loaderProvider = getIt<LoaderProvider>();
+  late AnimationController _animationController;
 
   @override
   void initState() {
     attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,168 +116,389 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
     });
   }
 
+  Color _getAttendanceColor(String? attendance) {
+    switch (attendance) {
+      case 'Present':
+        return const Color(0xFFE8F5E9);
+      case 'Absent':
+        return const Color(0xFFFFEBEE);
+      case 'Half Day':
+        return const Color(0xFFF3E5F5);
+      case 'Leave':
+        return const Color(0xFFE3F2FD);
+      default:
+        return Colors.grey.shade50;
+    }
+  }
+
+  Color _getAttendanceBorderColor(String? attendance) {
+    switch (attendance) {
+      case 'Present':
+        return const Color(0xFF4CAF50);
+      case 'Absent':
+        return const Color(0xFFF44336);
+      case 'Half Day':
+        return const Color(0xFF9C27B0);
+      case 'Leave':
+        return const Color(0xFF2196F3);
+      default:
+        return Colors.grey.shade400;
+    }
+  }
+
+  Color _getAttendanceTextColor(String? attendance) {
+    switch (attendance) {
+      case 'Present':
+        return const Color(0xFF1B5E20);
+      case 'Absent':
+        return const Color(0xFFB71C1C);
+      case 'Half Day':
+        return const Color(0xFF4A148C);
+      case 'Leave':
+        return const Color(0xFF0D47A1);
+      default:
+        return Colors.grey.shade800;
+    }
+  }
+
+  IconData _getAttendanceIcon(String? attendance) {
+    switch (attendance) {
+      case 'Present':
+        return Icons.check_circle;
+      case 'Absent':
+        return Icons.cancel;
+      case 'Half Day':
+        return Icons.access_time;
+      case 'Leave':
+        return Icons.event_busy;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
   Widget markedStudentDatatable(AttendanceProvider model) {
-    return DataTable(
-      decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-      horizontalMargin: 3,
-      border: const TableBorder(),
-      columns: const [
-        DataColumn(
-            label: Padding(
-          padding: EdgeInsets.only(left: 8.0),
-          child: Text('Student Name',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Montserrat Regular",
-                color: Colors.black,
-              )),
-        )),
-        DataColumn(
-            label: Text('Class',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-        DataColumn(
-            label: Text('Attendance',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-      ],
-      rows: List<DataRow>.generate(
-        model.getMarkedStudentResponse!.lststud!.length,
-        (index) => DataRow(
-          cells: [
-            DataCell(Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text((model.getMarkedStudentResponse!.lststud![index].sTUDNAME ?? "").toString().trim(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.black,
-                  )),
-            )),
-            DataCell(Text(
-                "${model.getMarkedStudentResponse!.lststud![index].cLASSDESC ?? ""}-${model.getMarkedStudentResponse!.lststud![index].sECTIONDESC ?? ""}",
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-            DataCell(
-              FittedBox(
-                child: Container(
-                    padding: const EdgeInsets.only(left: 8, right: 10),
-                    margin: const EdgeInsets.only(top: 8, bottom: 5),
-                    decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-                    child: DropdownButton<String>(
-                        value: model.returnFullValueOfAttendance(
-                            model.getMarkedStudentResponse!.lststud![index].pRESENT.toString()),
-                        onChanged: (String? newValue) => model.updateMarkedAttendanceStatus(
-                            newValue!, model.getMarkedStudentResponse!.lststud![index]),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: model.getMarkedStudentResponse!.lststud!.length,
+      itemBuilder: (context, index) {
+        final student = model.getMarkedStudentResponse!.lststud![index];
+        final currentAttendance = model.returnFullValueOfAttendance(student.pRESENT.toString());
+        
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _getAttendanceColor(currentAttendance),
+                _getAttendanceColor(currentAttendance).withOpacity(0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {},
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getAttendanceIcon(currentAttendance),
+                        color: _getAttendanceBorderColor(currentAttendance),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (student.sTUDNAME ?? "").toString().trim().toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: "Montserrat Regular",
+                              color: _getAttendanceTextColor(currentAttendance),
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.class_,
+                                size: 14,
+                                color: _getAttendanceTextColor(currentAttendance).withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${student.cLASSDESC ?? ""}-${student.sECTIONDESC ?? ""}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: "Montserrat Regular",
+                                  color: _getAttendanceTextColor(currentAttendance).withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _getAttendanceBorderColor(currentAttendance),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: DropdownButton<String>(
+                        value: currentAttendance,
+                        isDense: true,
+                        underline: const SizedBox(),
+                        icon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: _getAttendanceBorderColor(currentAttendance),
+                          size: 24,
+                        ),
+                        onChanged: (String? newValue) {
+                          _animationController.forward().then((_) {
+                            _animationController.reverse();
+                          });
+                          model.updateMarkedAttendanceStatus(newValue!, student);
+                        },
                         items: <String>['Present', 'Absent', 'Half Day', 'Leave']
                             .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(value: value, child: Text(value));
-                        }).toList())),
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _getAttendanceIcon(value),
+                                  size: 18,
+                                  color: _getAttendanceBorderColor(value),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  value,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: _getAttendanceTextColor(value),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget unmarkedStudentDataTable(AttendanceProvider model) {
-    return DataTable(
-      decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-      horizontalMargin: 3,
-      border: const TableBorder(),
-      columns: const [
-        DataColumn(
-            label: Padding(
-          padding: EdgeInsets.only(left: 8.0),
-          child: Text('Student Name',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Montserrat Regular",
-                color: Colors.black,
-              )),
-        )),
-        DataColumn(
-            label: Text('Class',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-        DataColumn(
-            label: Text('Attendance',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-      ],
-      rows: List<DataRow>.generate(
-        model.studentResponse!.aDMSTUDREGISTRATION!.length,
-        (index) => DataRow(
-          cells: [
-            DataCell(Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(model.studentResponse!.aDMSTUDREGISTRATION![index].fIRSTNAME ?? "",
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.black,
-                  )),
-            )),
-            DataCell(Text(
-                "${model.studentResponse!.aDMSTUDREGISTRATION![index].cLASSDESC ?? ""}-${model.studentResponse!.aDMSTUDREGISTRATION![index].sECTIONDESC ?? ""}",
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                ))),
-            DataCell(
-              FittedBox(
-                child: Container(
-                  padding: const EdgeInsets.only(left: 8, right: 10),
-                  margin: const EdgeInsets.only(top: 8, bottom: 5),
-                  decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
-                  child: DropdownButton<String>(
-                    value: model.studentResponse!.aDMSTUDREGISTRATION![index].attendance,
-                    onChanged: (String? newValue) {
-                      model.updateAttendanceStatus(
-                          newValue!, model.studentResponse!.aDMSTUDREGISTRATION![index]);
-                    },
-                    items: <String>['Present', 'Absent', 'Half Day', 'Leave'].map<DropdownMenuItem<String>>(
-                      (String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      },
-                    ).toList(),
-                  ),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: model.studentResponse!.aDMSTUDREGISTRATION!.length,
+      itemBuilder: (context, index) {
+        final student = model.studentResponse!.aDMSTUDREGISTRATION![index];
+        final currentAttendance = student.attendance;
+        
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _getAttendanceColor(currentAttendance),
+                _getAttendanceColor(currentAttendance).withOpacity(0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {},
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getAttendanceIcon(currentAttendance),
+                        color: _getAttendanceBorderColor(currentAttendance),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (student.fIRSTNAME ?? "").toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: "Montserrat Regular",
+                              color: _getAttendanceTextColor(currentAttendance),
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.class_,
+                                size: 14,
+                                color: _getAttendanceTextColor(currentAttendance).withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${student.cLASSDESC ?? ""}-${student.sECTIONDESC ?? ""}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: "Montserrat Regular",
+                                  color: _getAttendanceTextColor(currentAttendance).withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _getAttendanceBorderColor(currentAttendance),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: DropdownButton<String>(
+                        value: currentAttendance,
+                        isDense: true,
+                        underline: const SizedBox(),
+                        icon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: _getAttendanceBorderColor(currentAttendance),
+                          size: 24,
+                        ),
+                        onChanged: (String? newValue) {
+                          _animationController.forward().then((_) {
+                            _animationController.reverse();
+                          });
+                          model.updateAttendanceStatus(newValue!, student);
+                        },
+                        items: <String>['Present', 'Absent', 'Half Day', 'Leave']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _getAttendanceIcon(value),
+                                  size: 18,
+                                  color: _getAttendanceBorderColor(value),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  value,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: _getAttendanceTextColor(value),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

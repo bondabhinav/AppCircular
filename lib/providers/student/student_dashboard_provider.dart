@@ -189,6 +189,9 @@ class StudentDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> logoutApi(BuildContext context, String appDeviceId) async {
+    // Stop the continuous API call timer before logout
+    apiService.stop();
+    
     var requestedData = {"APP_DEVICE_ID": appDeviceId};
     var body = json.encode(requestedData);
     try {

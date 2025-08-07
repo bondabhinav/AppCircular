@@ -132,6 +132,9 @@ class ChangePasswordProvider extends ChangeNotifier {
   }
 
   Future<void> logout(BuildContext context) async {
+    // Stop the continuous API call timer before logout
+    apiService.stop();
+    
     try {
       String? appDeviceId = await WebService.getAppDeviceId();
       if (context.mounted) {
