@@ -87,13 +87,15 @@ class UnpaidFeeResponse {
 class UnpaidFeeItem {
   String? fEEDUEDATE;
   String? fORMONTH;
+  String? fEETYPEDESC;
   int? uNPAID;
 
-  UnpaidFeeItem({this.fEEDUEDATE, this.fORMONTH, this.uNPAID});
+  UnpaidFeeItem({this.fEEDUEDATE, this.fORMONTH, this.fEETYPEDESC, this.uNPAID});
 
   UnpaidFeeItem.fromJson(Map<String, dynamic> json) {
     fEEDUEDATE = json['FEE_DUE_DATE'];
     fORMONTH = json['FOR_MONTH'];
+    fEETYPEDESC = json['FEE_TYPE_DESC'];
     uNPAID = json['UNPAID'];
   }
 
@@ -101,6 +103,7 @@ class UnpaidFeeItem {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['FEE_DUE_DATE'] = fEEDUEDATE;
     data['FOR_MONTH'] = fORMONTH;
+    data['FEE_TYPE_DESC'] = fEETYPEDESC;
     data['UNPAID'] = uNPAID;
     return data;
   }
