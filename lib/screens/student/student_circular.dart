@@ -161,13 +161,7 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                                                                             //         .fILENAME ??
                                                                             //         "");
 
-                                                                            // model.requestWritePermission(context).then((_) {
-                                                                            //   model.downloadFile(
-                                                                            //       context,
-                                                                            //       data.lstCircularFile![index]
-                                                                            //               .fILENAME ??
-                                                                            //           "");
-                                                                            // });
+
                                                                           },
                                                                           icon: const Icon(Icons.download)),
                                                                     ),

@@ -35,20 +35,16 @@ Future<void> main() async {
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   
-  // Enable edge-to-edge mode for Android 15 compatibility
-  // This uses only the brightness properties, avoiding deprecated color APIs
-  // We only set brightness, not colors, to avoid deprecated APIs
+  // Modern edge-to-edge approach for Android 15 compatibility
+  // Only set brightness properties - color is now handled by native enableEdgeToEdge()
+  // This avoids deprecated statusBarColor, navigationBarColor, navigationBarDividerColor
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      // Set icon brightness for system bars
+      // Set icon brightness for system bars (Android)
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.dark,
       // Set status bar brightness (iOS)
       statusBarBrightness: Brightness.light,
-      // Explicitly avoid setting deprecated color properties:
-      // - statusBarColor (deprecated in Android 15)
-      // - navigationBarColor (deprecated in Android 15)
-      // - navigationBarDividerColor (deprecated in Android 15)
     ),
   );
   WebService.init();

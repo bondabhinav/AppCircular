@@ -98,12 +98,7 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                                                           });
 
 
-                                                          // model.requestWritePermission().then((value) {
-                                                          //   if (value) {
-                                                          //     model.downloadFile(context,
-                                                          //         data.lstCircularFile![index].fILENAME ?? "");
-                                                          //   }
-                                                          // });
+
                                                         },
                                                         icon: const Icon(Icons.download)),
                                                   ),
@@ -262,14 +257,7 @@ class _StudentCircularDetailScreenState extends State<StudentCircularDetailScree
                   //     ),
                   //     trailing: IconButton(
                   //       onPressed: () {
-                  //         model.requestWritePermission(context).then((_) {
-                  //           model.downloadFile(
-                  //             context,
-                  //             model.studentCircularDetailResponse?.classlist?.first.lstCircularFile![index]
-                  //                     .fILENAME ??
-                  //                 "",
-                  //           );
-                  //         });
+
                   //       },
                   //       icon: const Icon(Icons.download),
                   //     ),

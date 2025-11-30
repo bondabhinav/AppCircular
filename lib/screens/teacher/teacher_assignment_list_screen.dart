@@ -170,17 +170,7 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
 
 
 
-                                                                        // model
-                                                                        //     .requestWritePermission()
-                                                                        //     .then((value) {
-                                                                        //   if (value) {
-                                                                        //     model.downloadFile(
-                                                                        //         context,
-                                                                        //         data.lstCircularFile![index]
-                                                                        //                 .fILENAME ??
-                                                                        //             "");
-                                                                        //   }
-                                                                        // });
+
                                                                       },
                                                                       icon: const Icon(Icons.download)),
                                                                 ),

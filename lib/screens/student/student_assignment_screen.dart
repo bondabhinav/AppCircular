@@ -160,16 +160,7 @@ class _StudentAssignmentCalenderWithListState extends State<StudentAssignmentCal
                                   //                       ""),
                                   //                   trailing: IconButton(
                                   //                       onPressed: () {
-                                  //                         model
-                                  //                             .requestWritePermission(
-                                  //                             context)
-                                  //                             .then((_) {
-                                  //                           model.downloadFile(
-                                  //                               context,
-                                  //                               data.lstCircularFile![index]
-                                  //                                   .fILENAME ??
-                                  //                                   "");
-                                  //                         });
+
                                   //                       },
                                   //                       icon: const Icon(Icons.download)),
                                   //                 ),

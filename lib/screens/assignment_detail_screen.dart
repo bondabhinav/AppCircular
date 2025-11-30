@@ -120,14 +120,7 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
                                                                           }
                                                                         });
 
-                                                                        // model
-                                                                        //     .requestWritePermission()
-                                                                        //     .then((value) {
-                                                                        //   if (value) {
-                                                                        //     model.downloadFile(context,
-                                                                        //         data[index].fILENAME ?? "");
-                                                                        //   }
-                                                                        // });
+
                                                                       },
                                                                       icon: const Icon(Icons.download)),
                                                                 ),
@@ -165,14 +158,7 @@ class _AssignmentDetailScreenState extends State<AssignmentDetailScreen> {
                                     //     ),
                                     //     trailing: IconButton(
                                     //       onPressed: () {
-                                    //         model.requestWritePermission(context).then((_) {
-                                    //           model.downloadFile(
-                                    //             context,
-                                    //             model.assignmentDetailResponse?.lstAssignment?.first
-                                    //                     .lstCircularFile![index].fILENAME ??
-                                    //                 "",
-                                    //           );
-                                    //         });
+
                                     //       },
                                     //       icon: const Icon(Icons.download),
                                     //     ),

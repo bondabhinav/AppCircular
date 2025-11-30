@@ -91,37 +91,9 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
     return _startDate;
   }
 
-  // Future<void> requestWritePermission(BuildContext context) async {
-  //   PermissionStatus status = await Permission.storage.request();
-  //   debugPrint('Teacher assignment list provider Permission status: $status');
-  //   if (status.isGranted) {
-  //   } else {
-  //     if (context.mounted) {
-  //       ShowSnackBar.error(context: context, showMessage: 'Write permission denied.');
-  //     }
-  //   }
-  // }
 
-  Future<bool> requestWritePermission() async {
-    final DeviceInfoPlugin info = DeviceInfoPlugin();
-    final AndroidDeviceInfo androidInfo = await info.androidInfo;
-    debugPrint('releaseVersion : ${androidInfo.version.release}');
-    final int androidVersion = int.parse(androidInfo.version.release);
-    bool havePermission = false;
 
-    if (androidVersion >= 13) {
-      final request = await [Permission.videos, Permission.photos].request();
-      havePermission = request.values.every((status) => status == PermissionStatus.granted);
-    } else {
-      final status = await Permission.storage.request();
-      havePermission = status.isGranted;
-    }
 
-    if (!havePermission) {
-      await openAppSettings();
-    }
-    return havePermission;
-  }
 
   Future<void> downloadFile(BuildContext context, String url) async {
     final String fileName = url.split('/').last;

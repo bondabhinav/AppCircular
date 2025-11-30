@@ -9,13 +9,16 @@ class StudentListForAttendanceScreen extends StatefulWidget {
   final int teacherId;
   final bool isMarked;
 
-  const StudentListForAttendanceScreen({super.key, required this.teacherId, required this.isMarked});
+  const StudentListForAttendanceScreen(
+      {super.key, required this.teacherId, required this.isMarked});
 
   @override
-  State<StudentListForAttendanceScreen> createState() => _StudentListForAttendanceScreenState();
+  State<StudentListForAttendanceScreen> createState() =>
+      _StudentListForAttendanceScreenState();
 }
 
-class _StudentListForAttendanceScreenState extends State<StudentListForAttendanceScreen> 
+class _StudentListForAttendanceScreenState
+    extends State<StudentListForAttendanceScreen>
     with SingleTickerProviderStateMixin {
   AttendanceProvider? attendanceProvider;
   final loaderProvider = getIt<LoaderProvider>();
@@ -23,7 +26,8 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
 
   @override
   void initState() {
-    attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+    attendanceProvider =
+        Provider.of<AttendanceProvider>(context, listen: false);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -44,65 +48,83 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
         children: [
           Scaffold(
             backgroundColor: Colors.white,
-            bottomNavigationBar: MaterialButton(
-                minWidth: double.infinity,
-                color: Colors.blueAccent,
-                height: 50,
-                onPressed: () {
-                  if (widget.isMarked) {
-                    if (model.submittedMarkedList.isNotEmpty) {
-                      model.applyMarkedAttendance().then((value) {
-                        if (value != null) {
-                          if (value.success ?? false) {
-                            model.submittedMarkedList.clear();
-                            ShowSnackBar.successToast(
-                                context: context, showMessage: 'Attendance marked successfully!');
-                          //  model.disposeAndNavigateToDashboard(context);
-                            Navigator.pop(context,true);
+            bottomNavigationBar: SafeArea(
+              child: MaterialButton(
+                  minWidth: double.infinity,
+                  color: Colors.blueAccent,
+                  height: 50,
+                  onPressed: () {
+                    if (widget.isMarked) {
+                      if (model.submittedMarkedList.isNotEmpty) {
+                        model.applyMarkedAttendance().then((value) {
+                          if (value != null) {
+                            if (value.success ?? false) {
+                              model.submittedMarkedList.clear();
+                              ShowSnackBar.successToast(
+                                  context: context,
+                                  showMessage:
+                                      'Attendance marked successfully!');
+                              //  model.disposeAndNavigateToDashboard(context);
+                              Navigator.pop(context, true);
+                            } else {
+                              ShowSnackBar.error(
+                                  context: context,
+                                  showMessage: value.errorMessage.toString());
+                            }
                           } else {
-                            ShowSnackBar.error(context: context, showMessage: value.errorMessage.toString());
+                            ShowSnackBar.error(
+                                context: context,
+                                showMessage: 'Something wents wrong');
                           }
-                        } else {
-                          ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
-                        }
-                      });
-                    }
-                  } else {
-                    if (model.studentAttendanceList.isNotEmpty) {
-                      model.applyAttendance(teacherId: widget.teacherId).then((value) {
-                        if (value != null) {
-                          if (value.errorMessage == null) {
-                            ShowSnackBar.successToast(
-                                context: context, showMessage: 'Attendance marked successfully!');
-                        //    model.disposeAndNavigateToDashboard(context);
-                            Navigator.pop(context,true);
+                        });
+                      }
+                    } else {
+                      if (model.studentAttendanceList.isNotEmpty) {
+                        model
+                            .applyAttendance(teacherId: widget.teacherId)
+                            .then((value) {
+                          if (value != null) {
+                            if (value.errorMessage == null) {
+                              ShowSnackBar.successToast(
+                                  context: context,
+                                  showMessage:
+                                      'Attendance marked successfully!');
+                              //    model.disposeAndNavigateToDashboard(context);
+                              Navigator.pop(context, true);
+                            } else {
+                              ShowSnackBar.error(
+                                  context: context,
+                                  showMessage: value.errorMessage.toString());
+                            }
                           } else {
-                            ShowSnackBar.error(context: context, showMessage: value.errorMessage.toString());
+                            ShowSnackBar.error(
+                                context: context,
+                                showMessage: 'Something wents wrong');
                           }
-                        } else {
-                          ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
-                        }
-                      });
+                        });
+                      }
                     }
-                  }
-                },
-                child: const Text('Submit',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.white,
-                    ))),
+                  },
+                  child: const Text('Submit',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: "Montserrat Regular",
+                        color: Colors.white,
+                      ))),
+            ),
             appBar: AppBar(
               leading: IconButton(
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  onPressed: () => Navigator.pop(context,true)),
+                  onPressed: () => Navigator.pop(context, true)),
               centerTitle: true,
-              title: const Text('Attendance', style: TextStyle(color: Colors.white)),
+              title: const Text('Attendance',
+                  style: TextStyle(color: Colors.white)),
             ),
             body: SingleChildScrollView(
               child: Padding(
-                  padding: const EdgeInsets.only(bottom: 50, top: 5, left: 5, right: 5),
+                  padding: const EdgeInsets.only(
+                      bottom: 50, top: 5, left: 5, right: 5),
                   child: widget.isMarked
                       ? markedStudentDatatable(model)
                       : model.studentResponse == null
@@ -183,8 +205,9 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
       itemCount: model.getMarkedStudentResponse!.lststud!.length,
       itemBuilder: (context, index) {
         final student = model.getMarkedStudentResponse!.lststud![index];
-        final currentAttendance = model.returnFullValueOfAttendance(student.pRESENT.toString());
-        
+        final currentAttendance =
+            model.returnFullValueOfAttendance(student.pRESENT.toString());
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -200,12 +223,14 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
+              color:
+                  _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.15),
+                color: _getAttendanceBorderColor(currentAttendance)
+                    .withOpacity(0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -217,13 +242,15 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
               borderRadius: BorderRadius.circular(16),
               onTap: () {},
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                        color: _getAttendanceBorderColor(currentAttendance)
+                            .withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -239,7 +266,10 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (student.sTUDNAME ?? "").toString().trim().toUpperCase(),
+                            (student.sTUDNAME ?? "")
+                                .toString()
+                                .trim()
+                                .toUpperCase(),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -254,7 +284,9 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                               Icon(
                                 Icons.class_,
                                 size: 14,
-                                color: _getAttendanceTextColor(currentAttendance).withOpacity(0.7),
+                                color:
+                                    _getAttendanceTextColor(currentAttendance)
+                                        .withOpacity(0.7),
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -263,7 +295,9 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: "Montserrat Regular",
-                                  color: _getAttendanceTextColor(currentAttendance).withOpacity(0.8),
+                                  color:
+                                      _getAttendanceTextColor(currentAttendance)
+                                          .withOpacity(0.8),
                                 ),
                               ),
                             ],
@@ -272,7 +306,8 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -282,7 +317,8 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                            color: _getAttendanceBorderColor(currentAttendance)
+                                .withOpacity(0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -301,10 +337,15 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                           _animationController.forward().then((_) {
                             _animationController.reverse();
                           });
-                          model.updateMarkedAttendanceStatus(newValue!, student);
+                          model.updateMarkedAttendanceStatus(
+                              newValue!, student);
                         },
-                        items: <String>['Present', 'Absent', 'Half Day', 'Leave']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        items: <String>[
+                          'Present',
+                          'Absent',
+                          'Half Day',
+                          'Leave'
+                        ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Row(
@@ -347,7 +388,7 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
       itemBuilder: (context, index) {
         final student = model.studentResponse!.aDMSTUDREGISTRATION![index];
         final currentAttendance = student.attendance;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -363,12 +404,14 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
+              color:
+                  _getAttendanceBorderColor(currentAttendance).withOpacity(0.5),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.15),
+                color: _getAttendanceBorderColor(currentAttendance)
+                    .withOpacity(0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -380,13 +423,15 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
               borderRadius: BorderRadius.circular(16),
               onTap: () {},
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                        color: _getAttendanceBorderColor(currentAttendance)
+                            .withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -417,7 +462,9 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                               Icon(
                                 Icons.class_,
                                 size: 14,
-                                color: _getAttendanceTextColor(currentAttendance).withOpacity(0.7),
+                                color:
+                                    _getAttendanceTextColor(currentAttendance)
+                                        .withOpacity(0.7),
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -426,7 +473,9 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: "Montserrat Regular",
-                                  color: _getAttendanceTextColor(currentAttendance).withOpacity(0.8),
+                                  color:
+                                      _getAttendanceTextColor(currentAttendance)
+                                          .withOpacity(0.8),
                                 ),
                               ),
                             ],
@@ -435,7 +484,8 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -445,7 +495,8 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _getAttendanceBorderColor(currentAttendance).withOpacity(0.1),
+                            color: _getAttendanceBorderColor(currentAttendance)
+                                .withOpacity(0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -466,8 +517,12 @@ class _StudentListForAttendanceScreenState extends State<StudentListForAttendanc
                           });
                           model.updateAttendanceStatus(newValue!, student);
                         },
-                        items: <String>['Present', 'Absent', 'Half Day', 'Leave']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        items: <String>[
+                          'Present',
+                          'Absent',
+                          'Half Day',
+                          'Leave'
+                        ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Row(

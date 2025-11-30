@@ -195,17 +195,7 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                                                         //   }
                                                                         // });
 
-                                                                        // model
-                                                                        //     .requestWritePermission()
-                                                                        //     .then((value) {
-                                                                        //   if (value) {
-                                                                        //     model.downloadFile(
-                                                                        //         context,
-                                                                        //         data.lstCircularFile![index]
-                                                                        //                 .fILENAME ??
-                                                                        //             "");
-                                                                        //   }
-                                                                        // });
+
                                                                       },
                                                                       icon: const Icon(Icons.download)),
                                                                 ),
