@@ -1,4 +1,3 @@
-import 'dart:convert';
 /*
 // Example Usage
 Map<String, dynamic> map = jsonDecode(<myJSONString>);
@@ -23,20 +22,21 @@ class SchoolUrl {
 
   factory SchoolUrl.fromJson(Map<String, dynamic> json) {
     return SchoolUrl(
-        ID: json['ID'] ?? 0,
-        SCHOOLURL: json['SCHOOL_URL'] ?? '',
-        APIURL: json['API_URL'] ?? '',
-        IMGLOGO: json['IMG_LOGO'] ?? '',
-        APIIMAGE: json['API_IMAGE'] ?? '');
+      ID: json['ID'] ?? 0,
+      SCHOOLURL: json['SCHOOL_URL'] ?? '',
+      APIURL: json['API_URL'] ?? '',
+      IMGLOGO: json['IMG_LOGO'] ?? '',
+      APIIMAGE: json['API_IMAGE'] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['ID'] = ID;
-    _data['SCHOOL_URL'] = SCHOOLURL;
-    _data['API_URL'] = APIURL;
-    _data['IMG_LOGO'] = IMGLOGO;
-    _data['API_IMAGE'] = APIIMAGE;
-    return _data;
+    final data = <String, dynamic>{};
+    data['ID'] = ID;
+    data['SCHOOL_URL'] = SCHOOLURL;
+    data['API_URL'] = APIURL;
+    data['IMG_LOGO'] = IMGLOGO;
+    data['API_IMAGE'] = APIIMAGE;
+    return data;
   }
 }

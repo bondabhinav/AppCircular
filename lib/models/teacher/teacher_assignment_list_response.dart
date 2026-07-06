@@ -15,8 +15,7 @@ class TeacherAssignmentListModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (lstAssignment != null) {
-      data['lstAssignment'] =
-          lstAssignment!.map((v) => v.toJson()).toList();
+      data['lstAssignment'] = lstAssignment!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -35,18 +34,19 @@ class LstAssignment {
   String? eNDDATE;
   String? sTARTDATE;
 
-  LstAssignment(
-      {this.aPPASSIGNMENTID,
-        this.aSSIGNMENTDETAILS,
-        this.aSSIGNMENTDATE,
-        this.sUBJECTNAME,
-        this.fLAG,
-        this.aCTIVE,
-        this.lstCircularFile,
-        this.lstCircularSection,
-        this.cLASSDESC,
-        this.eNDDATE,
-        this.sTARTDATE});
+  LstAssignment({
+    this.aPPASSIGNMENTID,
+    this.aSSIGNMENTDETAILS,
+    this.aSSIGNMENTDATE,
+    this.sUBJECTNAME,
+    this.fLAG,
+    this.aCTIVE,
+    this.lstCircularFile,
+    this.lstCircularSection,
+    this.cLASSDESC,
+    this.eNDDATE,
+    this.sTARTDATE,
+  });
 
   LstAssignment.fromJson(Map<String, dynamic> json) {
     aPPASSIGNMENTID = json['APP_ASSIGNMENT_ID'];
@@ -81,12 +81,14 @@ class LstAssignment {
     data['FLAG'] = fLAG;
     data['ACTIVE'] = aCTIVE;
     if (lstCircularFile != null) {
-      data['lstCircularFile'] =
-          lstCircularFile!.map((v) => v.toJson()).toList();
+      data['lstCircularFile'] = lstCircularFile!
+          .map((v) => v.toJson())
+          .toList();
     }
     if (lstCircularSection != null) {
-      data['lstCircularSection'] =
-          lstCircularSection!.map((v) => v.toJson()).toList();
+      data['lstCircularSection'] = lstCircularSection!
+          .map((v) => v.toJson())
+          .toList();
     }
     data['CLASS_DESC'] = cLASSDESC;
     data['END_DATE'] = eNDDATE;

@@ -3,7 +3,6 @@
 
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id 'com.google.gms.google-services'
     id 'com.google.firebase.firebase-perf'
@@ -44,6 +43,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "flexischoolerpapp.sapinfotek.com"
     compileSdk = 36
+    buildToolsVersion = "35.0.0"
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -58,10 +58,6 @@ android {
             force 'androidx.core:core-ktx:1.15.0'
             force 'androidx.browser:browser:1.8.0'
         }
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     aaptOptions {
@@ -82,11 +78,6 @@ android {
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
         multiDexEnabled true
-        
-        // Specify supported ABIs for proper alignment
-        ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-        }
     }
     
     packagingOptions {
@@ -145,6 +136,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 flutter {
     source = "../.."
 }
@@ -165,9 +162,6 @@ dependencies {
     // Version 1.9.0+ required for enableEdgeToEdge() support
     implementation 'androidx.activity:activity-ktx:1.9.3'
 }
-
-
-
 
 
 

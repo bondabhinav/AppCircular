@@ -14,24 +14,24 @@ import 'package:permission_handler/permission_handler.dart';
 import 'firebase_options.dart';
 
 /// FCM Notification Behavior Across App States:
-/// 
+///
 /// 1. FOREGROUND (App is open and active):
 ///    - Firebase SDK does NOT automatically show notifications
 ///    - We must manually create and show local notifications
 ///    - onMessage listener is triggered
-/// 
+///
 /// 2. BACKGROUND (App is minimized but still in memory):
 ///    - Firebase SDK automatically shows notifications
 ///    - firebaseMessagingBackgroundHandler is triggered
 ///    - We should NOT create duplicate local notifications
 ///    - Only update badge count and process data
-/// 
+///
 /// 3. TERMINATED/KILL STATE (App is completely closed):
 ///    - Firebase SDK automatically shows notifications
 ///    - firebaseMessagingBackgroundHandler is triggered
 ///    - We should NOT create duplicate local notifications
 ///    - getInitialMessage() captures the notification that launched the app
-/// 
+///
 /// IMPORTANT: To prevent duplicate notifications in background/kill state,
 /// the background handler should only process data and update badges,
 /// but NOT show notifications.
@@ -53,7 +53,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("Notification Title: ${message.notification?.title}");
   debugPrint("Notification Body: ${message.notification?.body}");
   debugPrint("=== END BACKGROUND MESSAGE ===");
-  
+
   // Only process if data is valid
   if (message.data.isNotEmpty && message.data.containsKey('count')) {
     try {
@@ -81,7 +81,8 @@ class PushNotificationsManager {
   bool _initialized = false;
   bool _hasLaunched = false;
 
-  static final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin localNotifications =
+      FlutterLocalNotificationsPlugin();
   String _fcmToken = "";
 
   Future<void> init() async {
@@ -93,7 +94,9 @@ class PushNotificationsManager {
           await _fcmInitialization();
           _initialized = true;
         } else {
-          debugPrint("You can provide permission by going into Settings later.");
+          debugPrint(
+            "You can provide permission by going into Settings later.",
+          );
         }
       } else {
         // Request Android notification permissions
@@ -101,21 +104,24 @@ class PushNotificationsManager {
         await _fcmInitialization();
         _initialized = true;
       }
-      NotificationAppLaunchDetails? appLaunchDetails =
-          (await localNotifications.getNotificationAppLaunchDetails());
+      NotificationAppLaunchDetails? appLaunchDetails = (await localNotifications
+          .getNotificationAppLaunchDetails());
 
       var initializationSettings = _getPlatformSettings();
-      await localNotifications.initialize(initializationSettings,
-          onDidReceiveNotificationResponse: (NotificationResponse? notificationResponse) {
-        debugPrint("=== LOCAL NOTIFICATION RESPONSE ===");
-        debugPrint("Notification ID: ${notificationResponse?.id}");
-        debugPrint("Action ID: ${notificationResponse?.actionId}");
-        debugPrint("Input: ${notificationResponse?.input}");
-        debugPrint("Payload: ${notificationResponse?.payload}");
-        debugPrint("=== END LOCAL NOTIFICATION RESPONSE ===");
-        clickHandle(notificationResponse!.payload!);
-        // handleNotificationTap(notificationResponse!);
-      });
+      await localNotifications.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse:
+            (NotificationResponse? notificationResponse) {
+              debugPrint("=== LOCAL NOTIFICATION RESPONSE ===");
+              debugPrint("Notification ID: ${notificationResponse?.id}");
+              debugPrint("Action ID: ${notificationResponse?.actionId}");
+              debugPrint("Input: ${notificationResponse?.input}");
+              debugPrint("Payload: ${notificationResponse?.payload}");
+              debugPrint("=== END LOCAL NOTIFICATION RESPONSE ===");
+              clickHandle(notificationResponse!.payload!);
+              // handleNotificationTap(notificationResponse!);
+            },
+      );
 
       _hasLaunched = appLaunchDetails!.didNotificationLaunchApp;
       if (_hasLaunched) {
@@ -126,18 +132,23 @@ class PushNotificationsManager {
 
   String get fcmToken => _fcmToken;
 
-  static Future<dynamic> handleNotificationTap(NotificationResponse notificationResponse) async {
+  static Future<dynamic> handleNotificationTap(
+    NotificationResponse notificationResponse,
+  ) async {
     debugPrint('_handleNotificationTap1 ==> ${notificationResponse.payload}');
     if (notificationResponse.payload != null) {
       clickHandle(notificationResponse.payload!);
     }
   }
 
-  static clickHandle(String payload, {bool fromBackgroundOrTerminate = false}) {
+  static void clickHandle(
+    String payload, {
+    bool fromBackgroundOrTerminate = false,
+  }) {
     debugPrint("=== NOTIFICATION CLICK HANDLER ===");
     debugPrint("Payload: $payload");
     debugPrint("From Background/Terminate: $fromBackgroundOrTerminate");
-    
+
     final encodedData = payload;
     // Split the payload into key-value pairs using commas and remove curly braces
     final keyValuePairs = encodedData.split(', ');
@@ -159,23 +170,30 @@ class PushNotificationsManager {
     }
 
     debugPrint("Parsed Event Data: $event");
-    
+
     // Use the new dynamic navigation handler
     FCMNavigationHandler.handleFCMNavigation(event);
-    
+
     debugPrint("=== END NOTIFICATION CLICK HANDLER ===");
   }
 
   InitializationSettings _getPlatformSettings() {
-    var initializationSettingsAndroid = const AndroidInitializationSettings('mipmap/ic_launcher');
+    var initializationSettingsAndroid = const AndroidInitializationSettings(
+      'mipmap/ic_launcher',
+    );
 
-    DarwinInitializationSettings initializationSettingsIOS = const DarwinInitializationSettings(
-        requestSoundPermission: true,
-        requestBadgePermission: true,
-        requestAlertPermission: true,
-        defaultPresentSound: true,
-        defaultPresentBadge: true);
-    return InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    DarwinInitializationSettings initializationSettingsIOS =
+        const DarwinInitializationSettings(
+          requestSoundPermission: true,
+          requestBadgePermission: true,
+          requestAlertPermission: true,
+          defaultPresentSound: true,
+          defaultPresentBadge: true,
+        );
+    return InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
   }
 
   void _createNotificationChannel() async {
@@ -191,7 +209,9 @@ class PushNotificationsManager {
       ledColor: const Color.fromARGB(255, 255, 0, 0),
     );
     await localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(androidNotificationChannel);
   }
 
@@ -200,21 +220,28 @@ class PushNotificationsManager {
       _fcmToken = (await FirebaseMessaging.instance.getToken())!;
       debugPrint("firebase token :- $_fcmToken");
       if (Platform.isIOS) {
-        FirebaseMessaging.instance
-            .setForegroundNotificationPresentationOptions(alert: true, sound: true, badge: true);
+        FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+          alert: true,
+          sound: true,
+          badge: true,
+        );
       }
 
       // Handle notification that launched the app from kill state
-      FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      FirebaseMessaging.instance.getInitialMessage().then((
+        RemoteMessage? message,
+      ) {
         if (message != null && message.data.isNotEmpty) {
           debugPrint("=== FCM INITIAL MESSAGE (KILL STATE) ===");
           debugPrint("Message ID: ${message.messageId}");
           debugPrint("Data: ${message.data}");
           debugPrint("=== END INITIAL MESSAGE ===");
-          
+
           // Store the FCM data directly (no need to parse string representation)
-          final Map<String, dynamic> event = Map<String, dynamic>.from(message.data);
-          
+          final Map<String, dynamic> event = Map<String, dynamic>.from(
+            message.data,
+          );
+
           // Store for execution after app startup is complete
           FCMPendingNavigation.setPendingNavigation(event);
         } else {
@@ -228,7 +255,7 @@ class PushNotificationsManager {
         debugPrint("New Token: $_fcmToken");
         debugPrint("=== END TOKEN REFRESH ===");
       });
-      
+
       FirebaseMessaging.onMessage.listen((event) async {
         debugPrint("=== FCM FOREGROUND MESSAGE RECEIVED ===");
         debugPrint("Message ID: ${event.messageId}");
@@ -239,20 +266,26 @@ class PushNotificationsManager {
         debugPrint("Data: ${event.data}");
         debugPrint("Notification Title: ${event.notification?.title}");
         debugPrint("Notification Body: ${event.notification?.body}");
-        debugPrint("Notification Android: ${event.notification?.android?.toMap()}");
+        debugPrint(
+          "Notification Android: ${event.notification?.android?.toMap()}",
+        );
         debugPrint("Notification Apple: ${event.notification?.apple?.toMap()}");
         debugPrint("=== END FOREGROUND MESSAGE ===");
-        
+
         try {
           // Only process notifications with valid data
           if (event.data.isNotEmpty && event.data.containsKey('count')) {
             // In foreground, we need to manually show the notification
             // because Firebase SDK doesn't automatically show notifications when app is in foreground
             _showNotification(event);
-            NotificationCountHandler.updateNotificationCount(int.parse(event.data['count'].toString()));
+            NotificationCountHandler.updateNotificationCount(
+              int.parse(event.data['count'].toString()),
+            );
             AppBadgePlus.updateBadge(int.parse(event.data['count'].toString()));
           } else {
-            debugPrint("Skipping foreground notification with empty or invalid data");
+            debugPrint(
+              "Skipping foreground notification with empty or invalid data",
+            );
           }
         } catch (e) {
           debugPrint("Error handling foreground message: $e");
@@ -270,13 +303,13 @@ class PushNotificationsManager {
         debugPrint("Notification Title: ${event.notification?.title}");
         debugPrint("Notification Body: ${event.notification?.body}");
         debugPrint("=== END MESSAGE OPENED APP ===");
-        
+
         // Use dynamic navigation handler directly for background messages
         if (event.data.isNotEmpty) {
           FCMNavigationHandler.handleFCMNavigation(event.data);
         }
       });
-      
+
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     } catch (e) {
       debugPrint("Error in FCM initialization: $e");
@@ -286,13 +319,13 @@ class PushNotificationsManager {
   Future<void> _showNotification(RemoteMessage remoteMessage) async {
     debugPrint("=== SHOWING LOCAL NOTIFICATION ===");
     debugPrint('Remote Message Data: ${remoteMessage.data.toString()}');
-    
+
     // Check if data is valid
     if (remoteMessage.data.isEmpty) {
       debugPrint("Skipping notification with empty data");
       return;
     }
-    
+
     var vibrationPattern = Int64List(4);
     vibrationPattern[0] = 0;
     vibrationPattern[1] = 200;
@@ -314,56 +347,67 @@ class PushNotificationsManager {
     debugPrint("Parsed Notification Data: $event");
 
     var bigTextStyleInformation = BigTextStyleInformation(
-        remoteMessage.notification?.body ?? 'Tap to open',
-        contentTitle: remoteMessage.notification?.title ?? event['TYPE'].toString());
+      remoteMessage.notification?.body ?? 'Tap to open',
+      contentTitle:
+          remoteMessage.notification?.title ?? event['TYPE'].toString(),
+    );
 
     await localNotifications.show(
-        event.hashCode,
-        remoteMessage.notification?.title ?? event['TYPE'].toString(),
-        remoteMessage.notification?.body ?? 'Tap to open',
-        NotificationDetails(
-            android: AndroidNotificationDetails(
-              'high_importance_channel',
-              notificationChannel,
-              channelDescription: notificationChannelDescription,
-              playSound: true,
-              // Use default notification sound instead of custom sound
-              // sound: const RawResourceAndroidNotificationSound('notification'),
-              icon: 'mipmap/ic_launcher',
-              vibrationPattern: vibrationPattern,
-              importance: Importance.max,
-              priority: Priority.high,
-              styleInformation: bigTextStyleInformation,
-              channelShowBadge: true,
-              enableVibration: true,
-              enableLights: true,
-              ledColor: const Color.fromARGB(255, 255, 0, 0),
-              ledOnMs: 1000,
-              ledOffMs: 500,
-              fullScreenIntent: true,
-              category: AndroidNotificationCategory.message,
-              visibility: NotificationVisibility.public,
-              ongoing: false,
-              autoCancel: true,
-              showWhen: true,
-              when: DateTime.now().millisecondsSinceEpoch,
-            ),
-            iOS: DarwinNotificationDetails(
-                presentAlert: true,
-                presentSound: true,
-                badgeNumber: int.tryParse(event['count']?.toString() ?? '0') ?? 0,
-                presentBadge: true)),
-        payload: remoteMessage.data.toString());
-        
+      id: event.hashCode,
+      title: remoteMessage.notification?.title ?? event['TYPE'].toString(),
+      body: remoteMessage.notification?.body ?? 'Tap to open',
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'high_importance_channel',
+          notificationChannel,
+          channelDescription: notificationChannelDescription,
+          playSound: true,
+          // Use default notification sound instead of custom sound
+          // sound: const RawResourceAndroidNotificationSound('notification'),
+          icon: 'mipmap/ic_launcher',
+          vibrationPattern: vibrationPattern,
+          importance: Importance.max,
+          priority: Priority.high,
+          styleInformation: bigTextStyleInformation,
+          channelShowBadge: true,
+          enableVibration: true,
+          enableLights: true,
+          ledColor: const Color.fromARGB(255, 255, 0, 0),
+          ledOnMs: 1000,
+          ledOffMs: 500,
+          fullScreenIntent: true,
+          category: AndroidNotificationCategory.message,
+          visibility: NotificationVisibility.public,
+          ongoing: false,
+          autoCancel: true,
+          showWhen: true,
+          when: DateTime.now().millisecondsSinceEpoch,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          badgeNumber: int.tryParse(event['count']?.toString() ?? '0') ?? 0,
+          presentBadge: true,
+        ),
+      ),
+      payload: remoteMessage.data.toString(),
+    );
+
     debugPrint("=== END SHOWING LOCAL NOTIFICATION ===");
   }
 
   Future<bool?> _requestIOSPermissions() async {
-    var platformImplementation =
-        localNotifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    var platformImplementation = localNotifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     bool? permission = false;
     if (platformImplementation != null) {
-      permission = (await platformImplementation.requestPermissions(alert: true, badge: true, sound: true));
+      permission = (await platformImplementation.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      ));
     }
     return permission;
   }
@@ -373,10 +417,10 @@ class PushNotificationsManager {
     if (await Permission.notification.isDenied) {
       await Permission.notification.request();
     }
-    
+
     // Don't automatically request system alert window permission
     // This will be handled by a separate method when user wants floating notifications
-    
+
     // Request ignore battery optimization for better notification delivery
     if (await Permission.ignoreBatteryOptimizations.isDenied) {
       await Permission.ignoreBatteryOptimizations.request();
@@ -389,53 +433,57 @@ class PushNotificationsManager {
       await Permission.systemAlertWindow.request();
     }
   }
-  
+
   /// Debug method to check current app state and notification settings
   /// Call this when experiencing notification issues
   static Future<void> debugNotificationState() async {
     debugPrint("=== NOTIFICATION DEBUG INFO ===");
-    
+
     // Check notification permissions
     final notificationStatus = await Permission.notification.status;
     debugPrint("Notification Permission: ${notificationStatus.name}");
-    
+
     // Check if notifications are enabled
     final isEnabled = await Permission.notification.isGranted;
     debugPrint("Notifications Enabled: $isEnabled");
-    
+
     // Check FCM token
     final token = await FirebaseMessaging.instance.getToken();
-    debugPrint("FCM Token: ${token != null ? 'Available (${token.substring(0, 20)}...)' : 'Not Available'}");
-    
+    debugPrint(
+      "FCM Token: ${token != null ? 'Available (${token.substring(0, 20)}...)' : 'Not Available'}",
+    );
+
     // Check notification settings
     final settings = await FirebaseMessaging.instance.getNotificationSettings();
     debugPrint("Authorization Status: ${settings.authorizationStatus.name}");
     debugPrint("Alert Setting: ${settings.alert.name}");
     debugPrint("Badge Setting: ${settings.badge.name}");
     debugPrint("Sound Setting: ${settings.sound.name}");
-    
+
     // Platform specific checks
     if (Platform.isAndroid) {
       debugPrint("Platform: Android");
-      final batteryOptimization = await Permission.ignoreBatteryOptimizations.status;
+      final batteryOptimization =
+          await Permission.ignoreBatteryOptimizations.status;
       debugPrint("Battery Optimization: ${batteryOptimization.name}");
     } else if (Platform.isIOS) {
       debugPrint("Platform: iOS");
     }
-    
+
     debugPrint("=== END NOTIFICATION DEBUG INFO ===");
   }
-  
+
   /// Test method to send a local notification
   /// Use this to verify local notifications are working correctly
   static Future<void> sendTestNotification() async {
     debugPrint("Sending test notification...");
-    
+
     await localNotifications.show(
-      _notificationId,
-      "Test Notification",
-      "This is a test notification to verify the system is working correctly",
-      NotificationDetails(
+      id: _notificationId,
+      title: "Test Notification",
+      body:
+          "This is a test notification to verify the system is working correctly",
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'high_importance_channel',
           notificationChannel,
@@ -445,7 +493,10 @@ class PushNotificationsManager {
           vibrationPattern: Int64List(4),
           importance: Importance.max,
           priority: Priority.high,
-          styleInformation: BigTextStyleInformation("This is a test notification to verify the system is working correctly", contentTitle: "Test Notification"),
+          styleInformation: BigTextStyleInformation(
+            "This is a test notification to verify the system is working correctly",
+            contentTitle: "Test Notification",
+          ),
           channelShowBadge: true,
           enableVibration: true,
           enableLights: true,
@@ -469,7 +520,7 @@ class PushNotificationsManager {
       ),
       payload: '{"type": "test", "count": "1"}',
     );
-    
+
     debugPrint("Test notification sent");
   }
 }

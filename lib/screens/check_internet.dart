@@ -15,19 +15,28 @@ class CheckInternet extends StatelessWidget {
           child: ElevatedButton(
             child: const Text("Check Internet Connection"),
             onPressed: () async {
-              final connectivityResult = await Connectivity().checkConnectivity();
-              if (connectivityResult == ConnectivityResult.none) {
+              final connectivityResult = await Connectivity()
+                  .checkConnectivity();
+              if (connectivityResult.contains(ConnectivityResult.none)) {
                 if (context.mounted) {
                   showDialog(
                     barrierDismissible: false,
                     context: context,
                     builder: (_) => NetworkErrorDialog(
                       onPressed: () async {
-                        final connectivityResult = await Connectivity().checkConnectivity();
-                        if (connectivityResult == ConnectivityResult.none) {
+                        final connectivityResult = await Connectivity()
+                            .checkConnectivity();
+                        if (connectivityResult.contains(
+                          ConnectivityResult.none,
+                        )) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please turn on your wifi or mobile data')));
+                              const SnackBar(
+                                content: Text(
+                                  'Please turn on your wifi or mobile data',
+                                ),
+                              ),
+                            );
                           }
                         } else {
                           if (context.mounted) {
@@ -41,7 +50,12 @@ class CheckInternet extends StatelessWidget {
               } else {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('You\'re connected to a ${connectivityResult..first.name} network')));
+                    SnackBar(
+                      content: Text(
+                        'You\'re connected to a ${connectivityResult..first.name} network',
+                      ),
+                    ),
+                  );
                   checkForUpdate(context);
                   Navigator.pushReplacement(
                     context,
@@ -90,10 +104,7 @@ class NetworkErrorDialog extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onPressed,
-            child: const Text("Try Again"),
-          )
+          ElevatedButton(onPressed: onPressed, child: const Text("Try Again")),
         ],
       ),
     );

@@ -17,26 +17,26 @@ class WebService {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  static clearAllPref() async {
+  static Future<void> clearAllPref() async {
     _preferences?.remove("user_details");
     _preferences?.remove("global_login_type");
     _preferences?.remove("student_data");
     WebService.studentLoginData = null;
   }
 
-  static getSchoolUrl() async {
+  static Future<String> getSchoolUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
     return schoolBaseUrl ?? '';
   }
 
-  static getSchoolImageUrl() async {
+  static Future<String> getSchoolImageUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseImageUrl = prefs.getString('global_school_image_url');
     return schoolBaseImageUrl ?? '';
   }
 
-  static getLoginType() async {
+  static Future<String> getLoginType() async {
     final prefs = await SharedPreferences.getInstance();
     final loginType = prefs.getString('global_login_type');
     return loginType!;
@@ -63,20 +63,22 @@ class WebService {
     }
   }
 
-  static setStudentLoginDetails(StudentLoginResponse loginResponse) async {
+  static Future<void> setStudentLoginDetails(
+    StudentLoginResponse loginResponse,
+  ) async {
     await _preferences?.setString("student_data", json.encode(loginResponse));
   }
 
-  static setAppDeviceId(String appDeviceId) async {
+  static Future<void> setAppDeviceId(String appDeviceId) async {
     await _preferences?.setString("appDeviceId", appDeviceId);
   }
 
   static Future<String?> getAppDeviceId() async {
-    final value = await _preferences?.get("appDeviceId").toString();
+    final value = _preferences?.get("appDeviceId").toString();
     return value;
   }
 
-  static getTeacherDetails() async {
+  static Future<dynamic> getTeacherDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final userDetails = prefs.getString('teacher_data');
     dynamic userInfo;
@@ -86,13 +88,13 @@ class WebService {
     return userInfo;
   }
 
-  static setTeacherLoginDetails(dynamic loginResponse) async {
+  static Future<void> setTeacherLoginDetails(dynamic loginResponse) async {
     await _preferences?.setString("teacher_data", json.encode(loginResponse));
   }
 
   static Future<StudentLoginResponse?> getStudentLoginDetails() async {
     try {
-      final loginResponseString = await _preferences?.getString('student_data');
+      final loginResponseString = _preferences?.getString('student_data');
       if (loginResponseString != null) {
         final loginResponseJson = json.decode(loginResponseString);
         return StudentLoginResponse.fromJson(loginResponseJson);
@@ -177,15 +179,19 @@ class WebService {
       var requestedData = {"Type": loginType};
       var body = json.encode(requestedData);
 
-      final response = await ApiService()
-          .post(url: '${schoolBaseUrl!}DashboardForTeacher/DashboardForTeacher', data: body);
+      final response = await ApiService().post(
+        url: '${schoolBaseUrl}DashboardForTeacher/DashboardForTeacher',
+        data: body,
+      );
 
       final responseData = response.data;
       log("dashboard data ===> $responseData");
 
       if (responseData['lstDashobaord'] != null) {
         final List<dynamic> dashboardList = responseData['lstDashobaord'];
-        return dashboardList.map((json) => DashboardResponse.fromJson(json)).toList();
+        return dashboardList
+            .map((json) => DashboardResponse.fromJson(json))
+            .toList();
       } else {
         throw Exception('Dashboard data is null');
       }

@@ -8,8 +8,8 @@ class CommonResponse {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['Success'] = this.success;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['Success'] = success;
     return data;
   }
 }

@@ -32,8 +32,9 @@ class AttendanceDataRequest {
       classId: json['CLASS_ID'],
       sectionId: json['SECTION_ID'],
       lstAttendanceDetail: List<AttendanceDetail>.from(
-        json['lstAttendanceDetail']
-            .map((detail) => AttendanceDetail.fromJson(detail)),
+        json['lstAttendanceDetail'].map(
+          (detail) => AttendanceDetail.fromJson(detail),
+        ),
       ),
     );
   }
@@ -48,7 +49,9 @@ class AttendanceDataRequest {
       'UPDATE_USER_ID': updateUserId,
       'CLASS_ID': classId,
       'SECTION_ID': sectionId,
-      'lstAttendanceDetail': lstAttendanceDetail.map((detail) => detail.toJson()).toList(),
+      'lstAttendanceDetail': lstAttendanceDetail
+          .map((detail) => detail.toJson())
+          .toList(),
     };
   }
 }
@@ -73,10 +76,6 @@ class AttendanceDetail {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'PRESENT': present,
-      'ADM_NO': adm_id,
-      'STUDENT_ID': studentId,
-    };
+    return {'PRESENT': present, 'ADM_NO': adm_id, 'STUDENT_ID': studentId};
   }
 }

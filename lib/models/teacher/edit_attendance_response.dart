@@ -6,13 +6,14 @@ class EditAttendanceResponse {
   dynamic loginUserId;
   dynamic nUMBER;
 
-  EditAttendanceResponse(
-      {this.success,
-        this.errorCode,
-        this.errorMessage,
-        this.token,
-        this.loginUserId,
-        this.nUMBER});
+  EditAttendanceResponse({
+    this.success,
+    this.errorCode,
+    this.errorMessage,
+    this.token,
+    this.loginUserId,
+    this.nUMBER,
+  });
 
   EditAttendanceResponse.fromJson(Map<String, dynamic> json) {
     success = json['Success'];

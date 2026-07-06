@@ -16,13 +16,15 @@ import 'package:provider/provider.dart';
 class TeacherAssignmentListScreen extends StatefulWidget {
   final int employeeId;
 
-  const TeacherAssignmentListScreen({Key? key, required this.employeeId}) : super(key: key);
+  const TeacherAssignmentListScreen({super.key, required this.employeeId});
 
   @override
-  State<TeacherAssignmentListScreen> createState() => _TeacherAssignmentListScreenState();
+  State<TeacherAssignmentListScreen> createState() =>
+      _TeacherAssignmentListScreenState();
 }
 
-class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScreen> {
+class _TeacherAssignmentListScreenState
+    extends State<TeacherAssignmentListScreen> {
   TeacherAssignmentListProvider? teacherAssignmentListProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
@@ -31,16 +33,20 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
     debugPrint('init called again ');
     teacherAssignmentListProvider = TeacherAssignmentListProvider();
     teacherAssignmentListProvider?.fetchTeacherAssignmentListData(
-        employeeId: widget.employeeId, endDate: Constants.currentDate, fromDate: Constants.currentDate);
+      employeeId: widget.employeeId,
+      endDate: Constants.currentDate,
+      fromDate: Constants.currentDate,
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => teacherAssignmentListProvider,
-        builder: (context, child) {
-          return Consumer<TeacherAssignmentListProvider>(builder: (context, model, _) {
+      create: (_) => teacherAssignmentListProvider,
+      builder: (context, child) {
+        return Consumer<TeacherAssignmentListProvider>(
+          builder: (context, model, _) {
             return Scaffold(
               appBar: AppBar(
                 centerTitle: true,
@@ -49,18 +55,20 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                   style: TextStyle(color: Colors.white),
                 ),
                 leading: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios),
-                    color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back_ios),
+                  color: Colors.white,
+                ),
                 actions: [
                   IconButton(
                     onPressed: () {
                       model.getDateRange(context).then((value) {
                         if (value.isNotEmpty) {
                           model.fetchTeacherAssignmentListData(
-                              employeeId: widget.employeeId,
-                              endDate: model.endDate,
-                              fromDate: model.startDate);
+                            employeeId: widget.employeeId,
+                            endDate: model.endDate,
+                            fromDate: model.startDate,
+                          );
                         }
                       });
                     },
@@ -70,11 +78,12 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                   IconButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AssignmentForm(
-                                    employeeId: widget.employeeId,
-                                  )));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AssignmentForm(employeeId: widget.employeeId),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.white,
@@ -93,8 +102,10 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                           height: 50,
                           padding: const EdgeInsets.only(left: 10),
                           margin: const EdgeInsets.only(top: 10, bottom: 10),
-                          decoration:
-                              BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all()),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(),
+                          ),
                           child: Row(
                             children: [
                               const Icon(
@@ -102,104 +113,148 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                                 color: Colors.black,
                               ),
                               const SizedBox(width: 5),
-                              Text("${model.startDate} - ${model.endDate}",
-                                  textAlign: TextAlign.left,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
+                              Text(
+                                "${model.startDate} - ${model.endDate}",
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         Expanded(
-                          child: (model.teacherAssignmentListModel == null ||
-                                  model.teacherAssignmentListModel!.lstAssignment == null)
+                          child:
+                              (model.teacherAssignmentListModel == null ||
+                                  model
+                                          .teacherAssignmentListModel!
+                                          .lstAssignment ==
+                                      null)
                               ? const SizedBox.shrink()
                               : model.message != null
-                                  ? Center(
-                                      child: Text(
-                                      model.message ?? "",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ))
-                                  : ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: model.teacherAssignmentListModel!.lstAssignment!.length,
-                                      itemBuilder: (context, index) => listItem(
-                                          model: model,
-                                          assignment: model.teacherAssignmentListModel!.lstAssignment![index],
-                                          documentOnTap: () {
-                                            if (model.teacherAssignmentListModel!.lstAssignment![index]
-                                                .lstCircularFile!.isNotEmpty) {
-                                              showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (BuildContext context) {
-                                                  var data =
-                                                      model.teacherAssignmentListModel!.lstAssignment![index];
-                                                  return AlertDialog(
-                                                    title: const Text('Document'),
-                                                    content: SizedBox(
-                                                      width: double.maxFinite,
-                                                      child: LayoutBuilder(builder:
-                                                          (BuildContext context, BoxConstraints constraints) {
+                              ? Center(
+                                  child: Text(
+                                    model.message ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: model
+                                      .teacherAssignmentListModel!
+                                      .lstAssignment!
+                                      .length,
+                                  itemBuilder: (context, index) => listItem(
+                                    model: model,
+                                    assignment: model
+                                        .teacherAssignmentListModel!
+                                        .lstAssignment![index],
+                                    documentOnTap: () {
+                                      if (model
+                                          .teacherAssignmentListModel!
+                                          .lstAssignment![index]
+                                          .lstCircularFile!
+                                          .isNotEmpty) {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) {
+                                            var data = model
+                                                .teacherAssignmentListModel!
+                                                .lstAssignment![index];
+                                            return AlertDialog(
+                                              title: const Text('Document'),
+                                              content: SizedBox(
+                                                width: double.maxFinite,
+                                                child: LayoutBuilder(
+                                                  builder:
+                                                      (
+                                                        BuildContext context,
+                                                        BoxConstraints
+                                                        constraints,
+                                                      ) {
                                                         return ListView.builder(
-                                                            shrinkWrap: true,
-                                                            itemBuilder: (context, index) => ListTile(
-                                                                  contentPadding: const EdgeInsets.all(0),
-                                                                  title: Text(
-                                                                      data.lstCircularFile![index].fILENAME ??
-                                                                          ""),
-                                                                  trailing: IconButton(
-                                                                      onPressed: () {
-                                                                        DownloadPdf.downloadPdf(
-                                                                            "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                            data.lstCircularFile![index]
-                                                                                .fILENAME!
-                                                                                .split('/')
-                                                                                .last,
-                                                                            context, (value) {
-                                                                          if (Platform.isAndroid) {
-                                                                            //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                          }
-                                                                        });
-
-
-
-
-                                                                      },
-                                                                      icon: const Icon(Icons.download)),
+                                                          shrinkWrap: true,
+                                                          itemBuilder: (context, index) => ListTile(
+                                                            contentPadding:
+                                                                const EdgeInsets.all(
+                                                                  0,
                                                                 ),
-                                                            itemCount: data.lstCircularFile!.length);
-                                                      }),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context).pop();
-                                                        },
-                                                        child: const Text('Close'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            }
-                                            //  });
+                                                            title: Text(
+                                                              data
+                                                                      .lstCircularFile![index]
+                                                                      .fILENAME ??
+                                                                  "",
+                                                            ),
+                                                            trailing: IconButton(
+                                                              onPressed: () {
+                                                                DownloadPdf.downloadPdf(
+                                                                  "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                  data
+                                                                      .lstCircularFile![index]
+                                                                      .fILENAME!
+                                                                      .split(
+                                                                        '/',
+                                                                      )
+                                                                      .last,
+                                                                  context,
+                                                                  (value) {
+                                                                    if (Platform
+                                                                        .isAndroid) {
+                                                                      //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                    }
+                                                                  },
+                                                                );
+                                                              },
+                                                              icon: const Icon(
+                                                                Icons.download,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          itemCount: data
+                                                              .lstCircularFile!
+                                                              .length,
+                                                        );
+                                                      },
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('Close'),
+                                                ),
+                                              ],
+                                            );
                                           },
-                                          showMoreOnTap: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => AssignmentDetailScreen(
-                                                      sessionId: Constants.sessionId,
-                                                        assignmentId: model.teacherAssignmentListModel!
-                                                            .lstAssignment![index].aPPASSIGNMENTID!)));
-                                          })),
+                                        );
+                                      }
+                                      //  });
+                                    },
+                                    showMoreOnTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AssignmentDetailScreen(
+                                                sessionId: Constants.sessionId,
+                                                assignmentId: model
+                                                    .teacherAssignmentListModel!
+                                                    .lstAssignment![index]
+                                                    .aPPASSIGNMENTID!,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -208,22 +263,27 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                 ],
               ),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 
-  Widget listItem(
-      {void Function()? documentOnTap,
-      void Function()? showMoreOnTap,
-      required TeacherAssignmentListProvider model,
-      required LstAssignment assignment}) {
+  Widget listItem({
+    void Function()? documentOnTap,
+    void Function()? showMoreOnTap,
+    required TeacherAssignmentListProvider model,
+    required LstAssignment assignment,
+  }) {
     return Opacity(
       opacity: assignment.aCTIVE == "Y" ? 1.0 : 0.5,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(8),
-        decoration:
-            BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(5),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -235,14 +295,16 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                   child: Container(
                     margin: const EdgeInsets.only(right: 10),
                     //   decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
-                    child: Text(assignment.sUBJECTNAME ?? "",
-                        maxLines: 2,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Montserrat Regular",
-                          color: Colors.black,
-                        )),
+                    child: Text(
+                      assignment.sUBJECTNAME ?? "",
+                      maxLines: 2,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Montserrat Regular",
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -252,58 +314,76 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text('Assignment Date: ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.black,
-                            )),
-                        Text(DateTimeUtils.formatDateTime(assignment.aSSIGNMENTDATE ?? ""),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.orange,
-                            )),
+                        const Text(
+                          'Assignment Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          DateTimeUtils.formatDateTime(
+                            assignment.aSSIGNMENTDATE ?? "",
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text('Start Date: ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.black,
-                            )),
-                        Text(DateTimeUtils.formatDateTime(assignment.sTARTDATE ?? ""),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.orange,
-                            )),
+                        const Text(
+                          'Start Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          DateTimeUtils.formatDateTime(
+                            assignment.sTARTDATE ?? "",
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text('Submission Date: ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.black,
-                            )),
-                        Text(DateTimeUtils.formatDateTime(assignment.eNDDATE ?? ""),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: "Montserrat Regular",
-                              color: Colors.orange,
-                            )),
+                        const Text(
+                          'Submission Date: ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          DateTimeUtils.formatDateTime(
+                            assignment.eNDDATE ?? "",
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: "Montserrat Regular",
+                            color: Colors.orange,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -311,15 +391,17 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
               ],
             ),
             const SizedBox(height: 5),
-            Text(model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                )),
+            Text(
+              model.getContentAsHTML(assignment.aSSIGNMENTDETAILS ?? ""),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                fontFamily: "Montserrat Regular",
+                color: Colors.black,
+              ),
+            ),
             // SizedBox(
             //   height: 60,
             //   child: Html(
@@ -332,24 +414,25 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
               children: [
                 if (assignment.lstCircularFile!.isNotEmpty)
                   InkWell(
-                      onTap: documentOnTap,
-                      child: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.cloud_download,
-                            color: Colors.white,
-                          ))),
+                    onTap: documentOnTap,
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      child: Icon(Icons.cloud_download, color: Colors.white),
+                    ),
+                  ),
                 const Spacer(),
                 MaterialButton(
                   onPressed: showMoreOnTap,
                   color: Colors.blue,
-                  child: const Text("View more",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.white,
-                      )),
+                  child: const Text(
+                    "View more",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: "Montserrat Regular",
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -364,20 +447,24 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Class: ',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
-                              )),
-                          Text(assignment.cLASSDESC ?? "",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
-                              )),
+                          const Text(
+                            'Class: ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            assignment.cLASSDESC ?? "",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            ),
+                          ),
                         ],
                       ),
                       if (assignment.lstCircularSection != null)
@@ -386,20 +473,26 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Section: ',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
+                              const Text(
+                                'Section: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
+                              ),
                               Expanded(
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: assignment.lstCircularSection!.length,
+                                  itemCount:
+                                      assignment.lstCircularSection!.length,
                                   itemBuilder: (context, index) {
                                     return Text(
-                                      assignment.lstCircularSection![index].sECTIONDESC ?? "",
+                                      assignment
+                                              .lstCircularSection![index]
+                                              .sECTIONDESC ??
+                                          "",
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.normal,
@@ -408,14 +501,15 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                                       ),
                                     );
                                   },
-                                  separatorBuilder: (BuildContext context, int index) {
-                                    return const Text(', ');
-                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                        return const Text(', ');
+                                      },
                                 ),
-                              )
+                              ),
                             ],
                           ),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -432,12 +526,17 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Confirm Action'),
-                                    content: const Text('Are you sure you want to inactive this assignment?'),
+                                    content: const Text(
+                                      'Are you sure you want to inactive this assignment?',
+                                    ),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          model.inActiveAssignment(assignment, context);
+                                          model.inActiveAssignment(
+                                            assignment,
+                                            context,
+                                          );
                                         },
                                         child: const Text('Yes'),
                                       ),
@@ -455,11 +554,11 @@ class _TeacherAssignmentListScreenState extends State<TeacherAssignmentListScree
                           : null,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                     Text(assignment.aCTIVE == "Y"?'Active':'Inactive')
+                    Text(assignment.aCTIVE == "Y" ? 'Active' : 'Inactive'),
                   ],
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

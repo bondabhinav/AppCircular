@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 class RemoteConfigService {
   static final RemoteConfigService _instance = RemoteConfigService._internal();
@@ -12,19 +11,19 @@ class RemoteConfigService {
   StreamSubscription? _configListener;
   Timer? _fallbackTimer;
 
-  /// Initialize and start listening for app_update flag changes
+  /// Initialize and start listening for app_update flag changes.
   Future<void> initialize() async {
     try {
       // Set minimum fetch interval
-      await _remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(minutes: 1),
-      ));
+      await _remoteConfig.setConfigSettings(
+        RemoteConfigSettings(
+          fetchTimeout: const Duration(seconds: 5),
+          minimumFetchInterval: const Duration(minutes: 1),
+        ),
+      );
 
       // Set default values
-      await _remoteConfig.setDefaults({
-        'app_update': false,
-      });
+      await _remoteConfig.setDefaults({'app_update': false});
 
       // Fetch and activate config
       await _remoteConfig.fetchAndActivate();
@@ -37,7 +36,6 @@ class RemoteConfigService {
 
       // Check immediately
       _checkAppUpdate();
-
     } catch (e) {
       // Silent fail
     }
@@ -61,33 +59,16 @@ class RemoteConfigService {
     });
   }
 
-  /// Check if app should be killed
+  /// Check if the remote app_update flag is enabled.
   void _checkAppUpdate() {
     try {
-      final shouldKill = _remoteConfig.getBool('app_update');
-      
-      if (shouldKill) {
-        _killApp();
+      final appUpdateEnabled = _remoteConfig.getBool('app_update');
+
+      if (appUpdateEnabled) {
+        debugPrint('Remote Config app_update is enabled; app remains open.');
       }
     } catch (e) {
       // Silent fail
-    }
-  }
-
-  /// Kill the app
-  void _killApp() {
-    try {
-      // Stop all timers and listeners
-      _configListener?.cancel();
-      _fallbackTimer?.cancel();
-      
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else {
-        exit(0);
-      }
-    } catch (e) {
-      exit(0); // Force exit
     }
   }
 
@@ -108,4 +89,4 @@ class RemoteConfigService {
       // Silent fail
     }
   }
-} 
+}

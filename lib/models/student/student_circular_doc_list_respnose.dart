@@ -15,7 +15,9 @@ class StudentCircularDocumentListResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (circularAttachment != null) {
-      data['CircularAttachment'] = circularAttachment!.map((v) => v.toJson()).toList();
+      data['CircularAttachment'] = circularAttachment!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }
@@ -26,7 +28,11 @@ class CircularAttachment {
   int? aPPCIRCULARID;
   String? fILENAME;
 
-  CircularAttachment({this.aPPCIRCULARINFODETID, this.aPPCIRCULARID, this.fILENAME});
+  CircularAttachment({
+    this.aPPCIRCULARINFODETID,
+    this.aPPCIRCULARID,
+    this.fILENAME,
+  });
 
   CircularAttachment.fromJson(Map<String, dynamic> json) {
     aPPCIRCULARINFODETID = json['APP_CIRCULAR_INFO_DET_ID'];

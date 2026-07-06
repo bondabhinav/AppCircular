@@ -40,11 +40,15 @@ class CircularsProvider extends ChangeNotifier {
   List<String>? checkboxGroupValues;
   final loaderProvider = getIt<LoaderProvider>();
   File? filePick;
-  var path;
+  String? path;
   List<ADMSTUDREGISTRATION> filteredStudents = [];
 
-  final startDateController = TextEditingController(text: Constants.getFormattedDate(Constants.startDate));
-  final endDateController = TextEditingController(text: Constants.getFormattedDate(Constants.endDate));
+  final startDateController = TextEditingController(
+    text: Constants.getFormattedDate(Constants.startDate),
+  );
+  final endDateController = TextEditingController(
+    text: Constants.getFormattedDate(Constants.endDate),
+  );
   DateTime selectedStartDate = DateTime.parse(Constants.startDate);
   DateTime? selectedEndDate;
 
@@ -83,8 +87,12 @@ class CircularsProvider extends ChangeNotifier {
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
         // lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
-        lstStudentCircular
-            .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID.toString(), ADM_NO: item.aDMNO.toString()));
+        lstStudentCircular.add(
+          StudentListModel(
+            STUDENT_ID: item.aDMSTUDENTID.toString(),
+            ADM_NO: item.aDMNO.toString(),
+          ),
+        );
       }
     } else {
       _studentIds.clear();
@@ -114,8 +122,9 @@ class CircularsProvider extends ChangeNotifier {
 
   void updateSelectedClass(int? value) {
     _selectedClass = value;
-    selectedClassName =
-        getClassResponse.cLASSandSECTION!.firstWhere((element) => element.classId == value).cLASSDESC!;
+    selectedClassName = getClassResponse.cLASSandSECTION!
+        .firstWhere((element) => element.classId == value)
+        .cLASSDESC!;
     debugPrint('class id ===> $selectedClass');
     debugPrint('class name ===> $selectedClassName');
     if (selectedClass != null) {
@@ -170,10 +179,19 @@ class CircularsProvider extends ChangeNotifier {
         _studentIds.add(studentId);
         for (var element in studentResponse!.aDMSTUDREGISTRATION!) {
           if (element.aDMSTUDENTID == studentId) {
-            if (!lstStudentCircular.any((item) => item.STUDENT_ID == studentId.toString())) {
-              lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+            if (!lstStudentCircular.any(
+              (item) => item.STUDENT_ID == studentId.toString(),
+            )) {
+              lstStudentCircular.add(
+                StudentListModel(
+                  STUDENT_ID: studentId.toString(),
+                  ADM_NO: element.aDMNO,
+                ),
+              );
             }
-            if (!lstSectionCircular.any((item) => item["STUDENT_ID"] == studentId)) {
+            if (!lstSectionCircular.any(
+              (item) => item["STUDENT_ID"] == studentId,
+            )) {
               lstSectionCircular.add({"STUDENT_ID": studentId});
             }
           }
@@ -181,7 +199,9 @@ class CircularsProvider extends ChangeNotifier {
       }
     } else {
       _studentIds.remove(studentId);
-      lstStudentCircular.removeWhere((item) => item.STUDENT_ID == studentId.toString());
+      lstStudentCircular.removeWhere(
+        (item) => item.STUDENT_ID == studentId.toString(),
+      );
       lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
     }
 
@@ -195,7 +215,9 @@ class CircularsProvider extends ChangeNotifier {
   }
 
   Future<CommonResponse> addCircularsData({required int teacherId}) async {
-    final List<Map<String, dynamic>> studentJsonList = lstStudentCircular.map((student) => student.toJson()).toList();
+    final List<Map<String, dynamic>> studentJsonList = lstStudentCircular
+        .map((student) => student.toJson())
+        .toList();
 
     log("student data $studentJsonList end");
     var commonResponse = CommonResponse();
@@ -215,14 +237,23 @@ class CircularsProvider extends ChangeNotifier {
         "CIRCULAR_SUBJECT": subjectController.text,
         "IS_APPLICABLETOPARENT": circularInfo.value ? "Y" : "N",
         "lstsectionCircular": lstSectionCircular,
-        "lstStudentCircular": lstStudentCircular.map((e) => e.toJson()).toList(), // Convert objects to JSON
-        "lstStudentCircularinfo": docList.map((e) => e.toJson()).toList(), // Convert objects to JSON
-        "SESSION_ID": Constants.sessionId
+        "lstStudentCircular": lstStudentCircular
+            .map((e) => e.toJson())
+            .toList(), // Convert objects to JSON
+        "lstStudentCircularinfo": docList
+            .map((e) => e.toJson())
+            .toList(), // Convert objects to JSON
+        "SESSION_ID": Constants.sessionId,
       };
 
-      log("Data======> ${jsonEncode(data)}"); // Convert the entire map to a JSON string
+      log(
+        "Data======> ${jsonEncode(data)}",
+      ); // Convert the entire map to a JSON string
 
-      final response = await apiService.post(url: Api.addCircularApi, data: data);
+      final response = await apiService.post(
+        url: Api.addCircularApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         commonResponse = CommonResponse.fromJson(response.data);
         loaderProvider.hideLoader();
@@ -262,7 +293,10 @@ class CircularsProvider extends ChangeNotifier {
     try {
       loaderProvider.showLoader();
       var data = {"TEACHER_ID": teacherId, "SESSION_ID": Constants.sessionId};
-      final response = await apiService.post(url: Api.getSectionApi, data: data);
+      final response = await apiService.post(
+        url: Api.getSectionApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         getSectionResponse = GetSectionResponse.fromJson(response.data);
         loaderProvider.hideLoader();
@@ -281,16 +315,19 @@ class CircularsProvider extends ChangeNotifier {
     try {
       final requestPayload = StudentRequest(
         sESSIONID: Constants.sessionId.toString(),
-        lstClass: [
-          LstClass(cLASSID: selectedClass.toString()),
-        ],
+        lstClass: [LstClass(cLASSID: selectedClass.toString())],
         lstSection: selectedSectionIds
-            .map((sectionId) => LstSection(cURRENTSECTIONID: sectionId.toString()))
+            .map(
+              (sectionId) => LstSection(cURRENTSECTIONID: sectionId.toString()),
+            )
             .toList(),
       );
       final jsonPayload = requestPayload.toJson();
       loaderProvider.showLoader();
-      final response = await apiService.post(url: Api.getStudentApi, data: jsonPayload);
+      final response = await apiService.post(
+        url: Api.getStudentApi,
+        data: jsonPayload,
+      );
       if (response.statusCode == 200) {
         studentResponse = StudentResponse.fromJson(response.data);
         if (studentResponse!.aDMSTUDREGISTRATION!.isNotEmpty) {
@@ -300,8 +337,12 @@ class CircularsProvider extends ChangeNotifier {
           _selectAll = true;
           studentResponse!.aDMSTUDREGISTRATION!.map((item) {
             _studentIds.add(item.aDMSTUDENTID!);
-            lstStudentCircular
-                .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID!.toString(), ADM_NO: item.aDMNO));
+            lstStudentCircular.add(
+              StudentListModel(
+                STUDENT_ID: item.aDMSTUDENTID!.toString(),
+                ADM_NO: item.aDMNO,
+              ),
+            );
           }).toList();
         }
         loaderProvider.hideLoader();
@@ -317,17 +358,30 @@ class CircularsProvider extends ChangeNotifier {
   }
 
   Future<void> uploadFile() async {
-    debugPrint('upload ${File(path).path}');
+    final filePath = path;
+    if (filePath == null) return;
+
+    debugPrint('upload ${File(filePath).path}');
     loaderProvider.showLoader();
     notifyListeners();
     try {
       String fileName =
-          '${selectedClassName.replaceAll(' ', '')}_${DateTime.now().millisecondsSinceEpoch}_${path.split('/').last}';
+          '${selectedClassName.replaceAll(' ', '')}_${DateTime.now().millisecondsSinceEpoch}_${filePath.split('/').last}';
       debugPrint('upload fileName ----> $fileName');
-      var request = http.MultipartRequest('POST', Uri.parse(Api.uploadCircularImageDocFileApi));
-      request.headers['Content-Type'] = 'multipart/form-data; boundary=<calculated when request is sent>';
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(Api.uploadCircularImageDocFileApi),
+      );
+      request.headers['Content-Type'] =
+          'multipart/form-data; boundary=<calculated when request is sent>';
       request.headers['Accept'] = '*/*';
-      request.files.add(await http.MultipartFile.fromPath('', File(path).path, filename: fileName));
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          '',
+          File(filePath).path,
+          filename: fileName,
+        ),
+      );
 
       http.StreamedResponse response = await request.send();
       final data = await http.Response.fromStream(response);
@@ -341,10 +395,12 @@ class CircularsProvider extends ChangeNotifier {
           if (jsonResponse.isNotEmpty) {
             for (var jsonItem in jsonResponse) {
               Map<String, dynamic> jsonData = jsonItem;
-              UploadDocResponse uploadDocResponse = UploadDocResponse.fromJson(jsonData);
+              UploadDocResponse uploadDocResponse = UploadDocResponse.fromJson(
+                jsonData,
+              );
               docList.add(uploadDocResponse);
-              allFiles.add(File(path).path);
-              path == null;
+              allFiles.add(File(filePath).path);
+              path = null;
               filePick?.delete();
               filePick = null;
               _fileName = null;
@@ -377,7 +433,10 @@ class CircularsProvider extends ChangeNotifier {
   Future<void> deleteFile(String filename, int index) async {
     try {
       loaderProvider.showLoader();
-      final response = await apiService.post(url: Api.deleteCircularFileApi, data: {"FILE_NAME": filename});
+      final response = await apiService.post(
+        url: Api.deleteCircularFileApi,
+        data: {"FILE_NAME": filename},
+      );
       if (response.statusCode == 200) {
         debugPrint('data =====> ${response.data}');
         if (response.data == "TRUE") {
@@ -399,12 +458,20 @@ class CircularsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> selectDate({required BuildContext context, required bool startDate}) async {
+  Future<void> selectDate({
+    required BuildContext context,
+    required bool startDate,
+  }) async {
+    final preferredInitialDate = startDate
+        ? Constants.parseAppDate(Constants.startDate)
+        : Constants.parseAppDate(Constants.endDate);
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate:startDate? DateTime.parse(Constants.startDate): DateTime.parse(Constants.endDate),
-      firstDate: DateTime.parse(Constants.startDate),
-      lastDate: DateTime.parse(Constants.lastDate),
+      initialDate: Constants.scheduleDatePickerInitialDate(
+        preferredInitialDate,
+      ),
+      firstDate: Constants.scheduleDatePickerFirstDate,
+      lastDate: Constants.scheduleDatePickerLastDate,
     );
 
     if (pickedDate != null) {
@@ -414,12 +481,16 @@ class CircularsProvider extends ChangeNotifier {
           pickedDate.month,
           pickedDate.day,
         );
-        startDateController.text = DateTimeUtils.formatDate(selectedStartDate).toString();
+        startDateController.text = DateTimeUtils.formatDate(
+          selectedStartDate,
+        ).toString();
       } else {
         if (pickedDate.isBefore(selectedStartDate)) {
           if (context.mounted) {
             ShowSnackBar.error(
-                context: context, showMessage: 'End date cannot be earlier than the start date!');
+              context: context,
+              showMessage: 'End date cannot be earlier than the start date!',
+            );
           }
         } else {
           selectedEndDate = DateTime(
@@ -427,7 +498,9 @@ class CircularsProvider extends ChangeNotifier {
             pickedDate.month,
             pickedDate.day,
           );
-          endDateController.text = DateTimeUtils.formatDate(selectedEndDate!).toString();
+          endDateController.text = DateTimeUtils.formatDate(
+            selectedEndDate!,
+          ).toString();
         }
       }
       notifyListeners();
@@ -442,14 +515,17 @@ class CircularsProvider extends ChangeNotifier {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      final pickedPath = result.files.first.path;
+      if (pickedPath == null) return;
+
       filePick = null;
       _fileName = null;
-      path = result.files.first.path;
-      filePick = File(path!);
+      path = pickedPath;
+      filePick = File(pickedPath);
       _fileName = result.files.first.name;
       debugPrint("File name: ${result.files.first.name}");
       debugPrint("File Path: $path");
-      debugPrint("pickedFiles: ${File(path)}");
+      debugPrint("pickedFiles: ${File(pickedPath)}");
       notifyListeners();
     }
   }

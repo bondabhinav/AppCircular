@@ -15,8 +15,9 @@ class StudentResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (aDMSTUDREGISTRATION != null) {
-      data['ADM_STUD_REGISTRATION'] =
-          aDMSTUDREGISTRATION!.map((v) => v.toJson()).toList();
+      data['ADM_STUD_REGISTRATION'] = aDMSTUDREGISTRATION!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }
@@ -34,17 +35,18 @@ class ADMSTUDREGISTRATION {
   int? cURRENTCLASSID;
   String attendance = 'Present';
 
-  ADMSTUDREGISTRATION(
-      {this.aDMDATE,
-      this.fIRSTNAME,
-      this.aDMNO,
-      this.aDMSTUDENTID,
-      this.cLASSDESC,
-      this.sECTIONDESC,
-      this.fATHER,
-        this.attendance = 'Present',
-      this.mOBILENO,
-      this.cURRENTCLASSID});
+  ADMSTUDREGISTRATION({
+    this.aDMDATE,
+    this.fIRSTNAME,
+    this.aDMNO,
+    this.aDMSTUDENTID,
+    this.cLASSDESC,
+    this.sECTIONDESC,
+    this.fATHER,
+    this.attendance = 'Present',
+    this.mOBILENO,
+    this.cURRENTCLASSID,
+  });
 
   ADMSTUDREGISTRATION.fromJson(Map<String, dynamic> json) {
     aDMDATE = json['ADM_DATE'];

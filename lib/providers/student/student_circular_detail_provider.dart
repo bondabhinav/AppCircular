@@ -1,20 +1,14 @@
-import 'dart:io';
-
 // Removed: import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/auth_middleware.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/student/student_circular_detail_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flexischool/providers/student/student_dashboard_provider.dart';
 import 'package:flexischool/providers/student/student_notification_provider.dart';
-import 'package:flexischool/utils/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 final GetIt getIt = GetIt.instance;
@@ -28,23 +22,34 @@ class StudentCircularDetailProvider extends ChangeNotifier {
 
   String? get message => _message;
 
-  Future<void> fetchStudentCircularDetail(int id, int sessionId, int? notificationId) async {
+  Future<void> fetchStudentCircularDetail(
+    int id,
+    int sessionId,
+    int? notificationId,
+  ) async {
     try {
       loaderProvider.showLoader();
       var data = {"APP_CIRCULAR_ID": id, "SESSION_ID": sessionId};
-      final response = await apiService.post(url: Api.getCircularByIdApi, data: data);
+      final response = await apiService.post(
+        url: Api.getCircularByIdApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        studentCircularDetailResponse = StudentCircularDetailResponse.fromJson(response.data);
+        studentCircularDetailResponse = StudentCircularDetailResponse.fromJson(
+          response.data,
+        );
         loaderProvider.hideLoader();
 
         if (notificationId != null) {
-          Provider.of<StudentNotificationProvider>(AuthMiddleware.navigatorKey.currentContext!, listen: false)
-              .notificationUpdate(notificationId)
-              .then((value) {
+          Provider.of<StudentNotificationProvider>(
+            AuthMiddleware.navigatorKey.currentContext!,
+            listen: false,
+          ).notificationUpdate(notificationId).then((value) {
             if (value.success ?? false) {
-              Provider.of<StudentDashboardProvider>(AuthMiddleware.navigatorKey.currentContext!,
-                      listen: false)
-                  .getNotificationCount();
+              Provider.of<StudentDashboardProvider>(
+                AuthMiddleware.navigatorKey.currentContext!,
+                listen: false,
+              ).getNotificationCount();
             }
           });
         }
@@ -67,63 +72,13 @@ class StudentCircularDetailProvider extends ChangeNotifier {
     }
   }
 
-
-
-
-
   Future<void> downloadFile(BuildContext context, String url) async {
     final String fileName = url.split('/').last;
-
-    // final directory = await getExternalStorageDirectory();
-
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = await getExternalStorageDirectory();
-    } else if (Platform.isIOS) {
-      directory = await getApplicationSupportDirectory();
-    }
-
-    if (directory == null) {
-      debugPrint('Error: Unsupported platform.');
-      return;
-    }
-
-    final savePath = '${directory.path}/$fileName';
-    debugPrint('save Path $savePath');
-    debugPrint('download url ${Api.imageBaseUrl + url}');
-
-    try {
-      final dio = Dio();
-      await dio.download(
-        '${Api.imageBaseUrl}/$url',
-        savePath,
-        onReceiveProgress: (received, total) async {
-          int progress = ((received / total) * 100).toInt();
-          debugPrint('progress---> $progress');
-          if (Platform.isAndroid) {
-            await NotificationService.showNotification(
-              channelId: 1,
-              title: fileName,
-              body: "",
-              summary: "",
-              progress: progress,
-            );
-          }
-          //  NotificationService().showProgressNotification(progress, fileName);
-        },
-      );
-      await NotificationService.cancelProgressNotification();
-      await NotificationService.showNotification(
-        channelId: 2,
-        title: fileName,
-        body: "",
-        summary: "",
-        payload: {"path": savePath},
-      );
-      //  NotificationService().cancelProgressNotification();
-      //  NotificationService().showNotification(savePath, fileName);
-    } catch (e) {
-      debugPrint('Error during file download: $e');
-    }
+    await DownloadPdf.downloadPdf(
+      '${Api.imageBaseUrl}/$url',
+      fileName,
+      context,
+      (message) => debugPrint('download message -> $message'),
+    );
   }
 }

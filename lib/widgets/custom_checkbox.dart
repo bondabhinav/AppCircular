@@ -46,13 +46,11 @@ class _CustomCheckBoxState extends State<CustomCheckBox> {
     super.initState();
     checkboxValues = List.from(widget.controller.initialValue ?? []);
     if (!widget.initialized && checkboxValues.isNotEmpty) {
-      SchedulerBinding.instance.addPostFrameCallback(
-        (_) {
-          if (widget.onChanged != null) {
-            widget.onChanged!(checkboxValues);
-          }
-        },
-      );
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (widget.onChanged != null) {
+          widget.onChanged!(checkboxValues);
+        }
+      });
     }
     changeSelectedValues.addListener(() {
       if (!listEquals(checkboxValues, selectedValues)) {
@@ -72,52 +70,49 @@ class _CustomCheckBoxState extends State<CustomCheckBox> {
 
   @override
   Widget build(BuildContext context) => ListView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: widget.options.length,
-        itemBuilder: (context, index) {
-          final option = widget.options[index];
-          final selected = selectedValues.contains(option);
-          return Theme(
-            data: ThemeData(unselectedWidgetColor: widget.checkboxBorderColor),
-            child: Padding(
-              padding: widget.itemPadding ?? EdgeInsets.zero,
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: selected,
-                    onChanged: widget.onChanged != null
-                        ? (isSelected) {
-                            if (isSelected == null) {
-                              return;
-                            }
-                            isSelected
-                                ? checkboxValues.add(option)
-                                : checkboxValues.remove(option);
-                            widget.controller.value = List.from(checkboxValues);
-                            setState(() {});
-                          }
-                        : null,
-                    activeColor: widget.activeColor,
-                    checkColor: widget.checkColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          widget.checkboxBorderRadius ?? BorderRadius.zero,
-                    ),
-                  ),
-                  Padding(
-                    padding: widget.labelPadding ?? EdgeInsets.zero,
-                    child: Text(
-                      widget.options[index],
-                      style: widget.textStyle,
-                    ),
-                  ),
-                ],
+    physics: const NeverScrollableScrollPhysics(),
+    shrinkWrap: true,
+    itemCount: widget.options.length,
+    itemBuilder: (context, index) {
+      final option = widget.options[index];
+      final selected = selectedValues.contains(option);
+      return Theme(
+        data: ThemeData(unselectedWidgetColor: widget.checkboxBorderColor),
+        child: Padding(
+          padding: widget.itemPadding ?? EdgeInsets.zero,
+          child: Row(
+            children: [
+              Checkbox(
+                value: selected,
+                onChanged: widget.onChanged != null
+                    ? (isSelected) {
+                        if (isSelected == null) {
+                          return;
+                        }
+                        isSelected
+                            ? checkboxValues.add(option)
+                            : checkboxValues.remove(option);
+                        widget.controller.value = List.from(checkboxValues);
+                        setState(() {});
+                      }
+                    : null,
+                activeColor: widget.activeColor,
+                checkColor: widget.checkColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      widget.checkboxBorderRadius ?? BorderRadius.zero,
+                ),
               ),
-            ),
-          );
-        },
+              Padding(
+                padding: widget.labelPadding ?? EdgeInsets.zero,
+                child: Text(widget.options[index], style: widget.textStyle),
+              ),
+            ],
+          ),
+        ),
       );
+    },
+  );
 }
 
 class FormFieldController<T> extends ValueNotifier<T?> {

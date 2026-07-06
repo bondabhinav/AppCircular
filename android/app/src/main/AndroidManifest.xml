@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
     
+    <!-- Play-distributed builds must update through Google Play, not APK installs. -->
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:node="remove" />
+    
     <!-- Notification permissions -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -82,16 +87,15 @@
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
 
-
-        <!-- Add Flutter Downloader Provider -->
+        <!-- OTA Update FileProvider -->
         <provider
-            android:name="vn.hunghd.flutterdownloader.DownloadedFileProvider"
-            android:authorities="${applicationId}.flutter_downloader.provider"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.ota_update.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
+                android:resource="@xml/ota_update_paths" />
         </provider>
 
     </application>

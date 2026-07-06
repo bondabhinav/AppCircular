@@ -27,16 +27,13 @@ class UrlProvider extends ChangeNotifier {
   }
 
   //get URl
-  Future getUrl(String _url) async {
-    var result;
-    var requestedData = {
-      "SCHOOL_URL": _url,
-    };
+  Future getUrl(String url) async {
+    var requestedData = {"SCHOOL_URL": url};
     var body = json.encode(requestedData);
 
     try {
       final response = await http.post(
-        Uri.parse(Constants.baseUrl + 'GetURL'),
+        Uri.parse('${Constants.baseUrl}GetURL'),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
@@ -65,35 +62,42 @@ class UrlProvider extends ChangeNotifier {
 
         await preferences.setString('global_school_logo', schoolLogo);
 
-        await preferences.setString('global_school_image_url', res['API_IMAGE']);
+        await preferences.setString(
+          'global_school_image_url',
+          res['API_IMAGE'],
+        );
 
         Api.baseUrl = res['API_URL'];
         Api.imageBaseUrl = res['API_IMAGE'];
         notifyListeners();
 
-        return result = {
+        return {
           'status': true,
           //'api' : res['API_URL'],
           'message': 'School Details has been fetched Successfully!',
-          'data': json.encode(SchoolurlResponse.toJson())
+          'data': json.encode(SchoolurlResponse.toJson()),
         };
       } else {
         //return 'Unexpected response: ${response.statusCode}';
 
-        return result = {
+        return {
           'status': false,
           'message': 'Unexpected response: ${response.statusCode}',
-          'data': response
+          'data': response,
         };
       }
     } catch (e) {
       // _errorMessage = 'Error: $e';
       //return 'Something went wrong please try again.';
-      return result = {'status': false, 'message': 'Something went wrong please try again.', 'data': ''};
+      return {
+        'status': false,
+        'message': 'Something went wrong please try again.',
+        'data': '',
+      };
     }
   }
 
-  notify() {
+  void notify() {
     notifyListeners();
   }
 }

@@ -15,8 +15,9 @@ class GetClassResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (cLASSandSECTION != null) {
-      data['CLASSandSECTION'] =
-          cLASSandSECTION!.map((v) => v.toJson()).toList();
+      data['CLASSandSECTION'] = cLASSandSECTION!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }

@@ -8,7 +8,6 @@ import 'package:flexischool/providers/student/student_circular_provider.dart';
 import 'package:flexischool/utils/date_formater.dart';
 import 'package:flexischool/widgets/custom_loader.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class StudentCircularScreen extends StatefulWidget {
@@ -18,14 +17,18 @@ class StudentCircularScreen extends StatefulWidget {
   State<StudentCircularScreen> createState() => _StudentCircularScreenState();
 }
 
-class _StudentCircularScreenState extends State<StudentCircularScreen> with SingleTickerProviderStateMixin {
+class _StudentCircularScreenState extends State<StudentCircularScreen>
+    with SingleTickerProviderStateMixin {
   StudentCircularProvider? studentCircularProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
   @override
   void initState() {
     studentCircularProvider = StudentCircularProvider();
-    studentCircularProvider?.tabController = TabController(length: 2, vsync: this);
+    studentCircularProvider?.tabController = TabController(
+      length: 2,
+      vsync: this,
+    );
     studentCircularProvider?.fetchStudentCircularData();
     super.initState();
   }
@@ -33,17 +36,22 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => studentCircularProvider,
-        builder: (context, child) {
-          return Consumer<StudentCircularProvider>(builder: (context, model, _) {
+      create: (_) => studentCircularProvider,
+      builder: (context, child) {
+        return Consumer<StudentCircularProvider>(
+          builder: (context, model, _) {
             return Scaffold(
               backgroundColor: Colors.white,
               appBar: AppBar(
                 leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: () => Navigator.pop(context)),
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
                 centerTitle: true,
-                title: const Text('Circulars', style: TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Circulars',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               body: Stack(
                 children: [
@@ -55,15 +63,23 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                         Container(
                           height: 45,
                           decoration: BoxDecoration(
-                              color: Colors.blueAccent, borderRadius: BorderRadius.circular(25.0)),
+                            color: Colors.blueAccent,
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
                           child: TabBar(
-                              controller: model.tabController,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              indicator: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25.0), color: Colors.lightBlueAccent),
-                              labelColor: Colors.white,
-                              unselectedLabelColor: Colors.white,
-                              tabs: const [Tab(text: 'Current'), Tab(text: 'Previous')]),
+                            controller: model.tabController,
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            indicator: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25.0),
+                              color: Colors.lightBlueAccent,
+                            ),
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.white,
+                            tabs: const [
+                              Tab(text: 'Current'),
+                              Tab(text: 'Previous'),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Expanded(
@@ -71,263 +87,373 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                             controller: model.tabController,
                             children: [
                               (model.studentCircularListResponse == null ||
-                                      model.studentCircularListResponse!.classlist == null)
+                                      model
+                                              .studentCircularListResponse!
+                                              .classlist ==
+                                          null)
                                   ? const SizedBox.shrink()
                                   : model.message != null
-                                      ? Center(
-                                          child: Text(
-                                          model.message ?? "",
-                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                                        ))
-                                      : ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: model.studentCircularListResponse!.classlist!.length > 5
-                                              ? 5
-                                              : model.studentCircularListResponse!.classlist!.length,
-                                          itemBuilder: (context, index) => listItem(
-                                              circular: model.studentCircularListResponse!.classlist![index],
-                                              documentOnTap: () {
-                                                // model
-                                                //     .fetchStudentDocumentData(
-                                                //         circularId: model.studentCircularListResponse
-                                                //             .classlist![index].aPPCIRCULARID!)
-                                                //     .then((value) {
-                                                if (model.studentCircularListResponse!.classlist![index]
-                                                    .lstCircularFile!.isNotEmpty) {
-                                                  showDialog(
-                                                    context: context,
-                                                    barrierDismissible: false,
-                                                    builder: (BuildContext context) {
-                                                      var data = model
-                                                          .studentCircularListResponse!.classlist![index];
-                                                      if (data.fLAG == "N") {
-                                                        model.updateCircularFlag(
-                                                            data.aPPCIRCULARID.toString());
-                                                      }
-                                                      return AlertDialog(
-                                                        title: const Text('Document'),
-                                                        content: SizedBox(
-                                                          width: double.maxFinite,
-                                                          child: LayoutBuilder(builder: (BuildContext context,
-                                                              BoxConstraints constraints) {
+                                  ? Center(
+                                      child: Text(
+                                        model.message ?? "",
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount:
+                                          model
+                                                  .studentCircularListResponse!
+                                                  .classlist!
+                                                  .length >
+                                              5
+                                          ? 5
+                                          : model
+                                                .studentCircularListResponse!
+                                                .classlist!
+                                                .length,
+                                      itemBuilder: (context, index) => listItem(
+                                        circular: model
+                                            .studentCircularListResponse!
+                                            .classlist![index],
+                                        documentOnTap: () {
+                                          // model
+                                          //     .fetchStudentDocumentData(
+                                          //         circularId: model.studentCircularListResponse
+                                          //             .classlist![index].aPPCIRCULARID!)
+                                          //     .then((value) {
+                                          if (model
+                                              .studentCircularListResponse!
+                                              .classlist![index]
+                                              .lstCircularFile!
+                                              .isNotEmpty) {
+                                            showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                var data = model
+                                                    .studentCircularListResponse!
+                                                    .classlist![index];
+                                                if (data.fLAG == "N") {
+                                                  model.updateCircularFlag(
+                                                    data.aPPCIRCULARID
+                                                        .toString(),
+                                                  );
+                                                }
+                                                return AlertDialog(
+                                                  title: const Text('Document'),
+                                                  content: SizedBox(
+                                                    width: double.maxFinite,
+                                                    child: LayoutBuilder(
+                                                      builder:
+                                                          (
+                                                            BuildContext
+                                                            context,
+                                                            BoxConstraints
+                                                            constraints,
+                                                          ) {
                                                             return ListView.builder(
-                                                                shrinkWrap: true,
-                                                                itemBuilder: (context, index) => ListTile(
-                                                                      contentPadding: const EdgeInsets.all(0),
-                                                                      title: Text(data.lstCircularFile![index]
-                                                                              .fILENAME ??
-                                                                          ""),
-                                                                      trailing: IconButton(
-                                                                          onPressed: () async {
-                                                                            debugPrint('url....... ${"${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}"}');
-
-                                                                            DownloadPdf.downloadPdf(
-                                                                                "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                                data.lstCircularFile![index]
-                                                                                    .fILENAME!
-                                                                                    .split('/')
-                                                                                    .last,
-                                                                                context, (value) {
-                                                                              if (Platform.isAndroid) {
-                                                                                //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                              }
-                                                                            });
-
-                                                                            // final _localPath = (await _getSavedDir(data.lstCircularFile![index].fILENAME!))!;
-                                                                            //  final savedDir = Directory(_localPath);
-                                                                            //  if (!savedDir.existsSync()) {
-                                                                            //    await savedDir.create();
-                                                                            //  }
-                                                                            //
-                                                                            //
-                                                                            //  final taskId =
-                                                                            //      await FlutterDownloader.enqueue(
-                                                                            //          url:
-                                                                            //              "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                            //          savedDir:_localPath,
-                                                                            //          showNotification: true,
-                                                                            //          allowCellular: true,
-                                                                            //          saveInPublicStorage: true,
-                                                                            //          openFileFromNotification:
-                                                                            //              true);
-                                                                            //
-                                                                            //  if (taskId != null) {
-                                                                            //    debugPrint('task id $taskId');
-                                                                            //  }
-
-                                                                            // model.downloadFile(
-                                                                            //     context,
-                                                                            //     data.lstCircularFile![index]
-                                                                            //         .fILENAME ??
-                                                                            //         "");
-
-
-                                                                          },
-                                                                          icon: const Icon(Icons.download)),
+                                                              shrinkWrap: true,
+                                                              itemBuilder: (context, index) => ListTile(
+                                                                contentPadding:
+                                                                    const EdgeInsets.all(
+                                                                      0,
                                                                     ),
-                                                                itemCount: data.lstCircularFile!.length);
-                                                          }),
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(context).pop();
-                                                            },
-                                                            child: const Text('Close'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  ).whenComplete(() {
-                                                    if (model.studentCircularListResponse!.classlist![index]
-                                                            .fLAG ==
-                                                        "N") {
-                                                      model.updateFlagStatus(model
-                                                          .studentCircularListResponse!.classlist![index]);
-                                                    }
-                                                  });
-                                                }
-                                                //  });
+                                                                title: Text(
+                                                                  data
+                                                                          .lstCircularFile![index]
+                                                                          .fILENAME ??
+                                                                      "",
+                                                                ),
+                                                                trailing: IconButton(
+                                                                  onPressed: () async {
+                                                                    debugPrint(
+                                                                      'url....... ${"${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}"}',
+                                                                    );
+
+                                                                    DownloadPdf.downloadPdf(
+                                                                      "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                      data
+                                                                          .lstCircularFile![index]
+                                                                          .fILENAME!
+                                                                          .split(
+                                                                            '/',
+                                                                          )
+                                                                          .last,
+                                                                      context,
+                                                                      (value) {
+                                                                        if (Platform
+                                                                            .isAndroid) {
+                                                                          //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                        }
+                                                                      },
+                                                                    );
+
+                                                                    // model.downloadFile(
+                                                                    //     context,
+                                                                    //     data.lstCircularFile![index]
+                                                                    //         .fILENAME ??
+                                                                    //         "");
+                                                                  },
+                                                                  icon: const Icon(
+                                                                    Icons
+                                                                        .download,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              itemCount: data
+                                                                  .lstCircularFile!
+                                                                  .length,
+                                                            );
+                                                          },
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                      },
+                                                      child: const Text(
+                                                        'Close',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
                                               },
-                                              showMoreOnTap: () {
-                                                showScrollableTextDialog(
-                                                    model: model,
-                                                    complete: () {
-                                                      if (model.studentCircularListResponse!.classlist![index]
-                                                              .fLAG ==
-                                                          "N") {
-                                                        model.updateFlagStatus(model
-                                                            .studentCircularListResponse!.classlist![index]);
-                                                      }
-                                                    },
-                                                    context: context,
-                                                    data:
-                                                        model.studentCircularListResponse!.classlist![index]);
-                                              })),
+                                            ).whenComplete(() {
+                                              if (model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index]
+                                                      .fLAG ==
+                                                  "N") {
+                                                model.updateFlagStatus(
+                                                  model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index],
+                                                );
+                                              }
+                                            });
+                                          }
+                                          //  });
+                                        },
+                                        showMoreOnTap: () {
+                                          showScrollableTextDialog(
+                                            model: model,
+                                            complete: () {
+                                              if (model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index]
+                                                      .fLAG ==
+                                                  "N") {
+                                                model.updateFlagStatus(
+                                                  model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index],
+                                                );
+                                              }
+                                            },
+                                            context: context,
+                                            data: model
+                                                .studentCircularListResponse!
+                                                .classlist![index],
+                                          );
+                                        },
+                                      ),
+                                    ),
                               (model.studentCircularListResponse == null ||
-                                      model.studentCircularListResponse!.classlist == null)
+                                      model
+                                              .studentCircularListResponse!
+                                              .classlist ==
+                                          null)
                                   ? const SizedBox.shrink()
                                   : model.message != null
-                                      ? Center(
-                                          child: Text(
-                                          model.message ?? "",
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ))
-                                      : ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: model.studentCircularListResponse!.classlist!.length,
-                                          itemBuilder: (context, index) => listItem(
-                                              circular: model.studentCircularListResponse!.classlist![index],
-                                              documentOnTap: () {
-                                                // model
-                                                //     .fetchStudentDocumentData(
-                                                //         circularId: model.studentCircularListResponse
-                                                //             .classlist![index].aPPCIRCULARID!)
-                                                //     .then((value) {
-                                                if (model.studentCircularListResponse!.classlist![index]
-                                                    .lstCircularFile!.isNotEmpty) {
-                                                  showDialog(
-                                                    context: context,
-                                                    barrierDismissible: false,
-                                                    builder: (BuildContext context) {
-                                                      var data = model
-                                                          .studentCircularListResponse!.classlist![index];
-                                                      if (data.fLAG == "N") {
-                                                        model.updateCircularFlag(
-                                                            data.aPPCIRCULARID.toString());
-                                                      }
-                                                      return AlertDialog(
-                                                        title: const Text('Document'),
-                                                        content: SizedBox(
-                                                          width: double.maxFinite,
-                                                          child: LayoutBuilder(builder: (BuildContext context,
-                                                              BoxConstraints constraints) {
-                                                            return ListView.separated(
-                                                                shrinkWrap: true,
-                                                                itemBuilder: (context, index) => ListTile(
-                                                                      contentPadding: const EdgeInsets.all(0),
-                                                                      title: Text(data.lstCircularFile![index]
-                                                                              .fILENAME ??
-                                                                          ""),
-                                                                      trailing: IconButton(
-                                                                          onPressed: () async {
-                                                                            DownloadPdf.downloadPdf(
-                                                                                "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                                data.lstCircularFile![index]
-                                                                                    .fILENAME!
-                                                                                    .split('/')
-                                                                                    .last,
-                                                                                context, (value) {
-                                                                              if (Platform.isAndroid) {
-                                                                                //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                              }
-                                                                            });
-
-                                                                            // PermissionStatus status =
-                                                                            //     await Permission.storage
-                                                                            //         .request();
-                                                                            // if (status.isGranted) {
-                                                                            //   if (context.mounted) {
-                                                                            //     model.downloadFile(
-                                                                            //         context,
-                                                                            //         data
-                                                                            //                 .lstCircularFile![
-                                                                            //                     index]
-                                                                            //                 .fILENAME ??
-                                                                            //             "");
-                                                                            //   }
-                                                                            // }
-                                                                          },
-                                                                          icon: const Icon(Icons.download)),
-                                                                    ),
-                                                                separatorBuilder:
-                                                                    (BuildContext context, int index) {
-                                                                  return const Divider(
-                                                                    color: Colors.tealAccent,
-                                                                    thickness: 2,
-                                                                  );
-                                                                },
-                                                                itemCount: data.lstCircularFile!.length);
-                                                          }),
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(context).pop();
-                                                            },
-                                                            child: const Text('Close'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  ).whenComplete(() {
-                                                    if (model.studentCircularListResponse!.classlist![index]
-                                                            .fLAG ==
-                                                        "N") {
-                                                      model.updateFlagStatus(model
-                                                          .studentCircularListResponse!.classlist![index]);
-                                                    }
-                                                  });
+                                  ? Center(
+                                      child: Text(
+                                        model.message ?? "",
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: model
+                                          .studentCircularListResponse!
+                                          .classlist!
+                                          .length,
+                                      itemBuilder: (context, index) => listItem(
+                                        circular: model
+                                            .studentCircularListResponse!
+                                            .classlist![index],
+                                        documentOnTap: () {
+                                          // model
+                                          //     .fetchStudentDocumentData(
+                                          //         circularId: model.studentCircularListResponse
+                                          //             .classlist![index].aPPCIRCULARID!)
+                                          //     .then((value) {
+                                          if (model
+                                              .studentCircularListResponse!
+                                              .classlist![index]
+                                              .lstCircularFile!
+                                              .isNotEmpty) {
+                                            showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                var data = model
+                                                    .studentCircularListResponse!
+                                                    .classlist![index];
+                                                if (data.fLAG == "N") {
+                                                  model.updateCircularFlag(
+                                                    data.aPPCIRCULARID
+                                                        .toString(),
+                                                  );
                                                 }
+                                                return AlertDialog(
+                                                  title: const Text('Document'),
+                                                  content: SizedBox(
+                                                    width: double.maxFinite,
+                                                    child: LayoutBuilder(
+                                                      builder:
+                                                          (
+                                                            BuildContext
+                                                            context,
+                                                            BoxConstraints
+                                                            constraints,
+                                                          ) {
+                                                            return ListView.separated(
+                                                              shrinkWrap: true,
+                                                              itemBuilder: (context, index) => ListTile(
+                                                                contentPadding:
+                                                                    const EdgeInsets.all(
+                                                                      0,
+                                                                    ),
+                                                                title: Text(
+                                                                  data
+                                                                          .lstCircularFile![index]
+                                                                          .fILENAME ??
+                                                                      "",
+                                                                ),
+                                                                trailing: IconButton(
+                                                                  onPressed: () async {
+                                                                    DownloadPdf.downloadPdf(
+                                                                      "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                      data
+                                                                          .lstCircularFile![index]
+                                                                          .fILENAME!
+                                                                          .split(
+                                                                            '/',
+                                                                          )
+                                                                          .last,
+                                                                      context,
+                                                                      (value) {
+                                                                        if (Platform
+                                                                            .isAndroid) {
+                                                                          //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                        }
+                                                                      },
+                                                                    );
+
+                                                                    // PermissionStatus status =
+                                                                    //     await Permission.storage
+                                                                    //         .request();
+                                                                    // if (status.isGranted) {
+                                                                    //   if (context.mounted) {
+                                                                    //     model.downloadFile(
+                                                                    //         context,
+                                                                    //         data
+                                                                    //                 .lstCircularFile![
+                                                                    //                     index]
+                                                                    //                 .fILENAME ??
+                                                                    //             "");
+                                                                    //   }
+                                                                    // }
+                                                                  },
+                                                                  icon: const Icon(
+                                                                    Icons
+                                                                        .download,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              separatorBuilder:
+                                                                  (
+                                                                    BuildContext
+                                                                    context,
+                                                                    int index,
+                                                                  ) {
+                                                                    return const Divider(
+                                                                      color: Colors
+                                                                          .tealAccent,
+                                                                      thickness:
+                                                                          2,
+                                                                    );
+                                                                  },
+                                                              itemCount: data
+                                                                  .lstCircularFile!
+                                                                  .length,
+                                                            );
+                                                          },
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                      },
+                                                      child: const Text(
+                                                        'Close',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
                                               },
-                                              showMoreOnTap: () {
-                                                showScrollableTextDialog(
-                                                    model: model,
-                                                    complete: () {
-                                                      if (model.studentCircularListResponse!.classlist![index]
-                                                              .fLAG ==
-                                                          "N") {
-                                                        model.updateFlagStatus(model
-                                                            .studentCircularListResponse!.classlist![index]);
-                                                      }
-                                                    },
-                                                    context: context,
-                                                    data:
-                                                        model.studentCircularListResponse!.classlist![index]);
-                                              })),
+                                            ).whenComplete(() {
+                                              if (model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index]
+                                                      .fLAG ==
+                                                  "N") {
+                                                model.updateFlagStatus(
+                                                  model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index],
+                                                );
+                                              }
+                                            });
+                                          }
+                                        },
+                                        showMoreOnTap: () {
+                                          showScrollableTextDialog(
+                                            model: model,
+                                            complete: () {
+                                              if (model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index]
+                                                      .fLAG ==
+                                                  "N") {
+                                                model.updateFlagStatus(
+                                                  model
+                                                      .studentCircularListResponse!
+                                                      .classlist![index],
+                                                );
+                                              }
+                                            },
+                                            context: context,
+                                            data: model
+                                                .studentCircularListResponse!
+                                                .classlist![index],
+                                          );
+                                        },
+                                      ),
+                                    ),
                             ],
                           ),
                         ),
@@ -338,20 +464,25 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                 ],
               ),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 
-  void showScrollableTextDialog(
-      {required BuildContext context,
-      required void Function() complete,
-      required StudentCircularProvider model,
-      required Classlist data}) {
+  void showScrollableTextDialog({
+    required BuildContext context,
+    required void Function() complete,
+    required StudentCircularProvider model,
+    required Classlist data,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        if (data.fLAG == "N") model.updateCircularFlag(data.aPPCIRCULARID.toString());
+        if (data.fLAG == "N") {
+          model.updateCircularFlag(data.aPPCIRCULARID.toString());
+        }
         return AlertDialog(
           title: const Text('Description'),
           content: SingleChildScrollView(
@@ -372,13 +503,18 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
     });
   }
 
-  Widget listItem(
-      {required Classlist circular, void Function()? documentOnTap, void Function()? showMoreOnTap}) {
+  Widget listItem({
+    required Classlist circular,
+    void Function()? documentOnTap,
+    void Function()? showMoreOnTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
-      decoration:
-          BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -391,65 +527,72 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
                   //   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(right: 10),
                   // decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(10)),
-                  child: Text(circular.aPPCIRCULARSUBJECT ?? "",
-                      maxLines: 5,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.black,
-                      )),
+                  child: Text(
+                    circular.aPPCIRCULARSUBJECT ?? "",
+                    maxLines: 5,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: "Montserrat Regular",
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
               ),
               //  const Spacer(),
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.orange,
-                    )),
+                child: Text(
+                  DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                    fontFamily: "Montserrat Regular",
+                    color: Colors.orange,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 5),
-          Text(circular.aPPCIRCULARDESCRIPTION ?? "",
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                fontFamily: "Montserrat Regular",
-                color: Colors.black,
-              )),
+          Text(
+            circular.aPPCIRCULARDESCRIPTION ?? "",
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+              fontFamily: "Montserrat Regular",
+              color: Colors.black,
+            ),
+          ),
           const SizedBox(height: 5),
           Row(
             children: [
               if (circular.lstCircularFile!.isNotEmpty)
                 InkWell(
-                    onTap: documentOnTap,
-                    child: const CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Icon(
-                          Icons.cloud_download,
-                          color: Colors.white,
-                        ))),
+                  onTap: documentOnTap,
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Icon(Icons.cloud_download, color: Colors.white),
+                  ),
+                ),
               const Spacer(),
               MaterialButton(
                 onPressed: showMoreOnTap,
                 color: Colors.blue,
-                child: const Text("View more",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Montserrat Regular",
-                      color: Colors.white,
-                    )),
+                child: const Text(
+                  "View more",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Montserrat Regular",
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -519,13 +662,5 @@ class _StudentCircularScreenState extends State<StudentCircularScreen> with Sing
     //     ],
     //   ),
     // );
-  }
-
-  Future<String?> _getSavedDir(String fileName) async {
-    final externalStorageDirPath = (await getApplicationDocumentsDirectory());
-
-    final savePath = '${externalStorageDirPath.path}/$fileName';
-
-    return savePath;
   }
 }

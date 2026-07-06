@@ -10,6 +10,7 @@ import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/models/student/add_token_response.dart';
 import 'package:flexischool/models/student/student_login_response.dart';
 import 'package:flexischool/notification_helper.dart';
+import 'package:flexischool/utils/image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,45 +39,45 @@ class LoginProvider extends ChangeNotifier {
     _loginStatus = value;
   }
 
-  get userName => _userName;
+  String get userName => _userName;
 
-  set username(value) {
+  set username(String value) {
     _userName = value;
   }
 
-  get employeeId => _employee_id;
+  int get employeeId => _employee_id;
 
-  set employeeId(value) {
+  set employeeId(int value) {
     _employee_id = value;
   }
 
-  get employeeCode => _employeeCode;
+  int get employeeCode => _employeeCode;
 
-  set employeeCode(value) {
+  set employeeCode(int value) {
     _employeeCode = value;
   }
 
-  get depName => _depName;
+  String get depName => _depName;
 
-  set depName(value) {
+  set depName(String value) {
     _depName = value;
   }
 
-  get designation => _designation;
+  String get designation => _designation;
 
-  set designation(value) {
+  set designation(String value) {
     _designation = value;
   }
 
-  get photo => _photo;
+  String get photo => _photo;
 
-  set photo(value) {
+  set photo(String value) {
     _photo = value;
   }
 
-  get session => _session;
+  String get session => _session;
 
-  set session(value) {
+  set session(String value) {
     _session = value;
   }
 
@@ -107,29 +108,41 @@ class LoginProvider extends ChangeNotifier {
       debugPrint(userInfo.toString());
 
       final empLogo = prefs.getString('global_school_logo');
-      String profileLogo = "${empLogo!}employee/" + userInfo['PHOTO'];
+      final profileLogo = buildImageUrl(
+        baseUrl: empLogo,
+        folder: 'employee',
+        fileName: userInfo['PHOTO'],
+      );
 
       _userName = userInfo['USER_NAME'];
       _employee_id = userInfo['EMPLOYEE_ID'];
       _employeeCode = userInfo['EMPLOYEE_CODE'] ?? '';
       _depName = toTitleCase(userInfo['DEPARTMENT_NAME']);
       _designation = userInfo['DESIGNATION_DESC'];
-      _photo = profileLogo ?? '';
+      _photo = profileLogo;
       notify();
     }
   }
 
   //Login Validate
-  Future loginValidate(String _uname, String _pass) async {
+  Future loginValidate(String uname, String pass) async {
     debugPrint('enter login teacher');
-    var result;
-    var requestedData = {"USER_LOGIN": _uname.trim(), "USER_PASSWORD": _pass.trim()};
+    var requestedData = {
+      "USER_LOGIN": uname.trim(),
+      "USER_PASSWORD": pass.trim(),
+    };
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
     var body = json.encode(requestedData);
-   try {
-      final response = await http.post(Uri.parse('${schoolBaseUrl!}EmployeeLogin/GetteacherLogin'),
-          headers: {"Accept": "application/json", "Content-Type": "application/json"}, body: body);
+    try {
+      final response = await http.post(
+        Uri.parse('${schoolBaseUrl!}EmployeeLogin/GetteacherLogin'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: body,
+      );
       log('teacher login response -- ${response.body}');
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -141,55 +154,79 @@ class LoginProvider extends ChangeNotifier {
         final uniqueId = await UniqueIdentifier.serial;
         final deviceInfoPlugin = DeviceInfoPlugin();
         final androidInfo = await deviceInfoPlugin.androidInfo;
-        debugPrint('device name --- ${"${androidInfo.brand} ${androidInfo.model}"}');
+        debugPrint(
+          'device name --- ${"${androidInfo.brand} ${androidInfo.model}"}',
+        );
         var data = {
           "EMPLOYEE_ID": loginResponse.EMPLOYEEID,
           "DEVICE_TOKEN": '',
           "TYPE": "T",
           "DEVICE_NAME": "${androidInfo.brand} ${androidInfo.model}",
           "UNIQUE_ID": uniqueId,
-          "START_DATE": DateTime.now().toString()
+          "START_DATE": DateTime.now().toString(),
         };
         debugPrint('add token api data $data');
-        final addDeviceDataResponse = await apiService.post(url: Api.addFcmTokenApi, data: data);
+        final addDeviceDataResponse = await apiService.post(
+          url: Api.addFcmTokenApi,
+          data: data,
+        );
         log('response of add device data -- ${addDeviceDataResponse.data}');
-        log('response of add device data numver -- ${addDeviceDataResponse.data['NUMBER']}');
+        log(
+          'response of add device data numver -- ${addDeviceDataResponse.data['NUMBER']}',
+        );
         if (addDeviceDataResponse.statusCode == 200) {
           //Store Local
           final preferences = await SharedPreferences.getInstance();
-          await WebService.setAppDeviceId(addDeviceDataResponse.data['NUMBER'].toString());
-          await preferences.setString('user_details', json.encode(loginResponse.toJson()));
+          await WebService.setAppDeviceId(
+            addDeviceDataResponse.data['NUMBER'].toString(),
+          );
+          await preferences.setString(
+            'user_details',
+            json.encode(loginResponse.toJson()),
+          );
           // await preferences.setString('global_school_url',res['API_URL']);
           final empLogo = preferences.getString('global_school_logo');
-          String profileLogo = "${empLogo!}employee/" + res['PHOTO'];
+          final profileLogo = buildImageUrl(
+            baseUrl: empLogo,
+            folder: 'employee',
+            fileName: res['PHOTO'],
+          );
           //Store Local
           _userName = res['USER_NAME'];
           _employee_id = res['EMPLOYEE_ID'];
           _employeeCode = res['EMPLOYEE_CODE'] ?? '';
           _depName = toTitleCase(res['DEPARTMENT_NAME']);
           _designation = res['DESIGNATION_DESC'];
-          _photo = profileLogo ?? '';
-          print(res['USER_NAME']);
-          return result = {
+          _photo = profileLogo;
+          debugPrint(res['USER_NAME']);
+          return {
             'status': true,
             'message': 'You have successfully logged in!',
-            'data': json.encode(loginResponse.toJson())
+            'data': json.encode(loginResponse.toJson()),
           };
         } else {
-          return result = {'status': false, 'message': 'Something went wrong', 'data': response};
+          return {
+            'status': false,
+            'message': 'Something went wrong',
+            'data': response,
+          };
         }
       } else {
         //return 'Unexpected response: ${response.statusCode}';
 
-        return result = {
+        return {
           'status': false,
           'message': 'Unexpected response: ${response.statusCode}',
-          'data': response
+          'data': response,
         };
       }
     } catch (e) {
-     debugPrint('error -- $e');
-      return result = {'status': false, 'message': 'Invalid Login Credentials.', 'data': ''};
+      debugPrint('error -- $e');
+      return {
+        'status': false,
+        'message': 'Invalid Login Credentials.',
+        'data': '',
+      };
     }
   }
 
@@ -198,21 +235,30 @@ class LoginProvider extends ChangeNotifier {
   Future<String> studentLogin(String uname, String pass) async {
     debugPrint('enter login student');
     String result = '';
-    var requestedData = {"STUD_USERID": uname.trim(), "STUD_PASSWORD": pass.trim()};
+    var requestedData = {
+      "STUD_USERID": uname.trim(),
+      "STUD_PASSWORD": pass.trim(),
+    };
     final prefs = await SharedPreferences.getInstance();
     final schoolBaseUrl = prefs.getString('global_school_url');
     try {
       final response = await apiService.loginPost(
-          url: '${schoolBaseUrl!}StudentLogin/GetStudentLogin', data: requestedData);
+        url: '${schoolBaseUrl!}StudentLogin/GetStudentLogin',
+        data: requestedData,
+      );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         final loginResponse = StudentLoginResponse.fromJson(responseData);
         debugPrint('responseData response ${responseData.toString()}');
-        debugPrint('loginResponse response ${loginResponse.toJson().toString()}');
+        debugPrint(
+          'loginResponse response ${loginResponse.toJson().toString()}',
+        );
         if (loginResponse.table1!.isNotEmpty) {
           WebService.setStudentLoginDetails(loginResponse);
           WebService.studentLoginData = loginResponse;
-          debugPrint("check push notification ${PushNotificationsManager().fcmToken}");
+          debugPrint(
+            "check push notification ${PushNotificationsManager().fcmToken}",
+          );
           if (PushNotificationsManager().fcmToken.isNotEmpty) {
             try {
               final uniqueId = await UniqueIdentifier.serial;
@@ -221,7 +267,9 @@ class LoginProvider extends ChangeNotifier {
               final deviceInfoPlugin = DeviceInfoPlugin();
               final androidInfo = await deviceInfoPlugin.androidInfo;
 
-              debugPrint('device name --- ${"${androidInfo.brand} ${androidInfo.model}"}');
+              debugPrint(
+                'device name --- ${"${androidInfo.brand} ${androidInfo.model}"}',
+              );
 
               var data = {
                 "ADM_NO": loginResponse.table1!.first.aDMNO!,
@@ -231,15 +279,24 @@ class LoginProvider extends ChangeNotifier {
                 "TYPE": "S",
                 "DEVICE_NAME": "${androidInfo.brand} ${androidInfo.model}",
                 "UNIQUE_ID": uniqueId,
-                "START_DATE": DateTime.now().toString()
+                "START_DATE": DateTime.now().toString(),
               };
               debugPrint('final api data $data');
-              final response = await apiService.post(url: Api.addFcmTokenApi, data: data);
+              final response = await apiService.post(
+                url: Api.addFcmTokenApi,
+                data: data,
+              );
               if (response.statusCode == 200) {
                 //   final responseData = json.decode(response.data);
-                final addTokenResponse = AddTokenResponse.fromJson(response.data);
-                debugPrint('fcm token api response ${addTokenResponse.toString()}');
-                debugPrint('fcm token number ${addTokenResponse.nUMBER.toString()}');
+                final addTokenResponse = AddTokenResponse.fromJson(
+                  response.data,
+                );
+                debugPrint(
+                  'fcm token api response ${addTokenResponse.toString()}',
+                );
+                debugPrint(
+                  'fcm token number ${addTokenResponse.nUMBER.toString()}',
+                );
                 WebService.setAppDeviceId(addTokenResponse.nUMBER.toString());
                 result = 'You have successfully logged in!';
               } else {
@@ -271,7 +328,7 @@ class LoginProvider extends ChangeNotifier {
   }
 
   //Notify Listeners
-  notify() {
+  void notify() {
     notifyListeners();
   }
 }

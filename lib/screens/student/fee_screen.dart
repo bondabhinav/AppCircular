@@ -11,7 +11,8 @@ class FeeScreen extends StatefulWidget {
   State<FeeScreen> createState() => _FeeScreenState();
 }
 
-class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMixin {
+class _FeeScreenState extends State<FeeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late FeeProvider _feeProvider;
 
@@ -20,7 +21,9 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _feeProvider = Provider.of<FeeProvider>(context, listen: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _feeProvider.fetchAllFees());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _feeProvider.fetchAllFees(),
+    );
   }
 
   @override
@@ -32,37 +35,56 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: const Text('Fees', style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.blue,
-            iconTheme: const IconThemeData(color: Colors.white),
-            bottom: TabBar(
-                controller: _tabController,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                indicatorColor: Colors.white,
-                tabs: const [Tab(text: 'Due Fees'), Tab(text: 'Paid Fees')])),
-        body: Consumer<FeeProvider>(builder: (context, provider, child) {
+      appBar: AppBar(
+        title: const Text('Fees', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.white),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'Due Fees'),
+            Tab(text: 'Paid Fees'),
+          ],
+        ),
+      ),
+      body: Consumer<FeeProvider>(
+        builder: (context, provider, child) {
           if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (provider.errorMessage != null) {
             return Center(
-                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-              const SizedBox(height: 16),
-              Text('Error: ${provider.errorMessage}',
-                  style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: () => provider.fetchAllFees(), child: const Text('Retry'))
-            ]));
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${provider.errorMessage}',
+                    style: const TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => provider.fetchAllFees(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           }
 
           return TabBarView(
-              controller: _tabController,
-              children: [_buildDueFeesTab(provider), _buildPaidFeesTab(provider)]);
-        }));
+            controller: _tabController,
+            children: [_buildDueFeesTab(provider), _buildPaidFeesTab(provider)],
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildPaidFeesTab(FeeProvider provider) {
@@ -83,7 +105,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withOpacity(0.3),
+                color: Colors.green.withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -168,7 +190,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.orange.withOpacity(0.3),
+                color: Colors.orange.withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -213,7 +235,11 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 64,
+                        color: Colors.green,
+                      ),
                       SizedBox(height: 16),
                       Text(
                         'No pending fees!',
@@ -237,7 +263,9 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
 
   Widget _buildPaidFeeCard(dynamic fee) {
     final date = fee.dATE != null ? DateTime.tryParse(fee.dATE!) : null;
-    final formattedDate = date != null ? DateFormat('dd MMM yyyy').format(date) : 'N/A';
+    final formattedDate = date != null
+        ? DateFormat('dd MMM yyyy').format(date)
+        : 'N/A';
 
     return GestureDetector(
       onTap: () {
@@ -245,7 +273,8 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PaymentDetailScreen(receiptNumber: fee.rECIPTNO!),
+              builder: (context) =>
+                  PaymentDetailScreen(receiptNumber: fee.rECIPTNO!),
             ),
           );
         }
@@ -257,7 +286,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.green.withOpacity(0.3)),
+            border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -276,9 +305,12 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
@@ -309,10 +341,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                       children: [
                         const Text(
                           'Paid Amount',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         Text(
                           '₹${fee.pAID ?? 0}',
@@ -329,10 +358,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                       children: [
                         const Text(
                           'Receipt Number',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         Text(
                           '${fee.rECIPTNO ?? 'N/A'}',
@@ -355,8 +381,12 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
   }
 
   Widget _buildDueFeeCard(dynamic fee) {
-    final dueDate = fee.fEEDUEDATE != null ? DateTime.tryParse(fee.fEEDUEDATE!) : null;
-    final formattedDueDate = dueDate != null ? DateFormat('dd MMM yyyy').format(dueDate) : 'N/A';
+    final dueDate = fee.fEEDUEDATE != null
+        ? DateTime.tryParse(fee.fEEDUEDATE!)
+        : null;
+    final formattedDueDate = dueDate != null
+        ? DateFormat('dd MMM yyyy').format(dueDate)
+        : 'N/A';
 
     final isOverdue = dueDate != null && dueDate.isBefore(DateTime.now());
 
@@ -368,7 +398,9 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isOverdue ? Colors.red.withOpacity(0.5) : Colors.orange.withOpacity(0.3),
+            color: isOverdue
+                ? Colors.red.withValues(alpha: 0.5)
+                : Colors.orange.withValues(alpha: 0.3),
           ),
         ),
         child: Padding(
@@ -396,9 +428,14 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: isOverdue ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                      color: isOverdue
+                          ? Colors.red.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -430,10 +467,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                     children: [
                       const Text(
                         'Payable Amount',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       Text(
                         '₹${fee.uNPAID ?? 0}',
@@ -450,10 +484,7 @@ class _FeeScreenState extends State<FeeScreen> with SingleTickerProviderStateMix
                     children: [
                       const Text(
                         'For Month',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       Text(
                         '${fee.fORMONTH ?? 'N/A'}',

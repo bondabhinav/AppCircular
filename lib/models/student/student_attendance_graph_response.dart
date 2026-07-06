@@ -12,19 +12,20 @@ class StudentAttendanceGraphResponse {
   dynamic february;
   dynamic march;
 
-  StudentAttendanceGraphResponse(
-      {this.april,
-      this.may,
-      this.june,
-      this.july,
-      this.august,
-      this.september,
-      this.october,
-      this.november,
-      this.december,
-      this.january,
-      this.february,
-      this.march});
+  StudentAttendanceGraphResponse({
+    this.april,
+    this.may,
+    this.june,
+    this.july,
+    this.august,
+    this.september,
+    this.october,
+    this.november,
+    this.december,
+    this.january,
+    this.february,
+    this.march,
+  });
 
   StudentAttendanceGraphResponse.fromJson(Map<String, dynamic> json) {
     april = json['April'];

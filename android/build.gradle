@@ -27,14 +27,6 @@ subprojects {
                         useLegacyPackaging = false
                     }
                 }
-                
-                // Ensure all native libraries are properly aligned
-                defaultConfig {
-                    ndk {
-                        // Ensure ABI filters are consistent across all modules
-                        abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                    }
-                }
             }
         }
     }

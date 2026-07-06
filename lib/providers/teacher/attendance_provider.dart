@@ -85,8 +85,12 @@ class AttendanceProvider extends ChangeNotifier {
       for (var item in studentResponse!.aDMSTUDREGISTRATION!) {
         _studentIds.add(item.aDMSTUDENTID!);
         //  lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
-        lstStudentCircular
-            .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID.toString(), ADM_NO: item.aDMNO.toString()));
+        lstStudentCircular.add(
+          StudentListModel(
+            STUDENT_ID: item.aDMSTUDENTID.toString(),
+            ADM_NO: item.aDMNO.toString(),
+          ),
+        );
       }
     } else {
       _studentIds.clear();
@@ -116,8 +120,9 @@ class AttendanceProvider extends ChangeNotifier {
 
   void updateSelectedClass(int? value) {
     _selectedClass = value;
-    selectedClassName =
-        getClassResponse.cLASSandSECTION!.firstWhere((element) => element.classId == value).cLASSDESC!;
+    selectedClassName = getClassResponse.cLASSandSECTION!
+        .firstWhere((element) => element.classId == value)
+        .cLASSDESC!;
     debugPrint('class id ===> $selectedClass');
     debugPrint('class name ===> $selectedClassName');
     if (selectedClass != null) {
@@ -131,7 +136,8 @@ class AttendanceProvider extends ChangeNotifier {
 
   void updateSelectedSection(int? value) {
     _selectedSection = value;
-    selectedSectionName = getSectionResponse?.cLASSandSECTION!
+    selectedSectionName =
+        getSectionResponse?.cLASSandSECTION!
             .firstWhere((element) => element.sECTIONID == value)
             .sECTIONDESC ??
         "";
@@ -154,13 +160,20 @@ class AttendanceProvider extends ChangeNotifier {
 
         studentResponse!.aDMSTUDREGISTRATION!.where((element) {
           if (element.aDMSTUDENTID == studentId) {
-            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+            lstStudentCircular.add(
+              StudentListModel(
+                STUDENT_ID: studentId.toString(),
+                ADM_NO: element.aDMNO,
+              ),
+            );
           }
           return false;
         }).toList();
       } else {
         _studentIds.remove(studentId);
-        lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
+        lstSectionCircular.removeWhere(
+          (item) => item["STUDENT_ID"] == studentId,
+        );
         _selectAll = false;
       }
     } else {
@@ -168,16 +181,24 @@ class AttendanceProvider extends ChangeNotifier {
         _studentIds.add(studentId);
         studentResponse!.aDMSTUDREGISTRATION!.where((element) {
           if (element.aDMSTUDENTID == studentId) {
-            lstStudentCircular.add(StudentListModel(STUDENT_ID: studentId.toString(), ADM_NO: element.aDMNO));
+            lstStudentCircular.add(
+              StudentListModel(
+                STUDENT_ID: studentId.toString(),
+                ADM_NO: element.aDMNO,
+              ),
+            );
           }
           return false;
         }).toList();
         //   lstStudentCircular.add({"STUDENT_ID": studentId});
-        if (_studentIds.length == studentResponse!.aDMSTUDREGISTRATION!.length) {
+        if (_studentIds.length ==
+            studentResponse!.aDMSTUDREGISTRATION!.length) {
           _selectAll = true;
         }
       } else {
-        lstSectionCircular.removeWhere((item) => item["STUDENT_ID"] == studentId);
+        lstSectionCircular.removeWhere(
+          (item) => item["STUDENT_ID"] == studentId,
+        );
         _studentIds.remove(studentId);
       }
     }
@@ -189,7 +210,10 @@ class AttendanceProvider extends ChangeNotifier {
     try {
       loaderProvider.showLoader();
       var data = {"TEACHER_ID": teacherId, "SESSION_ID": Constants.sessionId};
-      final response = await apiService.post(url: Api.getClassForAttendanceApi, data: data);
+      final response = await apiService.post(
+        url: Api.getClassForAttendanceApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         getClassResponse = GetClassResponse.fromJson(response.data);
         if (getClassResponse.cLASSandSECTION!.isNotEmpty) {
@@ -215,11 +239,15 @@ class AttendanceProvider extends ChangeNotifier {
     try {
       loaderProvider.showLoader();
       var data = {"TEACHER_ID": teacherId, "SESSION_ID": Constants.sessionId};
-      final response = await apiService.post(url: Api.getSectionApi, data: data);
+      final response = await apiService.post(
+        url: Api.getSectionApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         getSectionResponse = GetSectionResponse.fromJson(response.data);
         if (getSectionResponse!.cLASSandSECTION!.isNotEmpty) {
-          _selectedSection = getSectionResponse!.cLASSandSECTION!.first.sECTIONID;
+          _selectedSection =
+              getSectionResponse!.cLASSandSECTION!.first.sECTIONID;
           if (selectedClass != null) {
             getEventsDates();
             getMarkedAttendance();
@@ -240,18 +268,20 @@ class AttendanceProvider extends ChangeNotifier {
   Future<StudentResponse?> getStudentData() async {
     try {
       studentResponse = null;
-      final requestPayload = StudentRequest(sESSIONID: Constants.sessionId.toString(), lstClass: [
-        LstClass(cLASSID: selectedClass.toString()),
-      ], lstSection: [
-        LstSection(cURRENTSECTIONID: selectedSection.toString())
-      ]
-          // selectedSectionIds
-          //     .map((sectionId) => LstSection(cURRENTSECTIONID: sectionId.toString()))
-          //     .toList(),
-          );
+      final requestPayload = StudentRequest(
+        sESSIONID: Constants.sessionId.toString(),
+        lstClass: [LstClass(cLASSID: selectedClass.toString())],
+        lstSection: [LstSection(cURRENTSECTIONID: selectedSection.toString())],
+        // selectedSectionIds
+        //     .map((sectionId) => LstSection(cURRENTSECTIONID: sectionId.toString()))
+        //     .toList(),
+      );
       final jsonPayload = requestPayload.toJson();
       loaderProvider.showLoader();
-      final response = await apiService.post(url: Api.getStudentApi, data: jsonPayload);
+      final response = await apiService.post(
+        url: Api.getStudentApi,
+        data: jsonPayload,
+      );
       if (response.statusCode == 200) {
         studentResponse = StudentResponse.fromJson(response.data);
         if (studentResponse!.aDMSTUDREGISTRATION!.isNotEmpty) {
@@ -262,10 +292,19 @@ class AttendanceProvider extends ChangeNotifier {
           studentResponse!.aDMSTUDREGISTRATION!.map((item) {
             _studentIds.add(item.aDMSTUDENTID!);
             //  lstStudentCircular.add({"STUDENT_ID": item.aDMSTUDENTID!});
-            lstStudentCircular
-                .add(StudentListModel(STUDENT_ID: item.aDMSTUDENTID!.toString(), ADM_NO: item.aDMNO));
-            studentAttendanceList
-                .add(AttendanceDetail(studentId: item.aDMSTUDENTID!, present: 'P', adm_id: item.aDMNO!));
+            lstStudentCircular.add(
+              StudentListModel(
+                STUDENT_ID: item.aDMSTUDENTID!.toString(),
+                ADM_NO: item.aDMNO,
+              ),
+            );
+            studentAttendanceList.add(
+              AttendanceDetail(
+                studentId: item.aDMSTUDENTID!,
+                present: 'P',
+                adm_id: item.aDMNO!,
+              ),
+            );
           }).toList();
         }
         loaderProvider.hideLoader();
@@ -281,25 +320,33 @@ class AttendanceProvider extends ChangeNotifier {
     return studentResponse;
   }
 
-  Future<ApplyAttendanceResponse?> applyAttendance({required int teacherId}) async {
+  Future<ApplyAttendanceResponse?> applyAttendance({
+    required int teacherId,
+  }) async {
     loaderProvider.showLoader();
     notifyListeners();
     try {
       final requestPayload = AttendanceDataRequest(
-          classId: selectedClass!,
-          attDate: date,
-          entryDate: Constants.currentDate,
-          sectionId: selectedSection!,
-          lastUpdateDate: Constants.currentDate,
-          entryUserId: teacherId.toString(),
-          sessionId: Constants.sessionId,
-          updateUserId: teacherId.toString(),
-          lstAttendanceDetail: studentAttendanceList);
+        classId: selectedClass!,
+        attDate: date,
+        entryDate: Constants.currentDate,
+        sectionId: selectedSection!,
+        lastUpdateDate: Constants.currentDate,
+        entryUserId: teacherId.toString(),
+        sessionId: Constants.sessionId,
+        updateUserId: teacherId.toString(),
+        lstAttendanceDetail: studentAttendanceList,
+      );
       final jsonPayload = requestPayload.toJson();
-      final response = await apiService.post(url: Api.applyAttendanceApi, data: jsonPayload);
+      final response = await apiService.post(
+        url: Api.applyAttendanceApi,
+        data: jsonPayload,
+      );
       if (response.statusCode == 200) {
         applyAttendanceResponse = null;
-        applyAttendanceResponse = ApplyAttendanceResponse.fromJson(response.data);
+        applyAttendanceResponse = ApplyAttendanceResponse.fromJson(
+          response.data,
+        );
         loaderProvider.hideLoader();
         notifyListeners();
       } else {
@@ -334,7 +381,10 @@ class AttendanceProvider extends ChangeNotifier {
     }
   }
 
-  void updateAttendanceStatus(String value, ADMSTUDREGISTRATION admstudregistration) {
+  void updateAttendanceStatus(
+    String value,
+    ADMSTUDREGISTRATION admstudregistration,
+  ) {
     admstudregistration.attendance = value;
 
     AttendanceDetail? studentDetail = studentAttendanceList.firstWhere(
@@ -352,7 +402,9 @@ class AttendanceProvider extends ChangeNotifier {
     }
 
     studentAttendanceList.map((item) {
-      debugPrint('new status of attendance ==> ${item.studentId}  *******  ${item.present}');
+      debugPrint(
+        'new status of attendance ==> ${item.studentId}  *******  ${item.present}',
+      );
     }).toList();
 
     notifyListeners();
@@ -361,17 +413,20 @@ class AttendanceProvider extends ChangeNotifier {
   void updateMarkedAttendanceStatus(String value, Lststud lststud) {
     debugPrint('value - $value');
     lststud.pRESENT = returnShortValueOfAttendance(value);
-    submittedMarkedList
-            .firstWhere((item) => item['STUD_ATTENDANCE_DET_ID'] == lststud.sTUDATTENDANCEDETID)['PRESENT'] =
-        returnShortValueOfAttendance(value);
+    submittedMarkedList.firstWhere(
+      (item) => item['STUD_ATTENDANCE_DET_ID'] == lststud.sTUDATTENDANCEDETID,
+    )['PRESENT'] = returnShortValueOfAttendance(
+      value,
+    );
     submittedMarkedList.map((item) {
       debugPrint(
-          'final submited marked attendance ==> ${item['STUD_ATTENDANCE_DET_ID']}  *******  ${item['PRESENT']}');
+        'final submited marked attendance ==> ${item['STUD_ATTENDANCE_DET_ID']}  *******  ${item['PRESENT']}',
+      );
     }).toList();
     notifyListeners();
   }
 
-  returnShortValueOfAttendance(String value) {
+  String returnShortValueOfAttendance(String value) {
     if (value == 'Present') {
       return 'P';
     } else if (value == 'Absent') {
@@ -381,9 +436,10 @@ class AttendanceProvider extends ChangeNotifier {
     } else if (value == 'Leave') {
       return 'L';
     }
+    return value;
   }
 
-  returnFullValueOfAttendance(String value) {
+  String returnFullValueOfAttendance(String value) {
     if (value == 'P') {
       return 'Present';
     } else if (value == 'A') {
@@ -393,6 +449,7 @@ class AttendanceProvider extends ChangeNotifier {
     } else if (value == 'L') {
       return 'Leave';
     }
+    return value;
   }
 
   Future<void> getEventsDates() async {
@@ -401,7 +458,11 @@ class AttendanceProvider extends ChangeNotifier {
     allEvents.clear();
     notifyListeners();
     try {
-      var data = {"MONTH": tempDateTime.month.toString(), "CLASS_ID": selectedClass, "SESSION_ID": Constants.sessionId};
+      var data = {
+        "MONTH": tempDateTime.month.toString(),
+        "CLASS_ID": selectedClass,
+        "SESSION_ID": Constants.sessionId,
+      };
       final response = await apiService.post(url: Api.getEventApi, data: data);
       if (response.statusCode == 200) {
         getEventResponse = GetEventResponse.fromJson(response.data);
@@ -422,15 +483,19 @@ class AttendanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<DateTime, List<CalendarEvent>> _groupEventsByDate(List<CalendarEvent> events) {
+  Map<DateTime, List<CalendarEvent>> _groupEventsByDate(
+    List<CalendarEvent> events,
+  ) {
     Map<DateTime, List<CalendarEvent>> groupedEvents = {};
 
     for (var event in events) {
-      DateTime eventDate = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
-      String formattedDate = DateFormat('yyyy-MM-dd').format(eventDate);
-
-      if (groupedEvents.containsKey(formattedDate)) {
-        groupedEvents[formattedDate]!.add(event);
+      DateTime eventDate = DateTime(
+        event.startDate.year,
+        event.startDate.month,
+        event.startDate.day,
+      );
+      if (groupedEvents.containsKey(eventDate)) {
+        groupedEvents[eventDate]!.add(event);
       } else {
         groupedEvents[eventDate] = [event];
       }
@@ -456,11 +521,16 @@ class AttendanceProvider extends ChangeNotifier {
         "MONTH": tempDateTime.month.toString(),
         "CLASS_ID": selectedClass,
         "SECTION_ID": selectedSection,
-        "SESSION_ID": Constants.sessionId
+        "SESSION_ID": Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.markedAttendanceApi, data: data);
+      final response = await apiService.post(
+        url: Api.markedAttendanceApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        markedAttendanceResponse = MarkedAttendanceResponse.fromJson(response.data);
+        markedAttendanceResponse = MarkedAttendanceResponse.fromJson(
+          response.data,
+        );
         notifyListeners();
       } else {}
     } catch (e) {
@@ -497,7 +567,6 @@ class AttendanceProvider extends ChangeNotifier {
     if (context.mounted) {
       notifyListeners();
     }
-
   }
 
   Future<GetMarkedStudentResponse?> getMarkedStudentAttendanceData() async {
@@ -506,18 +575,25 @@ class AttendanceProvider extends ChangeNotifier {
         "SESSION_ID": Constants.sessionId,
         "CURRENT_CLASS_ID": selectedClass,
         "CURRENT_SECTION_ID": selectedSection,
-        "ISSUE_DATE": date
+        "ISSUE_DATE": date,
       };
       loaderProvider.showLoader();
-      final response = await apiService.post(url: Api.getStudentMarkedAttendanceApi, data: data);
+      final response = await apiService.post(
+        url: Api.getStudentMarkedAttendanceApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        getMarkedStudentResponse = GetMarkedStudentResponse.fromJson(response.data);
+        getMarkedStudentResponse = GetMarkedStudentResponse.fromJson(
+          response.data,
+        );
         if (getMarkedStudentResponse!.lststud!.isNotEmpty) {
           submittedMarkedList = getMarkedStudentResponse!.lststud!
-              .map((attendanceData) => {
-                    "STUD_ATTENDANCE_DET_ID": attendanceData.sTUDATTENDANCEDETID,
-                    "PRESENT": attendanceData.pRESENT
-                  })
+              .map(
+                (attendanceData) => {
+                  "STUD_ATTENDANCE_DET_ID": attendanceData.sTUDATTENDANCEDETID,
+                  "PRESENT": attendanceData.pRESENT,
+                },
+              )
               .toList();
         }
         loaderProvider.hideLoader();
@@ -538,24 +614,31 @@ class AttendanceProvider extends ChangeNotifier {
     debugPrint('=== APPLY MARKED ATTENDANCE DEBUG ===');
     debugPrint('submittedMarkedList length: ${submittedMarkedList.length}');
     debugPrint('submittedMarkedList raw data: $submittedMarkedList');
-    
+
     // Print each item in detail
     for (int i = 0; i < submittedMarkedList.length; i++) {
       debugPrint('Item $i: ${submittedMarkedList[i]}');
-      debugPrint('  - STUD_ATTENDANCE_DET_ID: ${submittedMarkedList[i]['STUD_ATTENDANCE_DET_ID']}');
+      debugPrint(
+        '  - STUD_ATTENDANCE_DET_ID: ${submittedMarkedList[i]['STUD_ATTENDANCE_DET_ID']}',
+      );
       debugPrint('  - PRESENT: ${submittedMarkedList[i]['PRESENT']}');
     }
-    
+
     // Create the final payload
-    final Map<String, dynamic> payload = {"lstAttendanceDetail": submittedMarkedList};
+    final Map<String, dynamic> payload = {
+      "lstAttendanceDetail": submittedMarkedList,
+    };
     debugPrint('Final payload being sent: $payload');
     debugPrint('Final payload JSON: ${payload.toString()}');
     debugPrint('=== END DEBUG ===');
-    
+
     loaderProvider.showLoader();
     notifyListeners();
     try {
-      final response = await apiService.post(url: Api.editAttendanceApi, data: payload);
+      final response = await apiService.post(
+        url: Api.editAttendanceApi,
+        data: payload,
+      );
       if (response.statusCode == 200) {
         editAttendanceResponse = null;
         editAttendanceResponse = EditAttendanceResponse.fromJson(response.data);
@@ -574,6 +657,7 @@ class AttendanceProvider extends ChangeNotifier {
     }
     return editAttendanceResponse;
   }
+
   DateTime tempDateTime = DateTime.now();
 
   void updateMonth(DateTime dateTime) {

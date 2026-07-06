@@ -23,7 +23,7 @@ class ChangePasswordProvider extends ChangeNotifier {
 
   bool _changePasswordLoader = false;
 
-  get changePasswordLoader => _changePasswordLoader;
+  bool get changePasswordLoader => _changePasswordLoader;
 
   void setChangePasswordLoader(bool value) {
     _changePasswordLoader = value;
@@ -41,26 +41,46 @@ class ChangePasswordProvider extends ChangeNotifier {
       }
       var data = type.toString() == 'S'
           ? {
-              "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
-              "STUD_PASSWORD": oldPasswordController.text
+              "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO
+                  .toString(),
+              "STUD_PASSWORD": oldPasswordController.text,
             }
           : {"EMPLOYEE_ID": teacherData['EMPLOYEE_ID'].toString()};
       final response = await apiService.post(
-          url: type.toString() == 'S' ? Api.getStudentPasswordApi : Api.getTeacherPasswordApi, data: data);
+        url: type.toString() == 'S'
+            ? Api.getStudentPasswordApi
+            : Api.getTeacherPasswordApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        final checkOldPasswordResponse = CheckOldPasswordResponse.fromJson(response.data);
-        if (checkOldPasswordResponse.table1 != null && checkOldPasswordResponse.table1!.isNotEmpty) {
+        final checkOldPasswordResponse = CheckOldPasswordResponse.fromJson(
+          response.data,
+        );
+        if (checkOldPasswordResponse.table1 != null &&
+            checkOldPasswordResponse.table1!.isNotEmpty) {
           if (type.toString() == 'T'
-              ? checkOldPasswordResponse.table1!.first.uSER_PASSWORD.toString().trim() == oldPasswordController.text.trim()
-              : checkOldPasswordResponse.table1!.first.sTUDPASSWORD.toString().trim() ==
-                  oldPasswordController.text.trim()) {
+              ? checkOldPasswordResponse.table1!.first.uSER_PASSWORD
+                        .toString()
+                        .trim() ==
+                    oldPasswordController.text.trim()
+              : checkOldPasswordResponse.table1!.first.sTUDPASSWORD
+                        .toString()
+                        .trim() ==
+                    oldPasswordController.text.trim()) {
             if (context.mounted) {
-              changePassword(context: context, teacherData: teacherData, type: type);
+              changePassword(
+                context: context,
+                teacherData: teacherData,
+                type: type,
+              );
             }
           } else {
             setChangePasswordLoader(false);
             if (context.mounted) {
-              ShowSnackBar.error(context: context, showMessage: 'old password is incorrect');
+              ShowSnackBar.error(
+                context: context,
+                showMessage: 'old password is incorrect',
+              );
             }
           }
         } else {
@@ -84,26 +104,36 @@ class ChangePasswordProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> changePassword({required BuildContext context, dynamic type, var teacherData}) async {
+  Future<void> changePassword({
+    required BuildContext context,
+    dynamic type,
+    var teacherData,
+  }) async {
     try {
       var data = type.toString() == 'S'
           ? {
-              "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
-              "STUD_PASSWORD": newPasswordController.text.trim()
+              "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO
+                  .toString(),
+              "STUD_PASSWORD": newPasswordController.text.trim(),
             }
           : {
               "EMPLOYEE_ID": teacherData['EMPLOYEE_ID'].toString(),
-              "STUD_PASSWORD": newPasswordController.text
+              "STUD_PASSWORD": newPasswordController.text,
             };
       final response = await apiService.post(
-          url: type.toString() == 'S' ? Api.changeStudentPasswordApi : Api.changeTeacherPasswordApi,
-          data: data);
+        url: type.toString() == 'S'
+            ? Api.changeStudentPasswordApi
+            : Api.changeTeacherPasswordApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         final commonResponse = CommonResponse.fromJson(response.data);
         if (commonResponse.success ?? false) {
           if (context.mounted) {
             ShowSnackBar.successToast(
-                context: context, showMessage: 'Password changed successfully, please re-login');
+              context: context,
+              showMessage: 'Password changed successfully, please re-login',
+            );
             logout(context);
           }
         } else {
@@ -134,18 +164,24 @@ class ChangePasswordProvider extends ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     // Stop the continuous API call timer before logout
     apiService.stop();
-    
+
     try {
       String? appDeviceId = await WebService.getAppDeviceId();
       if (context.mounted) {
         if (appDeviceId != null) {
           debugPrint('app Device Id $appDeviceId');
-          final studentModel = Provider.of<StudentDashboardProvider>(context, listen: false);
+          final studentModel = Provider.of<StudentDashboardProvider>(
+            context,
+            listen: false,
+          );
           await studentModel.logoutApi(context, appDeviceId);
           setChangePasswordLoader(false);
         } else {
           debugPrint('else logout');
-          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          final LoginProvider loginStore = Provider.of<LoginProvider>(
+            context,
+            listen: false,
+          );
           loginStore.userLogout();
           AppBadgePlus.updateBadge(0);
           setChangePasswordLoader(false);

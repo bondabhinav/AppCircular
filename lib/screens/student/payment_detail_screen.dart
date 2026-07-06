@@ -55,7 +55,8 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => provider.fetchPaymentDetail(widget.receiptNumber),
+                    onPressed: () =>
+                        provider.fetchPaymentDetail(widget.receiptNumber),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -69,7 +70,10 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                 // Receipt Number Header
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 20,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.blue, Colors.blue[300]!],
@@ -96,10 +100,13 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+                    border: Border.all(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.grey.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -107,7 +114,10 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildDetailRow('Admission no.', _getStudentAdmissionNo()),
+                      _buildDetailRow(
+                        'Admission no.',
+                        _getStudentAdmissionNo(),
+                      ),
                       const SizedBox(height: 16),
                       _buildDetailRow('Student Name', _getStudentName()),
                       const SizedBox(height: 16),
@@ -125,7 +135,10 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                 // Fee Details Header
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 20,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.blue, Colors.blue[300]!],
@@ -152,10 +165,13 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+                    border: Border.all(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.grey.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -171,18 +187,17 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                                 fee.fEETYPEDESC ?? 'N/A',
                                 '₹${fee.pAID ?? 0}',
                               ),
-                              if (fee != provider.paymentDetailResponse!.table1!.last)
+                              if (fee !=
+                                  provider.paymentDetailResponse!.table1!.last)
                                 const SizedBox(height: 16),
                             ],
                           );
-                        }).toList(),
-                      
-                      if (provider.paymentDetailResponse?.table1?.isNotEmpty == true) ...[
+                        }),
+
+                      if (provider.paymentDetailResponse?.table1?.isNotEmpty ==
+                          true) ...[
                         const SizedBox(height: 20),
-                        Container(
-                          height: 1,
-                          color: Colors.grey[300],
-                        ),
+                        Container(height: 1, color: Colors.grey[300]),
                         const SizedBox(height: 20),
                         _buildFeeDetailRow(
                           'Total Amount',
@@ -279,7 +294,11 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     );
   }
 
-  Widget _buildFeeDetailRow(String feeType, String amount, {bool isTotal = false}) {
+  Widget _buildFeeDetailRow(
+    String feeType,
+    String amount, {
+    bool isTotal = false,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -326,17 +345,26 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   }
 
   String _getStudentName() {
-    final studentDashboard = Provider.of<StudentDashboardProvider>(context, listen: false);
-    final studentData = studentDashboard.studentDetailResponse?.getstudentData?.first;
+    final studentDashboard = Provider.of<StudentDashboardProvider>(
+      context,
+      listen: false,
+    );
+    final studentData =
+        studentDashboard.studentDetailResponse?.getstudentData?.first;
     if (studentData != null) {
-      return '${studentData.fIRSTNAME ?? ''} ${studentData.lASTNAME ?? ''}'.trim();
+      return '${studentData.fIRSTNAME ?? ''} ${studentData.lASTNAME ?? ''}'
+          .trim();
     }
     return 'N/A';
   }
 
   String _getFatherName() {
-    final studentDashboard = Provider.of<StudentDashboardProvider>(context, listen: false);
-    final studentData = studentDashboard.studentDetailResponse?.getstudentData?.first;
+    final studentDashboard = Provider.of<StudentDashboardProvider>(
+      context,
+      listen: false,
+    );
+    final studentData =
+        studentDashboard.studentDetailResponse?.getstudentData?.first;
     return studentData?.pARENTNAME ?? 'N/A';
   }
 
@@ -347,4 +375,4 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   String _getStudentSection() {
     return WebService.studentLoginData?.table1?.first.sECTIONDESC ?? 'N/A';
   }
-} 
+}

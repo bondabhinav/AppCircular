@@ -27,7 +27,12 @@ class Assignment {
   String? aSSIGNMENTDETAILS;
   String? sUBJECT_NAME;
 
-  Assignment({this.aPPASSIGNMENTID, this.eNDDATE, this.aSSIGNMENTDETAILS,this.sUBJECT_NAME});
+  Assignment({
+    this.aPPASSIGNMENTID,
+    this.eNDDATE,
+    this.aSSIGNMENTDETAILS,
+    this.sUBJECT_NAME,
+  });
 
   Assignment.fromJson(Map<String, dynamic> json) {
     aPPASSIGNMENTID = json['APP_ASSIGNMENT_ID'];

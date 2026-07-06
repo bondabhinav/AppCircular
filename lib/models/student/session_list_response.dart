@@ -7,15 +7,15 @@ class SessionListResponse {
     if (json['Table1'] != null) {
       table1 = <Table1>[];
       json['Table1'].forEach((v) {
-        table1!.add(new Table1.fromJson(v));
+        table1!.add(Table1.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.table1 != null) {
-      data['Table1'] = this.table1!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (table1 != null) {
+      data['Table1'] = table1!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -37,11 +37,11 @@ class Table1 {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['SESSION_ID'] = this.sESSIONID;
-    data['ACTIVE'] = this.aCTIVE;
-    data['START_DATE'] = this.sTARTDATE;
-    data['END_DATE'] = this.eNDDATE;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['SESSION_ID'] = sESSIONID;
+    data['ACTIVE'] = aCTIVE;
+    data['START_DATE'] = sTARTDATE;
+    data['END_DATE'] = eNDDATE;
     return data;
   }
 }

@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '905905139189',
     projectId: 'flexischoolapp',
     storageBucket: 'flexischoolapp.appspot.com',
-    androidClientId: '905905139189-u2o0m3sbdbr0ug8abf88lvkdjsdi38co.apps.googleusercontent.com',
+    androidClientId:
+        '905905139189-u2o0m3sbdbr0ug8abf88lvkdjsdi38co.apps.googleusercontent.com',
     iosBundleId: 'flexischoolerpapp.sapinfotek.com',
   );
 }

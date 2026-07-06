@@ -15,7 +15,9 @@ class NotificationCountResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (notificationCount != null) {
-      data['NotificationCount'] = notificationCount!.map((v) => v.toJson()).toList();
+      data['NotificationCount'] = notificationCount!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }

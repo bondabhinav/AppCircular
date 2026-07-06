@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internal storage path for OTA updates -->
+    <files-path name="ota_update" path="." />
+    <!-- External cache path (if needed) -->
+    <cache-path name="ota_update_cache" path="." />
+</paths>

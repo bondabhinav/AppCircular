@@ -29,13 +29,14 @@ class Classlist {
   String? fLAG;
   List<LstCircularFile>? lstCircularFile;
 
-  Classlist(
-      {this.aPPCIRCULARID,
-        this.aPPCIRCULARDATE,
-        this.aPPCIRCULARDESCRIPTION,
-        this.aPPCIRCULARSUBJECT,
-        this.fLAG,
-        this.lstCircularFile});
+  Classlist({
+    this.aPPCIRCULARID,
+    this.aPPCIRCULARDATE,
+    this.aPPCIRCULARDESCRIPTION,
+    this.aPPCIRCULARSUBJECT,
+    this.fLAG,
+    this.lstCircularFile,
+  });
 
   Classlist.fromJson(Map<String, dynamic> json) {
     aPPCIRCULARID = json['APP_CIRCULAR_ID'];
@@ -59,8 +60,9 @@ class Classlist {
     data['APP_CIRCULAR_SUBJECT'] = aPPCIRCULARSUBJECT;
     data['FLAG'] = fLAG;
     if (lstCircularFile != null) {
-      data['lstCircularFile'] =
-          lstCircularFile!.map((v) => v.toJson()).toList();
+      data['lstCircularFile'] = lstCircularFile!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }

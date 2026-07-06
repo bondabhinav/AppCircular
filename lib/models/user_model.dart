@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class User {
   User({
     required this.USERNAME,
@@ -18,27 +16,27 @@ class User {
   late final String DESIGNATIONDESC;
   late final String PHOTO;
 
-  factory  User.fromJson(Map<String, dynamic> json){
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
-    USERNAME : json['USER_NAME'] ?? '',
-    USERKID : json['USER_KID'] ?? 0,
-    EMPLOYEEID : json['EMPLOYEE_ID'] ?? 0,
-    EMPLOYEECODE : json['EMPLOYEE_CODE'] ?? 0,
-    DEPARTMENTNAME : json['DEPARTMENT_NAME'] ?? '',
-    DESIGNATIONDESC : json['DESIGNATION_DESC'] ?? '',
-    PHOTO : json['PHOTO'] ?? ''
+      USERNAME: json['USER_NAME'] ?? '',
+      USERKID: json['USER_KID'] ?? 0,
+      EMPLOYEEID: json['EMPLOYEE_ID'] ?? 0,
+      EMPLOYEECODE: json['EMPLOYEE_CODE'] ?? 0,
+      DEPARTMENTNAME: json['DEPARTMENT_NAME'] ?? '',
+      DESIGNATIONDESC: json['DESIGNATION_DESC'] ?? '',
+      PHOTO: json['PHOTO'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['USER_NAME'] = USERNAME;
-    _data['USER_KID'] = USERKID;
-    _data['EMPLOYEE_ID'] = EMPLOYEEID;
-    _data['EMPLOYEE_CODE'] = EMPLOYEECODE;
-    _data['DEPARTMENT_NAME'] = DEPARTMENTNAME;
-    _data['DESIGNATION_DESC'] = DESIGNATIONDESC;
-    _data['PHOTO'] = PHOTO;
-    return _data;
+    final data = <String, dynamic>{};
+    data['USER_NAME'] = USERNAME;
+    data['USER_KID'] = USERKID;
+    data['EMPLOYEE_ID'] = EMPLOYEEID;
+    data['EMPLOYEE_CODE'] = EMPLOYEECODE;
+    data['DEPARTMENT_NAME'] = DEPARTMENTNAME;
+    data['DESIGNATION_DESC'] = DESIGNATIONDESC;
+    data['PHOTO'] = PHOTO;
+    return data;
   }
 }

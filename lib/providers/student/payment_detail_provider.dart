@@ -42,7 +42,10 @@ class PaymentDetailProvider with ChangeNotifier {
         "STUDENT_ID": studentData.aDMSTUDENTID,
       };
 
-      final response = await apiService.post(url: Api.getPaymentDetailApi, data: requestBody);
+      final response = await apiService.post(
+        url: Api.getPaymentDetailApi,
+        data: requestBody,
+      );
 
       if (response.statusCode == 200) {
         _paymentDetailResponse = PaymentDetailResponse.fromJson(response.data);
@@ -58,7 +61,10 @@ class PaymentDetailProvider with ChangeNotifier {
 
   double get totalPaidAmount {
     if (_paymentDetailResponse?.table1 == null) return 0.0;
-    return _paymentDetailResponse!.table1!.fold(0.0, (sum, item) => sum + (item.pAID ?? 0));
+    return _paymentDetailResponse!.table1!.fold(
+      0.0,
+      (sum, item) => sum + (item.pAID ?? 0),
+    );
   }
 
   String get paymentDate {
@@ -89,4 +95,4 @@ class PaymentDetailProvider with ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-} 
+}

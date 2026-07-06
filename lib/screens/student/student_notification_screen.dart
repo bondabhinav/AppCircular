@@ -9,10 +9,11 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 
 class StudentNotificationScreen extends StatefulWidget {
-  const StudentNotificationScreen({Key? key}) : super(key: key);
+  const StudentNotificationScreen({super.key});
 
   @override
-  State<StudentNotificationScreen> createState() => _StudentNotificationScreenState();
+  State<StudentNotificationScreen> createState() =>
+      _StudentNotificationScreenState();
 }
 
 class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
@@ -20,17 +21,24 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
 
   @override
   void initState() {
-    studentNotificationProvider = Provider.of<StudentNotificationProvider>(context, listen: false);
+    studentNotificationProvider = Provider.of<StudentNotificationProvider>(
+      context,
+      listen: false,
+    );
     studentNotificationProvider?.fetchNotificationData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<StudentNotificationProvider>(builder: (context, model, _) {
-      return Scaffold(
+    return Consumer<StudentNotificationProvider>(
+      builder: (context, model, _) {
+        return Scaffold(
           appBar: AppBar(
-            title: const Text('Notifications', style: TextStyle(color: Colors.white)),
+            title: const Text(
+              'Notifications',
+              style: TextStyle(color: Colors.white),
+            ),
             leading: IconButton(
               color: Colors.white,
               icon: const Icon(Icons.arrow_back_ios),
@@ -57,108 +65,143 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
           body: model.notificationListResponse == null
               ? const Center(child: CircularProgressIndicator())
               : model.notificationListResponse!.notification!.isEmpty
-                  ? Center(child: Text(model.message ?? ""))
-                  : ListView.builder(
-                      itemCount: model.notificationListResponse?.notification?.length,
-                      itemBuilder: (context, index) {
-                        final notificationItem = model.notificationListResponse?.notification![index];
-                        return InkWell(
-                          onTap: () {
-                            if (notificationItem.nOTIFICATIONTYPE == 'ASSIGNMENT') {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => AssignmentDetailScreen(
-                                          sessionId: Constants.sessionId,
-                                          assignmentId: notificationItem.aPPASSIGNMENTID!,
-                                          notificationId: notificationItem.nOTIFICATIONID))).then((value) {
-                                model.updateNotificationStatus(index);
-                              });
-                            } else if (notificationItem.nOTIFICATIONTYPE == 'CIRCULAR') {
-                              debugPrint('check circular id ---> ${notificationItem.aPPCIRCULARID}');
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => StudentCircularDetailScreen(
-                                          sessionId: Constants.sessionId,
-                                          id: notificationItem.aPPCIRCULARID!,
-                                          notificationId: notificationItem.nOTIFICATIONID))).then((value) {
-                                model.updateNotificationStatus(index);
-                              });
-                            } else if (notificationItem.nOTIFICATIONTYPE == 'ATTENDANCE') {}
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Card(
-                              elevation: notificationItem?.nOTIFICATIONFLAG == 'N' ? 4.0 : 2.0,
-                              color:
-                                  notificationItem?.nOTIFICATIONFLAG == 'N' ? Colors.grey[300] : Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.orange,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.notifications,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Expanded(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  notificationItem?.nOTIFICATIONTYPE ?? "",
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16.0,
-                                                  ),
-                                                ),
-                                                description(notificationItem!, model),
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              dateItem(notificationItem, model),
-                                              if (notificationItem.aSSIGNMENT_STATUS
-                                                          .toString()
-                                                          .toUpperCase() ==
-                                                      'N' ||
-                                                  notificationItem.cIRCULAR_STATS.toString().toUpperCase() ==
-                                                      'N')
-                                                const Text('Deleted',
-                                                    style: TextStyle(color: Colors.redAccent))
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+              ? Center(child: Text(model.message ?? ""))
+              : ListView.builder(
+                  itemCount:
+                      model.notificationListResponse?.notification?.length,
+                  itemBuilder: (context, index) {
+                    final notificationItem =
+                        model.notificationListResponse?.notification![index];
+                    return InkWell(
+                      onTap: () {
+                        if (notificationItem.nOTIFICATIONTYPE == 'ASSIGNMENT') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AssignmentDetailScreen(
+                                sessionId: Constants.sessionId,
+                                assignmentId: notificationItem.aPPASSIGNMENTID!,
+                                notificationId: notificationItem.nOTIFICATIONID,
                               ),
                             ),
-                          ),
-                        );
+                          ).then((value) {
+                            model.updateNotificationStatus(index);
+                          });
+                        } else if (notificationItem.nOTIFICATIONTYPE ==
+                            'CIRCULAR') {
+                          debugPrint(
+                            'check circular id ---> ${notificationItem.aPPCIRCULARID}',
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StudentCircularDetailScreen(
+                                sessionId: Constants.sessionId,
+                                id: notificationItem.aPPCIRCULARID!,
+                                notificationId: notificationItem.nOTIFICATIONID,
+                              ),
+                            ),
+                          ).then((value) {
+                            model.updateNotificationStatus(index);
+                          });
+                        } else if (notificationItem.nOTIFICATIONTYPE ==
+                            'ATTENDANCE') {}
                       },
-                    ));
-    });
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                          elevation: notificationItem?.nOTIFICATIONFLAG == 'N'
+                              ? 4.0
+                              : 2.0,
+                          color: notificationItem?.nOTIFICATIONFLAG == 'N'
+                              ? Colors.grey[300]
+                              : Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.orange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              notificationItem
+                                                      ?.nOTIFICATIONTYPE ??
+                                                  "",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.0,
+                                              ),
+                                            ),
+                                            description(
+                                              notificationItem!,
+                                              model,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          dateItem(notificationItem, model),
+                                          if (notificationItem.aSSIGNMENT_STATUS
+                                                      .toString()
+                                                      .toUpperCase() ==
+                                                  'N' ||
+                                              notificationItem.cIRCULAR_STATS
+                                                      .toString()
+                                                      .toUpperCase() ==
+                                                  'N')
+                                            const Text(
+                                              'Deleted',
+                                              style: TextStyle(
+                                                color: Colors.redAccent,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        );
+      },
+    );
   }
 
-  Widget description(NotificationData notification, StudentNotificationProvider model) {
+  Widget description(
+    NotificationData notification,
+    StudentNotificationProvider model,
+  ) {
     switch (notification.nOTIFICATIONTYPE) {
       case 'ASSIGNMENT':
         return SizedBox(
@@ -177,12 +220,19 @@ class _StudentNotificationScreenState extends State<StudentNotificationScreen> {
     }
   }
 
-  Widget dateItem(NotificationData notification, StudentNotificationProvider model) {
+  Widget dateItem(
+    NotificationData notification,
+    StudentNotificationProvider model,
+  ) {
     switch (notification.nOTIFICATIONTYPE) {
       case 'ASSIGNMENT':
-        return Text(DateTimeUtils.formatDateTime(notification.aSSIGNMENTDATE ?? ""));
+        return Text(
+          DateTimeUtils.formatDateTime(notification.aSSIGNMENTDATE ?? ""),
+        );
       case 'CIRCULAR':
-        return Text(DateTimeUtils.formatDateTime(notification.aPPCIRCULARDATE ?? ""));
+        return Text(
+          DateTimeUtils.formatDateTime(notification.aPPCIRCULARDATE ?? ""),
+        );
       case 'ATTENDANCE':
         return const Text('');
       default:

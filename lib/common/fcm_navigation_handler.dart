@@ -15,7 +15,6 @@ import 'package:flexischool/screens/student/student_assignment_screen.dart';
 import 'package:flexischool/screens/student/student_circular.dart';
 
 class FCMNavigationHandler {
-  
   /// Map FCM PAGE values to screen widgets
   static final Map<String, Widget Function()> _pageToScreenMap = {
     'DASHBOARD': () => const Dashboard(),
@@ -27,14 +26,17 @@ class FCMNavigationHandler {
   };
 
   /// Map FCM PAGE values to screen widgets with parameters
-  static final Map<String, Widget Function(Map<String, dynamic>)> _pageToWidgetMap = {
+  static final Map<String, Widget Function(Map<String, dynamic>)>
+  _pageToWidgetMap = {
     'FEES': (data) => const FeeScreen(),
     'NOTIFICATION': (data) => const StudentNotificationScreen(),
     'ATTENDANCE': (data) => const StudentAttendanceGraphScreen(),
     'ACADEMIC': (data) => const AcademicCalenderScreen(),
     'ASSIGNMENT': (data) => _buildAssignmentScreen(data),
     'CIRCULAR': (data) => _buildCircularScreen(data),
-    'ASSIGNMENTS': (data) => StudentAssignmentCalenderWithList(employeeId: int.tryParse(data['EMPLOYEE_ID']?.toString() ?? '0') ?? 0),
+    'ASSIGNMENTS': (data) => StudentAssignmentCalenderWithList(
+      employeeId: int.tryParse(data['EMPLOYEE_ID']?.toString() ?? '0') ?? 0,
+    ),
     'CIRCULARS': (data) => const StudentCircularScreen(),
     // Add more screens as needed
   };
@@ -43,14 +45,18 @@ class FCMNavigationHandler {
   static void handleFCMNavigation(Map<String, dynamic> fcmData) {
     final String? page = fcmData['PAGE']?.toString();
     final String? type = fcmData['TYPE']?.toString();
-    
+
     debugPrint("=== FCM NAVIGATION HANDLER ===");
     debugPrint("PAGE: $page");
     debugPrint("TYPE: $type");
     debugPrint("FCM Data: $fcmData");
-    debugPrint("Navigator Context Available: ${AuthMiddleware.navigatorKey.currentContext != null}");
-    debugPrint("Navigator State Available: ${AuthMiddleware.navigatorKey.currentState != null}");
-    
+    debugPrint(
+      "Navigator Context Available: ${AuthMiddleware.navigatorKey.currentContext != null}",
+    );
+    debugPrint(
+      "Navigator State Available: ${AuthMiddleware.navigatorKey.currentState != null}",
+    );
+
     if (page == null || page.isEmpty) {
       debugPrint("No PAGE specified, falling back to TYPE-based navigation");
       _handleLegacyNavigation(fcmData);
@@ -62,7 +68,7 @@ class FCMNavigationHandler {
       final screenBuilder = _pageToScreenMap[page.toUpperCase()]!;
       final widget = screenBuilder();
       debugPrint("Navigating to screen: ${widget.runtimeType}");
-      
+
       if (AuthMiddleware.navigatorKey.currentContext != null) {
         Navigator.push(
           AuthMiddleware.navigatorKey.currentContext!,
@@ -83,9 +89,9 @@ class FCMNavigationHandler {
     if (_pageToWidgetMap.containsKey(page.toUpperCase())) {
       final widgetBuilder = _pageToWidgetMap[page.toUpperCase()]!;
       final widget = widgetBuilder(fcmData);
-      
+
       debugPrint("Navigating to widget: ${widget.runtimeType}");
-      
+
       if (AuthMiddleware.navigatorKey.currentContext != null) {
         Navigator.push(
           AuthMiddleware.navigatorKey.currentContext!,
@@ -110,30 +116,34 @@ class FCMNavigationHandler {
   /// Legacy navigation based on TYPE field (for backward compatibility)
   static void _handleLegacyNavigation(Map<String, dynamic> fcmData) {
     final String? type = fcmData['TYPE']?.toString();
-    
+
     debugPrint("Legacy navigation for TYPE: $type");
-    
+
     switch (type?.toUpperCase()) {
       case 'ASSIGNMENT':
-        if (fcmData['SESSION_ID'] != null && 
-            fcmData['APP_ASSIGNMENT_ID'] != null && 
+        if (fcmData['SESSION_ID'] != null &&
+            fcmData['APP_ASSIGNMENT_ID'] != null &&
             fcmData['NOTIFICATION_ID'] != null) {
           Navigator.push(
             AuthMiddleware.navigatorKey.currentContext!,
             MaterialPageRoute(
               builder: (context) => AssignmentDetailScreen(
                 sessionId: int.parse(fcmData['SESSION_ID'].toString()),
-                assignmentId: int.parse(fcmData['APP_ASSIGNMENT_ID'].toString()),
-                notificationId: int.parse(fcmData['NOTIFICATION_ID'].toString()),
+                assignmentId: int.parse(
+                  fcmData['APP_ASSIGNMENT_ID'].toString(),
+                ),
+                notificationId: int.parse(
+                  fcmData['NOTIFICATION_ID'].toString(),
+                ),
               ),
             ),
           );
         }
         break;
-        
+
       case 'CIRCULAR':
-        if (fcmData['SESSION_ID'] != null && 
-            fcmData['APP_CIRCULAR_ID'] != null && 
+        if (fcmData['SESSION_ID'] != null &&
+            fcmData['APP_CIRCULAR_ID'] != null &&
             fcmData['NOTIFICATION_ID'] != null) {
           Navigator.push(
             AuthMiddleware.navigatorKey.currentContext!,
@@ -141,27 +151,31 @@ class FCMNavigationHandler {
               builder: (context) => StudentCircularDetailScreen(
                 sessionId: int.parse(fcmData['SESSION_ID'].toString()),
                 id: int.parse(fcmData['APP_CIRCULAR_ID'].toString()),
-                notificationId: int.parse(fcmData['NOTIFICATION_ID'].toString()),
+                notificationId: int.parse(
+                  fcmData['NOTIFICATION_ID'].toString(),
+                ),
               ),
             ),
           );
         }
         break;
-        
+
       case 'ATTENDANCE':
         Navigator.push(
           AuthMiddleware.navigatorKey.currentContext!,
-          MaterialPageRoute(builder: (context) => const StudentNotificationScreen()),
+          MaterialPageRoute(
+            builder: (context) => const StudentNotificationScreen(),
+          ),
         );
         break;
-        
+
       case 'FEES':
         Navigator.push(
           AuthMiddleware.navigatorKey.currentContext!,
           MaterialPageRoute(builder: (context) => const FeeScreen()),
         );
         break;
-        
+
       default:
         debugPrint("Unknown TYPE: $type, no navigation performed");
         break;
@@ -170,8 +184,8 @@ class FCMNavigationHandler {
 
   /// Build assignment screen with parameters
   static Widget _buildAssignmentScreen(Map<String, dynamic> data) {
-    if (data['SESSION_ID'] != null && 
-        data['APP_ASSIGNMENT_ID'] != null && 
+    if (data['SESSION_ID'] != null &&
+        data['APP_ASSIGNMENT_ID'] != null &&
         data['NOTIFICATION_ID'] != null) {
       return AssignmentDetailScreen(
         sessionId: int.parse(data['SESSION_ID'].toString()),
@@ -180,13 +194,15 @@ class FCMNavigationHandler {
       );
     }
     // Fallback to assignment list if no specific assignment
-    return StudentAssignmentCalenderWithList(employeeId: int.tryParse(data['EMPLOYEE_ID']?.toString() ?? '0') ?? 0);
+    return StudentAssignmentCalenderWithList(
+      employeeId: int.tryParse(data['EMPLOYEE_ID']?.toString() ?? '0') ?? 0,
+    );
   }
 
   /// Build circular screen with parameters
   static Widget _buildCircularScreen(Map<String, dynamic> data) {
-    if (data['SESSION_ID'] != null && 
-        data['APP_CIRCULAR_ID'] != null && 
+    if (data['SESSION_ID'] != null &&
+        data['APP_CIRCULAR_ID'] != null &&
         data['NOTIFICATION_ID'] != null) {
       return StudentCircularDetailScreen(
         sessionId: int.parse(data['SESSION_ID'].toString()),
@@ -205,7 +221,10 @@ class FCMNavigationHandler {
   }
 
   /// Add new PAGE to widget mapping
-  static void addPageWidget(String page, Widget Function(Map<String, dynamic>) widgetBuilder) {
+  static void addPageWidget(
+    String page,
+    Widget Function(Map<String, dynamic>) widgetBuilder,
+  ) {
     // This would be used to dynamically add widget builders if needed
     debugPrint("Adding page widget: $page -> ${widgetBuilder.runtimeType}");
   }
@@ -224,11 +243,11 @@ class FCMNavigationHandler {
     _pageToScreenMap.forEach((page, screenBuilder) {
       debugPrint("  $page -> ${screenBuilder.runtimeType}");
     });
-    
+
     debugPrint("Available Widgets:");
     _pageToWidgetMap.forEach((page, builder) {
       debugPrint("  $page -> ${builder.runtimeType}");
     });
     debugPrint("=== END NAVIGATION MAPPING ===");
   }
-} 
+}

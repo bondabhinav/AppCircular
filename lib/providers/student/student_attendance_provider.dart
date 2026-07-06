@@ -9,7 +9,6 @@ import 'package:flexischool/models/teacher/get_event_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:intl/intl.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -30,11 +29,16 @@ class StudentAttendanceProvider extends ChangeNotifier {
         "CLASS_ID": Constants.studentClassId,
         "SECTION_ID": Constants.studentSectionId,
         "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
-        "SESSION_ID": Constants.sessionId
+        "SESSION_ID": Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.getOverallPercentageApi, data: data);
+      final response = await apiService.post(
+        url: Api.getOverallPercentageApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        overAllAttendanceResponse = OverAllAttendanceResponse.fromJson(response.data);
+        overAllAttendanceResponse = OverAllAttendanceResponse.fromJson(
+          response.data,
+        );
         notifyListeners();
       } else {
         overAllAttendanceResponse = OverAllAttendanceResponse();
@@ -54,11 +58,15 @@ class StudentAttendanceProvider extends ChangeNotifier {
         "CLASS_ID": Constants.studentClassId,
         "SECTION_ID": Constants.studentSectionId,
         "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
-        "SESSION_ID": Constants.sessionId
+        "SESSION_ID": Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.studentAttendanceGraphApi, data: data);
+      final response = await apiService.post(
+        url: Api.studentAttendanceGraphApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        studentAttendanceGraphResponse = StudentAttendanceGraphResponse.fromJson(response.data);
+        studentAttendanceGraphResponse =
+            StudentAttendanceGraphResponse.fromJson(response.data);
         loaderProvider.hideLoader();
         notifyListeners();
       } else {
@@ -81,9 +89,12 @@ class StudentAttendanceProvider extends ChangeNotifier {
         "CLASS_ID": Constants.studentClassId,
         "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
         "SESSION_ID": Constants.sessionId,
-        "MONTH": month
+        "MONTH": month,
       };
-      final response = await apiService.post(url: Api.absentPresentCalenderApi, data: data);
+      final response = await apiService.post(
+        url: Api.absentPresentCalenderApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         absentPresentResponse = AbsentPresentResponse.fromJson(response.data);
         loaderProvider.hideLoader();
@@ -106,7 +117,11 @@ class StudentAttendanceProvider extends ChangeNotifier {
     allEvents.clear();
     notifyListeners();
     try {
-      var data = {"MONTH": month, "CLASS_ID": Constants.studentClassId, "SESSION_ID": Constants.sessionId};
+      var data = {
+        "MONTH": month,
+        "CLASS_ID": Constants.studentClassId,
+        "SESSION_ID": Constants.sessionId,
+      };
       final response = await apiService.post(url: Api.getEventApi, data: data);
       debugPrint('response ---- $response');
       if (response.statusCode == 200) {
@@ -121,14 +136,18 @@ class StudentAttendanceProvider extends ChangeNotifier {
     }
   }
 
-  Map<DateTime, List<CalendarEvent>> _groupEventsByDate(List<CalendarEvent> events) {
+  Map<DateTime, List<CalendarEvent>> _groupEventsByDate(
+    List<CalendarEvent> events,
+  ) {
     Map<DateTime, List<CalendarEvent>> groupedEvents = {};
     for (var event in events) {
-      DateTime eventDate = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
-      String formattedDate = DateFormat('yyyy-MM-dd').format(eventDate);
-
-      if (groupedEvents.containsKey(formattedDate)) {
-        groupedEvents[formattedDate]!.add(event);
+      DateTime eventDate = DateTime(
+        event.startDate.year,
+        event.startDate.month,
+        event.startDate.day,
+      );
+      if (groupedEvents.containsKey(eventDate)) {
+        groupedEvents[eventDate]!.add(event);
       } else {
         groupedEvents[eventDate] = [event];
       }
@@ -140,11 +159,12 @@ class StudentAttendanceProvider extends ChangeNotifier {
     allEvents.forEach((date, events) {
       debugPrint('Date: $date');
       for (var event in events) {
-        debugPrint('  Event: ${event.eventName}, Start Date: ${event.startDate}, Type: ${event.type}');
+        debugPrint(
+          '  Event: ${event.eventName}, Start Date: ${event.startDate}, Type: ${event.type}',
+        );
       }
     });
   }
-
 
   void updateMonth(DateTime dateTime) {
     month = dateTime.month;

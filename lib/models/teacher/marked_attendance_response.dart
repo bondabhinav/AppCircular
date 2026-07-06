@@ -15,7 +15,9 @@ class MarkedAttendanceResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (getAttendanceStud != null) {
-      data['getAttendanceStud'] = getAttendanceStud!.map((v) => v.toJson()).toList();
+      data['getAttendanceStud'] = getAttendanceStud!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }

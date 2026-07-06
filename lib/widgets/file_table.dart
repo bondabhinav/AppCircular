@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 
 class FileTable extends StatelessWidget {
   final List<UploadDocResponse> files;
-  final Function(String,int) onRemove;
+  final Function(String, int) onRemove;
 
   const FileTable({super.key, required this.files, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
     return Table(
-      columnWidths: const {
-        0: FlexColumnWidth(2),
-        1: FlexColumnWidth(1),
-      },
+      columnWidths: const {0: FlexColumnWidth(2), 1: FlexColumnWidth(1)},
       border: TableBorder.all(),
       children: [
         const TableRow(
@@ -50,7 +47,7 @@ class FileTable extends StatelessWidget {
               TableCell(
                 child: IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () => onRemove(files[index].fileNAME ?? "",index),
+                  onPressed: () => onRemove(files[index].fileNAME ?? "", index),
                 ),
               ),
             ],

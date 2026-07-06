@@ -24,9 +24,11 @@ class GetEventResponse {
   GetEventResponse({required this.calendarDate});
 
   factory GetEventResponse.fromJson(Map<String, dynamic> json) {
-    List<CalendarEvent> events = List<CalendarEvent>.from((json['Calendar_date'] as List).map((event) {
-      return CalendarEvent.fromJson(event);
-    }));
+    List<CalendarEvent> events = List<CalendarEvent>.from(
+      (json['Calendar_date'] as List).map((event) {
+        return CalendarEvent.fromJson(event);
+      }),
+    );
 
     return GetEventResponse(calendarDate: events);
   }

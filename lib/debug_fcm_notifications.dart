@@ -3,12 +3,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 class FCMNotificationDebugger {
-  static final FCMNotificationDebugger _instance = FCMNotificationDebugger._internal();
-  
+  static final FCMNotificationDebugger _instance =
+      FCMNotificationDebugger._internal();
+
   factory FCMNotificationDebugger() {
     return _instance;
   }
-  
+
   FCMNotificationDebugger._internal();
 
   /// Initialize FCM debugging
@@ -32,13 +33,13 @@ class FCMNotificationDebugger {
   /// Log notification details
   static void logNotification(String type, RemoteMessage message) {
     final logData = _formatNotificationData(type, message);
-    
+
     // Print to console
     debugPrint(logData);
-    
+
     // Also log to developer console for better debugging
     developer.log(logData, name: 'FCM_NOTIFICATION');
-    
+
     // If you want to save to file or send to analytics, you can add that here
   }
 
@@ -52,30 +53,46 @@ class FCMNotificationDebugger {
     buffer.writeln('📤 From: ${message.from ?? 'N/A'}');
     buffer.writeln('⏰ Sent Time: ${message.sentTime ?? 'N/A'}');
     buffer.writeln('⏱️ TTL: ${message.ttl ?? 'N/A'}');
-    
+
     // Log notification payload
     if (message.notification != null) {
       buffer.writeln('📢 Notification:');
       buffer.writeln('  📝 Title: ${message.notification!.title ?? 'N/A'}');
       buffer.writeln('  📄 Body: ${message.notification!.body ?? 'N/A'}');
-      
+
       if (message.notification!.android != null) {
         buffer.writeln('  🤖 Android:');
-        buffer.writeln('    🔊 Sound: ${message.notification!.android!.sound ?? 'N/A'}');
-        buffer.writeln('    🏷️ Tag: ${message.notification!.android!.tag ?? 'N/A'}');
-        buffer.writeln('    🎨 Color: ${message.notification!.android!.color ?? 'N/A'}');
-        buffer.writeln('    📱 Channel ID: ${message.notification!.android!.channelId ?? 'N/A'}');
-        buffer.writeln('    🖼️ Image URL: ${message.notification!.android!.imageUrl ?? 'N/A'}');
+        buffer.writeln(
+          '    🔊 Sound: ${message.notification!.android!.sound ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    🏷️ Tag: ${message.notification!.android!.tag ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    🎨 Color: ${message.notification!.android!.color ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    📱 Channel ID: ${message.notification!.android!.channelId ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    🖼️ Image URL: ${message.notification!.android!.imageUrl ?? 'N/A'}',
+        );
       }
-      
+
       if (message.notification!.apple != null) {
         buffer.writeln('  🍎 Apple:');
-        buffer.writeln('    🔊 Sound: ${message.notification!.apple!.sound ?? 'N/A'}');
-        buffer.writeln('    🏷️ Badge: ${message.notification!.apple!.badge ?? 'N/A'}');
-        buffer.writeln('    🖼️ Image URL: ${message.notification!.apple!.imageUrl ?? 'N/A'}');
+        buffer.writeln(
+          '    🔊 Sound: ${message.notification!.apple!.sound ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    🏷️ Badge: ${message.notification!.apple!.badge ?? 'N/A'}',
+        );
+        buffer.writeln(
+          '    🖼️ Image URL: ${message.notification!.apple!.imageUrl ?? 'N/A'}',
+        );
       }
     }
-    
+
     // Log data payload
     if (message.data.isNotEmpty) {
       buffer.writeln('📦 Data Payload:');
@@ -85,7 +102,7 @@ class FCMNotificationDebugger {
     } else {
       buffer.writeln('📦 Data Payload: Empty');
     }
-    
+
     buffer.writeln('🔔 ===== END FCM NOTIFICATION =====');
     return buffer.toString();
   }
@@ -99,17 +116,20 @@ class FCMNotificationDebugger {
   static Future<void> printFCMSettings() async {
     final buffer = StringBuffer();
     buffer.writeln('⚙️ ===== FCM SETTINGS =====');
-    
+
     try {
       final token = await FirebaseMessaging.instance.getToken();
       buffer.writeln('🔑 FCM Token: $token');
     } catch (e) {
       buffer.writeln('🔑 FCM Token: Error getting token - $e');
     }
-    
+
     try {
-      final settings = await FirebaseMessaging.instance.getNotificationSettings();
-      buffer.writeln('📱 Authorization Status: ${settings.authorizationStatus}');
+      final settings = await FirebaseMessaging.instance
+          .getNotificationSettings();
+      buffer.writeln(
+        '📱 Authorization Status: ${settings.authorizationStatus}',
+      );
       buffer.writeln('🔔 Alert Setting: ${settings.alert}');
       buffer.writeln('🔊 Sound Setting: ${settings.sound}');
       buffer.writeln('🏷️ Badge Setting: ${settings.badge}');
@@ -118,9 +138,9 @@ class FCMNotificationDebugger {
     } catch (e) {
       buffer.writeln('📱 Settings: Error getting settings - $e');
     }
-    
+
     buffer.writeln('⚙️ ===== END FCM SETTINGS =====');
-    
+
     debugPrint(buffer.toString());
     developer.log(buffer.toString(), name: 'FCM_SETTINGS');
   }
@@ -136,4 +156,4 @@ class FCMNotificationDebugger {
     debugPrint('  • Fees - Fee payment notifications');
     debugPrint('📊 ===== END SUMMARY =====');
   }
-} 
+}

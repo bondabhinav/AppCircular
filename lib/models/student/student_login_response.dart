@@ -32,16 +32,17 @@ class Table1 {
   String? sECTIONDESC;
   String? sTUDPHOTO;
 
-  Table1(
-      {this.aDMSTUDENTID,
-        this.fROMSESSION,
-        this.tOSESSION,
-        this.sESSIONID,
-        this.cITYNAME,
-        this.aDMNO,
-        this.cLASSDESC,
-        this.sTUDPHOTO,
-        this.sECTIONDESC});
+  Table1({
+    this.aDMSTUDENTID,
+    this.fROMSESSION,
+    this.tOSESSION,
+    this.sESSIONID,
+    this.cITYNAME,
+    this.aDMNO,
+    this.cLASSDESC,
+    this.sTUDPHOTO,
+    this.sECTIONDESC,
+  });
 
   Table1.fromJson(Map<String, dynamic> json) {
     aDMSTUDENTID = json['ADM_STUDENT_ID'];

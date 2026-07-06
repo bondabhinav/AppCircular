@@ -23,13 +23,14 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-            onProgress: (int progress) {},
-            onPageStarted: (String url) {},
-            onPageFinished: (String url) {
-              isLoading = false;
-              setState(() {});
-            },
-            onWebResourceError: (WebResourceError error) {}),
+          onProgress: (int progress) {},
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            isLoading = false;
+            setState(() {});
+          },
+          onWebResourceError: (WebResourceError error) {},
+        ),
       )
       ..loadRequest(Uri.parse(widget.url));
   }
@@ -38,16 +39,18 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back_ios),
-              color: Colors.white),
-          title: Text(widget.title, style: const TextStyle(color: Colors.white))),
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.white,
+        ),
+        title: Text(widget.title, style: const TextStyle(color: Colors.white)),
+      ),
       body: Stack(
         children: [
           WebViewWidget(controller: controller),
-          if (isLoading) const Center(child: CircularProgressIndicator())
+          if (isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

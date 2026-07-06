@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/download_file.dart';
@@ -18,7 +16,8 @@ class TeacherCircularListScreen extends StatefulWidget {
   const TeacherCircularListScreen({super.key, required this.employeeId});
 
   @override
-  State<TeacherCircularListScreen> createState() => _TeacherCircularListScreenState();
+  State<TeacherCircularListScreen> createState() =>
+      _TeacherCircularListScreenState();
 }
 
 class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
@@ -29,33 +28,42 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
   void initState() {
     teacherCircularListProvider = TeacherCircularListProvider();
     teacherCircularListProvider?.fetchTeacherCircularListData(
-        employeeId: widget.employeeId, endDate: Constants.currentDate, fromDate: Constants.currentDate);
+      employeeId: widget.employeeId,
+      endDate: Constants.currentDate,
+      fromDate: Constants.currentDate,
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => teacherCircularListProvider,
-        builder: (context, child) {
-          return Consumer<TeacherCircularListProvider>(builder: (context, model, _) {
+      create: (_) => teacherCircularListProvider,
+      builder: (context, child) {
+        return Consumer<TeacherCircularListProvider>(
+          builder: (context, model, _) {
             return Scaffold(
               backgroundColor: Colors.white,
               appBar: AppBar(
                 leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: () => Navigator.pop(context)),
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
                 centerTitle: true,
-                title: const Text('Circulars', style: TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Circulars',
+                  style: TextStyle(color: Colors.white),
+                ),
                 actions: [
                   IconButton(
                     onPressed: () {
                       model.getDateRange(context).then((value) {
                         if (value.isNotEmpty) {
                           model.fetchTeacherCircularListData(
-                              employeeId: widget.employeeId,
-                              endDate: model.endDate,
-                              fromDate: model.startDate);
+                            employeeId: widget.employeeId,
+                            endDate: model.endDate,
+                            fromDate: model.startDate,
+                          );
                         }
                       });
                     },
@@ -65,15 +73,18 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                   IconButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => CircularsScreen(
-                                    employeeId: widget.employeeId,
-                                  ))).then((value) {
-                        teacherCircularListProvider?.fetchTeacherCircularListData(
-                            employeeId: widget.employeeId,
-                            endDate: Constants.currentDate,
-                            fromDate: Constants.currentDate);
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CircularsScreen(employeeId: widget.employeeId),
+                        ),
+                      ).then((value) {
+                        teacherCircularListProvider
+                            ?.fetchTeacherCircularListData(
+                              employeeId: widget.employeeId,
+                              endDate: Constants.currentDate,
+                              fromDate: Constants.currentDate,
+                            );
                       });
                     },
                     icon: const Icon(Icons.add),
@@ -93,8 +104,10 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                           height: 50,
                           padding: const EdgeInsets.only(left: 10),
                           margin: const EdgeInsets.only(top: 10, bottom: 10),
-                          decoration:
-                              BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all()),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(),
+                          ),
                           child: Row(
                             children: [
                               const Icon(
@@ -102,133 +115,177 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                 color: Colors.black,
                               ),
                               const SizedBox(width: 5),
-                              Text("${model.startDate} - ${model.endDate}",
-                                  textAlign: TextAlign.left,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
+                              Text(
+                                "${model.startDate} - ${model.endDate}",
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         Expanded(
-                          child: (model.teacherCircularListResponse == null ||
-                                  model.teacherCircularListResponse!.classlist == null)
+                          child:
+                              (model.teacherCircularListResponse == null ||
+                                  model
+                                          .teacherCircularListResponse!
+                                          .classlist ==
+                                      null)
                               ? const SizedBox.shrink()
                               : model.message != null
-                                  ? Center(
-                                      child: Text(
-                                      model.message ?? "",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ))
-                                  : ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: model.teacherCircularListResponse!.classlist!.length,
-                                      itemBuilder: (context, index) => listItem(
-                                          model: model,
-                                          circular: model.teacherCircularListResponse!.classlist![index],
-                                          documentOnTap: () {
-                                            if (model.teacherCircularListResponse!.classlist![index]
-                                                .lstCircularFile!.isNotEmpty) {
-                                              showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (BuildContext context) {
-                                                  var data =
-                                                      model.teacherCircularListResponse!.classlist![index];
-                                                  return AlertDialog(
-                                                    title: const Text('Document'),
-                                                    content: SizedBox(
-                                                      width: double.maxFinite,
-                                                      child: LayoutBuilder(builder:
-                                                          (BuildContext context, BoxConstraints constraints) {
+                              ? Center(
+                                  child: Text(
+                                    model.message ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: model
+                                      .teacherCircularListResponse!
+                                      .classlist!
+                                      .length,
+                                  itemBuilder: (context, index) => listItem(
+                                    model: model,
+                                    circular: model
+                                        .teacherCircularListResponse!
+                                        .classlist![index],
+                                    documentOnTap: () {
+                                      if (model
+                                          .teacherCircularListResponse!
+                                          .classlist![index]
+                                          .lstCircularFile!
+                                          .isNotEmpty) {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) {
+                                            var data = model
+                                                .teacherCircularListResponse!
+                                                .classlist![index];
+                                            return AlertDialog(
+                                              title: const Text('Document'),
+                                              content: SizedBox(
+                                                width: double.maxFinite,
+                                                child: LayoutBuilder(
+                                                  builder:
+                                                      (
+                                                        BuildContext context,
+                                                        BoxConstraints
+                                                        constraints,
+                                                      ) {
                                                         return ListView.builder(
-                                                            shrinkWrap: true,
-                                                            itemBuilder: (context, index) => ListTile(
-                                                                  contentPadding: const EdgeInsets.all(0),
-                                                                  title: Text(
-                                                                      data.lstCircularFile![index].fILENAME ??
-                                                                          ""),
-                                                                  trailing: IconButton(
-                                                                      onPressed: () async {
-                                                                        await DownloadPdf.downloadPdf(
-                                                                            "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                            data.lstCircularFile![index]
-                                                                                .fILENAME!
-                                                                                .split('/')
-                                                                                .last,
-                                                                            context,
-                                                                            (message) => debugPrint(
-                                                                                'download message -> $message'));
-
-                                                                        // DownloadPdf.downloadFileWithDio("${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                        //
-                                                                        //     data.lstCircularFile![index]
-                                                                        //             .fILENAME!
-                                                                        //             .split('/')
-                                                                        //             .last
-                                                                        //
-                                                                        //     , context, (p0) {
-                                                                        //
-                                                                        //     },(p0) {
-                                                                        //
-                                                                        //     },);
-
-                                                                        // DownloadPdf.downloadPdf(
-                                                                        //     "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
-                                                                        //     data.lstCircularFile![index]
-                                                                        //         .fILENAME!
-                                                                        //         .split('/')
-                                                                        //         .last,
-                                                                        //     context, (value) {
-                                                                        //   if (Platform.isAndroid) {
-                                                                        //     //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
-                                                                        //   }
-                                                                        // }, (file) async {
-                                                                        //   if (Platform.isIOS) {
-                                                                        //     //  await Share.shareXFiles([XFile(file.path)]);
-                                                                        //   }
-                                                                        // });
-
-
-                                                                      },
-                                                                      icon: const Icon(Icons.download)),
+                                                          shrinkWrap: true,
+                                                          itemBuilder: (context, index) => ListTile(
+                                                            contentPadding:
+                                                                const EdgeInsets.all(
+                                                                  0,
                                                                 ),
-                                                            itemCount: data.lstCircularFile!.length);
-                                                      }),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context).pop();
-                                                        },
-                                                        child: const Text('Close'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              ).whenComplete(() {
-                                                // if (model.teacherCircularListResponse!.classlist![index]
-                                                //     .fLAG ==
-                                                //     "N") {
-                                                //   model.updateFlagStatus(model
-                                                //       .teacherCircularListResponse!.classlist![index]);
-                                                // }
-                                              });
-                                            }
+                                                            title: Text(
+                                                              data
+                                                                      .lstCircularFile![index]
+                                                                      .fILENAME ??
+                                                                  "",
+                                                            ),
+                                                            trailing: IconButton(
+                                                              onPressed: () async {
+                                                                await DownloadPdf.downloadPdf(
+                                                                  "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                  data
+                                                                      .lstCircularFile![index]
+                                                                      .fILENAME!
+                                                                      .split(
+                                                                        '/',
+                                                                      )
+                                                                      .last,
+                                                                  context,
+                                                                  (
+                                                                    message,
+                                                                  ) => debugPrint(
+                                                                    'download message -> $message',
+                                                                  ),
+                                                                );
+
+                                                                // DownloadPdf.downloadFileWithDio("${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                //
+                                                                //     data.lstCircularFile![index]
+                                                                //             .fILENAME!
+                                                                //             .split('/')
+                                                                //             .last
+                                                                //
+                                                                //     , context, (p0) {
+                                                                //
+                                                                //     },(p0) {
+                                                                //
+                                                                //     },);
+
+                                                                // DownloadPdf.downloadPdf(
+                                                                //     "${Api.imageBaseUrl}/${data.lstCircularFile![index].fILENAME ?? ""}",
+                                                                //     data.lstCircularFile![index]
+                                                                //         .fILENAME!
+                                                                //         .split('/')
+                                                                //         .last,
+                                                                //     context, (value) {
+                                                                //   if (Platform.isAndroid) {
+                                                                //     //   Fluttertoast.showToast(msg: value, toastLength: Toast.LENGTH_LONG);
+                                                                //   }
+                                                                // }, (file) async {
+                                                                //   if (Platform.isIOS) {
+                                                                //     //  await Share.shareXFiles([XFile(file.path)]);
+                                                                //   }
+                                                                // });
+                                                              },
+                                                              icon: const Icon(
+                                                                Icons.download,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          itemCount: data
+                                                              .lstCircularFile!
+                                                              .length,
+                                                        );
+                                                      },
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('Close'),
+                                                ),
+                                              ],
+                                            );
                                           },
-                                          showMoreOnTap: () {
-                                            showScrollableTextDialog(
-                                                model: model,
-                                                complete: () {},
-                                                context: context,
-                                                data: model.teacherCircularListResponse!.classlist![index]);
-                                          })),
+                                        ).whenComplete(() {
+                                          // if (model.teacherCircularListResponse!.classlist![index]
+                                          //     .fLAG ==
+                                          //     "N") {
+                                          //   model.updateFlagStatus(model
+                                          //       .teacherCircularListResponse!.classlist![index]);
+                                          // }
+                                        });
+                                      }
+                                    },
+                                    showMoreOnTap: () {
+                                      showScrollableTextDialog(
+                                        model: model,
+                                        complete: () {},
+                                        context: context,
+                                        data: model
+                                            .teacherCircularListResponse!
+                                            .classlist![index],
+                                      );
+                                    },
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -237,15 +294,18 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                 ],
               ),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 
-  void showScrollableTextDialog(
-      {required BuildContext context,
-      required void Function() complete,
-      required TeacherCircularListProvider model,
-      required Classlist data}) {
+  void showScrollableTextDialog({
+    required BuildContext context,
+    required void Function() complete,
+    required TeacherCircularListProvider model,
+    required Classlist data,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -271,18 +331,21 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
     });
   }
 
-  Widget listItem(
-      {required Classlist circular,
-      void Function()? documentOnTap,
-      void Function()? showMoreOnTap,
-      required TeacherCircularListProvider model}) {
+  Widget listItem({
+    required Classlist circular,
+    void Function()? documentOnTap,
+    void Function()? showMoreOnTap,
+    required TeacherCircularListProvider model,
+  }) {
     return Opacity(
       opacity: circular.aCTIVE == "Y" ? 1.0 : 0.5,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(8),
-        decoration:
-            BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(5)),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(5),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -291,67 +354,78 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Flexible(
-                  child: Text(circular.aPPCIRCULARSUBJECT ?? "",
-                      maxLines: 2,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.black,
-                      )),
+                  child: Text(
+                    circular.aPPCIRCULARSUBJECT ?? "",
+                    maxLines: 2,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: "Montserrat Regular",
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
                 //  const Spacer(),
                 Row(
                   children: [
-                    Text(DateTimeUtils.formatDateTime(circular.aPPCIRCULARDATE ?? ""),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
-                          fontFamily: "Montserrat Regular",
-                          color: Colors.orange,
-                        )),
+                    Text(
+                      DateTimeUtils.formatDateTime(
+                        circular.aPPCIRCULARDATE ?? "",
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: "Montserrat Regular",
+                        color: Colors.orange,
+                      ),
+                    ),
                     const SizedBox(width: 5),
                     CircleAvatar(
                       radius: 4,
-                      backgroundColor: circular.aCTIVE == 'Y' ? Colors.green : Colors.red,
-                    )
+                      backgroundColor: circular.aCTIVE == 'Y'
+                          ? Colors.green
+                          : Colors.red,
+                    ),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 5),
-            Text(circular.aPPCIRCULARDESCRIPTION ?? "",
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: "Montserrat Regular",
-                  color: Colors.black,
-                )),
+            Text(
+              circular.aPPCIRCULARDESCRIPTION ?? "",
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                fontFamily: "Montserrat Regular",
+                color: Colors.black,
+              ),
+            ),
             const SizedBox(height: 5),
             Row(
               children: [
                 if (circular.lstCircularFile!.isNotEmpty)
                   InkWell(
-                      onTap: documentOnTap,
-                      child: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.cloud_download,
-                            color: Colors.white,
-                          ))),
+                    onTap: documentOnTap,
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      child: Icon(Icons.cloud_download, color: Colors.white),
+                    ),
+                  ),
                 const Spacer(),
                 MaterialButton(
                   onPressed: showMoreOnTap,
                   color: Colors.blue,
-                  child: const Text("View more",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Montserrat Regular",
-                        color: Colors.white,
-                      )),
+                  child: const Text(
+                    "View more",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: "Montserrat Regular",
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -363,13 +437,15 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Class: ',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Montserrat Regular",
-                                color: Colors.black,
-                              )),
+                          const Text(
+                            'Class: ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Montserrat Regular",
+                              color: Colors.black,
+                            ),
+                          ),
                           Text(
                             circular.cLASSDESC ?? "",
                             style: const TextStyle(
@@ -378,7 +454,7 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                               fontFamily: "Montserrat Regular",
                               color: Colors.black,
                             ),
-                          )
+                          ),
                         ],
                       ),
                       if (circular.lstCircularSection != null)
@@ -387,20 +463,26 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Section: ',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Montserrat Regular",
-                                    color: Colors.black,
-                                  )),
+                              const Text(
+                                'Section: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Montserrat Regular",
+                                  color: Colors.black,
+                                ),
+                              ),
                               Expanded(
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: circular.lstCircularSection!.length,
+                                  itemCount:
+                                      circular.lstCircularSection!.length,
                                   itemBuilder: (context, index) {
                                     return Text(
-                                      circular.lstCircularSection![index].sECTIONDESC ?? "",
+                                      circular
+                                              .lstCircularSection![index]
+                                              .sECTIONDESC ??
+                                          "",
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.normal,
@@ -409,14 +491,15 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                       ),
                                     );
                                   },
-                                  separatorBuilder: (BuildContext context, int index) {
-                                    return const Text(', ');
-                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                        return const Text(', ');
+                                      },
                                 ),
-                              )
+                              ),
                             ],
                           ),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -433,12 +516,17 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Confirm Action'),
-                                    content: const Text('Are you sure you want to inactive this circular?'),
+                                    content: const Text(
+                                      'Are you sure you want to inactive this circular?',
+                                    ),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          model.inActiveCircular(circular, context);
+                                          model.inActiveCircular(
+                                            circular,
+                                            context,
+                                          );
                                         },
                                         child: const Text('Yes'),
                                       ),
@@ -456,11 +544,11 @@ class _TeacherCircularListScreenState extends State<TeacherCircularListScreen> {
                           : null,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    Text(circular.aCTIVE == "Y" ? 'Active' : 'Inactive')
+                    Text(circular.aCTIVE == "Y" ? 'Active' : 'Inactive'),
                   ],
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

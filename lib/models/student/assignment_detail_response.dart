@@ -15,8 +15,7 @@ class AssignmentDetailResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (lstAssignment != null) {
-      data['lstAssignment'] =
-          lstAssignment!.map((v) => v.toJson()).toList();
+      data['lstAssignment'] = lstAssignment!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -33,16 +32,17 @@ class LstAssignment {
   dynamic lstCircularSection;
   dynamic cLASSDESC;
 
-  LstAssignment(
-      {this.aPPASSIGNMENTID,
-        this.aSSIGNMENTDETAILS,
-        this.aSSIGNMENTDATE,
-        this.sUBJECTNAME,
-        this.fLAG,
-        this.aCTIVE,
-        this.lstCircularFile,
-        this.lstCircularSection,
-        this.cLASSDESC});
+  LstAssignment({
+    this.aPPASSIGNMENTID,
+    this.aSSIGNMENTDETAILS,
+    this.aSSIGNMENTDATE,
+    this.sUBJECTNAME,
+    this.fLAG,
+    this.aCTIVE,
+    this.lstCircularFile,
+    this.lstCircularSection,
+    this.cLASSDESC,
+  });
 
   LstAssignment.fromJson(Map<String, dynamic> json) {
     aPPASSIGNMENTID = json['APP_ASSIGNMENT_ID'];
@@ -70,8 +70,9 @@ class LstAssignment {
     data['FLAG'] = fLAG;
     data['ACTIVE'] = aCTIVE;
     if (lstCircularFile != null) {
-      data['lstCircularFile'] =
-          lstCircularFile!.map((v) => v.toJson()).toList();
+      data['lstCircularFile'] = lstCircularFile!
+          .map((v) => v.toJson())
+          .toList();
     }
     data['lstCircularSection'] = lstCircularSection;
     data['CLASS_DESC'] = cLASSDESC;

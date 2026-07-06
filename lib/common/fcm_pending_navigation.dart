@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flexischool/common/fcm_navigation_handler.dart';
 
 class FCMPendingNavigation {
-  static final FCMPendingNavigation _instance = FCMPendingNavigation._internal();
-  
+  static final FCMPendingNavigation _instance =
+      FCMPendingNavigation._internal();
+
   factory FCMPendingNavigation() {
     return _instance;
   }
-  
+
   FCMPendingNavigation._internal();
 
   Map<String, dynamic>? _pendingNavigationData;
@@ -19,7 +20,7 @@ class FCMPendingNavigation {
     debugPrint("FCM Data: $fcmData");
     _instance._pendingNavigationData = fcmData;
     debugPrint("=== END STORING PENDING NAVIGATION ===");
-    
+
     // If app startup is already complete, execute immediately
     if (_instance._appStartupComplete) {
       _instance._executePendingNavigation();
@@ -30,7 +31,7 @@ class FCMPendingNavigation {
   static void markAppStartupComplete() {
     debugPrint("=== APP STARTUP COMPLETE ===");
     _instance._appStartupComplete = true;
-    
+
     // Execute any pending navigation
     _instance._executePendingNavigation();
   }
@@ -40,15 +41,15 @@ class FCMPendingNavigation {
     if (_pendingNavigationData != null) {
       debugPrint("=== EXECUTING PENDING FCM NAVIGATION ===");
       debugPrint("Pending Data: $_pendingNavigationData");
-      
+
       final data = _pendingNavigationData!;
       _pendingNavigationData = null; // Clear after use
-      
+
       // Add delay to ensure UI is ready
       Future.delayed(const Duration(milliseconds: 1000), () {
         FCMNavigationHandler.handleFCMNavigation(data);
       });
-      
+
       debugPrint("=== END EXECUTING PENDING NAVIGATION ===");
     } else {
       debugPrint("No pending FCM navigation to execute");
@@ -70,4 +71,4 @@ class FCMPendingNavigation {
   static Map<String, dynamic>? getPendingNavigationData() {
     return _instance._pendingNavigationData;
   }
-} 
+}

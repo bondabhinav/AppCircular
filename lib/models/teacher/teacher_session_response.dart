@@ -29,13 +29,14 @@ class SessionDD {
   int? sCHOOLID;
   String? sCHOOLNAME;
 
-  SessionDD(
-      {this.sESSIONID,
-        this.sTARTDATE,
-        this.eNDDATE,
-        this.aCTIVE,
-        this.sCHOOLID,
-        this.sCHOOLNAME});
+  SessionDD({
+    this.sESSIONID,
+    this.sTARTDATE,
+    this.eNDDATE,
+    this.aCTIVE,
+    this.sCHOOLID,
+    this.sCHOOLNAME,
+  });
 
   SessionDD.fromJson(Map<String, dynamic> json) {
     sESSIONID = json['SESSION_ID'];

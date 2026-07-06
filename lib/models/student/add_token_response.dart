@@ -5,12 +5,13 @@ class AddTokenResponse {
   bool? loginUserId;
   int? nUMBER;
 
-  AddTokenResponse(
-      {this.success,
-        this.errorCode,
-        this.token,
-        this.loginUserId,
-        this.nUMBER});
+  AddTokenResponse({
+    this.success,
+    this.errorCode,
+    this.token,
+    this.loginUserId,
+    this.nUMBER,
+  });
 
   AddTokenResponse.fromJson(Map<String, dynamic> json) {
     success = json['Success'];

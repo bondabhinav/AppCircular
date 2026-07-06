@@ -28,12 +28,13 @@ class Lststud {
   String? sECTIONDESC;
   int? sTUDATTENDANCEDETID;
 
-  Lststud(
-      {this.sTUDNAME,
-        this.pRESENT,
-        this.cLASSDESC,
-        this.sECTIONDESC,
-        this.sTUDATTENDANCEDETID});
+  Lststud({
+    this.sTUDNAME,
+    this.pRESENT,
+    this.cLASSDESC,
+    this.sECTIONDESC,
+    this.sTUDATTENDANCEDETID,
+  });
 
   Lststud.fromJson(Map<String, dynamic> json) {
     sTUDNAME = json['STUDNAME'];

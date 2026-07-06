@@ -43,10 +43,17 @@ class StudentNotificationProvider extends ChangeNotifier {
     try {
       _message = null;
       loaderProvider.showLoader();
-      var data = {"STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID};
-      final response = await apiService.post(url: Api.notificationListApi, data: data);
+      var data = {
+        "STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID,
+      };
+      final response = await apiService.post(
+        url: Api.notificationListApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        notificationListResponse = NotificationListResponse.fromJson(response.data);
+        notificationListResponse = NotificationListResponse.fromJson(
+          response.data,
+        );
         loaderProvider.hideLoader();
         if (notificationListResponse!.notification!.isEmpty) {
           _message = 'No notification found';
@@ -71,7 +78,10 @@ class StudentNotificationProvider extends ChangeNotifier {
     CommonResponse? commonResponse;
     try {
       var data = {"NOTIFICATION_ID": notificationId};
-      final response = await apiService.post(url: Api.notificationUpdateApi, data: data);
+      final response = await apiService.post(
+        url: Api.notificationUpdateApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         commonResponse = CommonResponse.fromJson(response.data);
         notifyListeners();

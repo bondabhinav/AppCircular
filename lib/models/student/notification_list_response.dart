@@ -34,18 +34,19 @@ class NotificationData {
   dynamic aSSIGNMENT_STATUS;
   dynamic cIRCULAR_STATS;
 
-  NotificationData(
-      {this.nOTIFICATIONID,
-      this.nOTIFICATIONTYPE,
-      this.aSSIGNMENTDETAILS,
-      this.aSSIGNMENTDATE,
-      this.nOTIFICATIONFLAG,
-      this.aPPASSIGNMENTID,
-      this.aPPCIRCULARDESCRIPTION,
-      this.aPPCIRCULARDATE,
-      this.aPPCIRCULARID,
-      this.cIRCULAR_STATS,
-        this.aSSIGNMENT_STATUS});
+  NotificationData({
+    this.nOTIFICATIONID,
+    this.nOTIFICATIONTYPE,
+    this.aSSIGNMENTDETAILS,
+    this.aSSIGNMENTDATE,
+    this.nOTIFICATIONFLAG,
+    this.aPPASSIGNMENTID,
+    this.aPPCIRCULARDESCRIPTION,
+    this.aPPCIRCULARDATE,
+    this.aPPCIRCULARID,
+    this.cIRCULAR_STATS,
+    this.aSSIGNMENT_STATUS,
+  });
 
   NotificationData.fromJson(Map<String, dynamic> json) {
     nOTIFICATIONID = json['NOTIFICATION_ID'];

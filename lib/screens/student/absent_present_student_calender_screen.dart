@@ -14,10 +14,12 @@ class AbsentPresentStudentCalenderScreen extends StatefulWidget {
   const AbsentPresentStudentCalenderScreen({super.key, required this.month});
 
   @override
-  State<AbsentPresentStudentCalenderScreen> createState() => _AbsentPresentStudentCalenderScreenState();
+  State<AbsentPresentStudentCalenderScreen> createState() =>
+      _AbsentPresentStudentCalenderScreenState();
 }
 
-class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStudentCalenderScreen> {
+class _AbsentPresentStudentCalenderScreenState
+    extends State<AbsentPresentStudentCalenderScreen> {
   late StudentAttendanceProvider studentAttendanceProvider;
   final loaderProvider = getIt<LoaderProvider>();
 
@@ -29,298 +31,376 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     super.initState();
     debugPrint('widget.month ${widget.month}');
     debugPrint('Constants.sessionYear --- ${Constants.sessionYear}');
-    String firstTwoCharactersMonth = (widget.month.toString().length >= 2)
-        ? widget.month.toString().substring(0, 2)
-        : widget.month.toString();
-    debugPrint('firstTwoCharactersMonth $firstTwoCharactersMonth');
-    String financialYear =
-        (int.parse(firstTwoCharactersMonth) >= 1 && int.parse(firstTwoCharactersMonth) < 4)
-            ? Constants.sessionYear.split(' - ')[1]
-            : Constants.sessionYear.split(' - ')[0];
+    final financialYear = _financialYearForMonth(widget.month);
     debugPrint('financialYear --- $financialYear');
     studentAttendanceProvider = StudentAttendanceProvider();
     studentAttendanceProvider.month = widget.month;
-    studentAttendanceProvider.focusedDay = DateTime(int.parse(financialYear), widget.month, 1);
+    studentAttendanceProvider.focusedDay = DateTime(
+      financialYear,
+      widget.month,
+      1,
+    );
     studentAttendanceProvider.fetchAbsentPresentCalenderData();
     studentAttendanceProvider.getEventsDates();
+  }
+
+  int _financialYearForMonth(int month) {
+    final sessionYears = RegExp(r'\d{4}')
+        .allMatches(Constants.sessionYear)
+        .map((match) => match.group(0)!)
+        .toList();
+
+    if (sessionYears.isEmpty) {
+      return DateTime.now().year;
+    }
+
+    final startYear = int.tryParse(sessionYears.first) ?? DateTime.now().year;
+    final endYear = sessionYears.length > 1
+        ? int.tryParse(sessionYears[1]) ?? startYear
+        : startYear;
+
+    return month >= 1 && month < 4 ? endYear : startYear;
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => studentAttendanceProvider,
-        builder: (context, child) {
-          return Consumer<StudentAttendanceProvider>(builder: (context, model, _) {
+      create: (_) => studentAttendanceProvider,
+      builder: (context, child) {
+        return Consumer<StudentAttendanceProvider>(
+          builder: (context, model, _) {
             return Scaffold(
-                appBar: AppBar(
-                    centerTitle: true,
-                    leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                        onPressed: () => Navigator.pop(context)),
-                    title: const Text('Attendance', style: TextStyle(color: Colors.white))),
-                body: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                      child: TableCalendar(
-                        availableGestures: AvailableGestures.horizontalSwipe,
-                        focusedDay: model.focusedDay,
-                        onDaySelected: (selectedDay, focusedDay) {
-                          if (selectedDay.isAfter(DateTime.now())) {
-                            return;
+              appBar: AppBar(
+                centerTitle: true,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                title: const Text(
+                  'Attendance',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              body: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                    ),
+                    child: TableCalendar(
+                      availableGestures: AvailableGestures.horizontalSwipe,
+                      focusedDay: model.focusedDay,
+                      onDaySelected: (selectedDay, focusedDay) {
+                        if (selectedDay.isAfter(DateTime.now())) {
+                          return;
+                        }
+                      },
+                      firstDay: DateTime.utc(2010, 10, 16),
+                      lastDay: DateTime.utc(2030, 3, 14),
+                      headerStyle: const HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                      ),
+                      onPageChanged: (dateTime) {
+                        model.updateMonth(dateTime);
+                      },
+                      rowHeight: 60,
+                      daysOfWeekHeight: 30,
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black54),
+                          color: Colors.black54,
+                        ),
+                        weekdayStyle: const TextStyle(
+                          fontFamily: "Montserrat Medium",
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                        weekendStyle: const TextStyle(
+                          fontFamily: "Montserrat Medium",
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                      calendarStyle: const CalendarStyle(
+                        outsideDaysVisible: false,
+                        tableBorder: TableBorder(
+                          horizontalInside: BorderSide(color: Colors.black),
+                          verticalInside: BorderSide(color: Colors.black),
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, day, _) {
+                          DateTime formattedDay = DateTime(
+                            day.year,
+                            day.month,
+                            day.day,
+                          );
+
+                          // Add debug prints
+                          print('formattedDay --> $formattedDay');
+                          print('allEvents keys --> ${model.allEvents.keys}');
+
+                          // Check if the day is Sunday
+                          bool isSunday = day.weekday == DateTime.sunday;
+
+                          // Check if the day has any events
+                          if (model.allEvents.containsKey(formattedDay)) {
+                            debugPrint('enter in if condition');
+                            List<CalendarEvent> eventsForDay =
+                                model.allEvents[formattedDay]!;
+                            Color backgroundColor;
+
+                            // Check for any 'H' type event
+                            if (eventsForDay.any(
+                              (event) => event.type == 'H',
+                            )) {
+                              backgroundColor = const Color(
+                                0xFF41B3B3,
+                              ); // Use the color for 'H' type event
+                            } else {
+                              // Check for any 'A' type event
+                              if (eventsForDay.any(
+                                (event) => event.type == 'A',
+                              )) {
+                                backgroundColor = Colors
+                                    .orange; // Use the color for 'A' type event
+                              } else {
+                                // Use a default color for other events
+                                backgroundColor = Colors.grey;
+                              }
+                            }
+
+                            // Return a container with the appropriate styling
+                            return Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(color: backgroundColor),
+                              child: buildDayContent(
+                                day,
+                                formattedDay,
+                                model,
+                                eventsForDay,
+                                isSunday,
+                              ),
+                            );
+                          } else {
+                            //   debugPrint('enter in else condition');
+                            // Handle days without events
+                            return Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: isSunday
+                                    ? const Color(0xFF41B3B3)
+                                    : Colors.grey,
+                              ),
+                              child: buildDayContent(
+                                day,
+                                formattedDay,
+                                model,
+                                [],
+                                isSunday,
+                              ),
+                            );
                           }
                         },
-                        firstDay: DateTime.utc(2010, 10, 16),
-                        lastDay: DateTime.utc(2030, 3, 14),
-                        headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
-                        onPageChanged: (dateTime) {
-                          model.updateMonth(dateTime);
-                        },
-                        rowHeight: 60,
-                        daysOfWeekHeight: 30,
-                        daysOfWeekStyle: DaysOfWeekStyle(
-                          decoration:
-                              BoxDecoration(border: Border.all(color: Colors.black54), color: Colors.black54),
-                          weekdayStyle: const TextStyle(
-                              fontFamily: "Montserrat Medium", color: Colors.white, fontSize: 14),
-                          weekendStyle: const TextStyle(
-                              fontFamily: "Montserrat Medium", color: Colors.white, fontSize: 14),
-                        ),
-                        calendarStyle: const CalendarStyle(
-                            outsideDaysVisible: false,
-                            tableBorder: TableBorder(
-                                horizontalInside: BorderSide(color: Colors.black),
-                                verticalInside: BorderSide(color: Colors.black)),
-                            todayDecoration: BoxDecoration(color: Colors.blueAccent, shape: BoxShape.circle),
-                            selectedDecoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
-
-                        calendarBuilders: CalendarBuilders(
-                          defaultBuilder: (context, day, _) {
-                            DateTime formattedDay = DateTime(day.year, day.month, day.day);
-
-                            // Add debug prints
-                            print('formattedDay --> $formattedDay');
-                            print('allEvents keys --> ${model.allEvents.keys}');
-
-                            // Check if the day is Sunday
-                            bool isSunday = day.weekday == DateTime.sunday;
-
-                            // Check if the day has any events
-                            if (model.allEvents.containsKey(formattedDay)) {
-                              debugPrint('enter in if condition');
-                              List<CalendarEvent> eventsForDay = model.allEvents[formattedDay]!;
-                              Color backgroundColor;
-
-                              // Check for any 'H' type event
-                              if (eventsForDay.any((event) => event.type == 'H')) {
-                                backgroundColor = const Color(0xFF41B3B3); // Use the color for 'H' type event
-                              } else {
-                                // Check for any 'A' type event
-                                if (eventsForDay.any((event) => event.type == 'A')) {
-                                  backgroundColor = Colors.orange; // Use the color for 'A' type event
-                                } else {
-                                  // Use a default color for other events
-                                  backgroundColor = Colors.grey;
-                                }
-                              }
-
-                              // Return a container with the appropriate styling
-                              return Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(color: backgroundColor),
-                                child: buildDayContent(day, formattedDay, model, eventsForDay, isSunday),
-                              );
-                            } else {
-                              //   debugPrint('enter in else condition');
-                              // Handle days without events
-                              return Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: isSunday ? const Color(0xFF41B3B3) : Colors.grey,
-                                ),
-                                child: buildDayContent(day, formattedDay, model, [], isSunday),
-                              );
-                            }
-                          },
-                        ),
-
-                        // calendarBuilders: CalendarBuilders(
-                        //   defaultBuilder: (context, day, _) {
-                        //     DateTime formattedDay = DateTime(day.year, day.month, day.day);
-                        //     Color? backgroundColor = Colors.grey;
-                        //     bool isMarked = model.absentPresentResponse?.lststud?.any((attendance) {
-                        //           DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-                        //           DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
-                        //           return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
-                        //         }) ??
-                        //         false;
-                        //
-                        //     var presentStatus = model.absentPresentResponse?.lststud?.firstWhere(
-                        //       (attendance) {
-                        //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-                        //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
-                        //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
-                        //       },
-                        //       orElse: () => Lststud(
-                        //           aTTDATE: '',
-                        //           pRESENT: ''), // Return a default Lststud if no element is found
-                        //     );
-                        //
-                        //     backgroundColor = presentStatus != null
-                        //         ? getColorForAttendanceStatus(presentStatus.pRESENT ?? '')
-                        //         : Colors.grey;
-                        //     isMarked = presentStatus != null;
-                        //     if (isMarked) {
-                        //       return Container(
-                        //         width: double.infinity,
-                        //         decoration: BoxDecoration(color: backgroundColor),
-                        //         child: Column(
-                        //           children: [
-                        //             const SizedBox(height: 5),
-                        //             Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //             const SizedBox(height: 5),
-                        //             Text(
-                        //               model.allEvents.containsKey(formattedDay)
-                        //                   ? model.allEvents[formattedDay]!
-                        //                       .map((event) => event.eventName)
-                        //                       .join(', ')
-                        //                   : '',
-                        //               textAlign: TextAlign.center,
-                        //               overflow: TextOverflow.ellipsis,
-                        //               maxLines: 2,
-                        //               style: const TextStyle(color: Colors.white, fontSize: 10),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       );
-                        //     }
-                        //
-                        //     if (model.allEvents.containsKey(formattedDay)) {
-                        //       List<CalendarEvent> eventsForDay = model.allEvents[formattedDay]!;
-                        //       bool isSunday = day.weekday == DateTime.sunday;
-                        //
-                        //       if (isSunday) {
-                        //         backgroundColor = const Color(0xFF41B3B3);
-                        //       } else {
-                        //         // Check for any 'H' type event
-                        //         if (eventsForDay.any((event) => event.type == 'H')) {
-                        //           backgroundColor =
-                        //               const Color(0xFF41B3B3); // Use the color for 'H' type event
-                        //         } else {
-                        //           // Check for any 'A' type event
-                        //           if (eventsForDay.any((event) => event.type == 'A')) {
-                        //             backgroundColor = Colors.orange; // Use the color for 'A' type event
-                        //           }
-                        //           // Add more cases as needed for other event types
-                        //         }
-                        //       }
-                        //       return Container(
-                        //         width: double.infinity,
-                        //         decoration: BoxDecoration(color: backgroundColor),
-                        //         child: Column(
-                        //           children: [
-                        //             const SizedBox(height: 5),
-                        //             Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //             const SizedBox(height: 5),
-                        //             Text(
-                        //               eventsForDay.map((event) => event.eventName).join(', '),
-                        //               textAlign: TextAlign.center,
-                        //               overflow: TextOverflow.ellipsis,
-                        //               maxLines: 2,
-                        //               style: const TextStyle(color: Colors.white, fontSize: 10),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       );
-                        //     }
-                        //     return Container(
-                        //       width: double.infinity,
-                        //       decoration: BoxDecoration(color: backgroundColor),
-                        //       child: Column(
-                        //         children: [
-                        //           const SizedBox(height: 5),
-                        //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //         ],
-                        //       ),
-                        //     );
-                        //   },
-                        // )
-
-                        // calendarBuilders: CalendarBuilders(defaultBuilder: (context, day, _) {
-                        //   DateTime formattedDay = DateTime(day.year, day.month, day.day);
-                        //   bool isPresent = model.absentPresentResponse?.lststud?.any((attendance) {
-                        //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-                        //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
-                        //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate) &&
-                        //             attendance.pRESENT == 'P';
-                        //       }) ??
-                        //       false;
-                        //   bool isAbsent = model.absentPresentResponse?.lststud?.any((attendance) {
-                        //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-                        //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
-                        //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate) &&
-                        //             attendance.pRESENT == 'A';
-                        //       }) ??
-                        //       false;
-                        //
-                        //   if (isPresent) {
-                        //     return Container(
-                        //       width: double.infinity,
-                        //       decoration: const BoxDecoration(color: Colors.green),
-                        //       child: Column(
-                        //         children: [
-                        //           const SizedBox(height: 5),
-                        //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //         ],
-                        //       ),
-                        //     );
-                        //   } else if (isAbsent) {
-                        //     return Container(
-                        //       width: double.infinity,
-                        //       decoration: const BoxDecoration(color: Colors.red),
-                        //       child: Column(
-                        //         children: [
-                        //           const SizedBox(height: 5),
-                        //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //         ],
-                        //       ),
-                        //     );
-                        //   } else {
-                        //     return Container(
-                        //       width: double.infinity,
-                        //       decoration: BoxDecoration(
-                        //         color:
-                        //             day.weekday == DateTime.sunday ? const Color(0xFF41B3B3) : Colors.grey,
-                        //       ),
-                        //       child: Column(
-                        //         children: [
-                        //           const SizedBox(height: 5),
-                        //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
-                        //         ],
-                        //       ),
-                        //     );
-                        //   }
-                        // })
                       ),
+
+                      // calendarBuilders: CalendarBuilders(
+                      //   defaultBuilder: (context, day, _) {
+                      //     DateTime formattedDay = DateTime(day.year, day.month, day.day);
+                      //     Color? backgroundColor = Colors.grey;
+                      //     bool isMarked = model.absentPresentResponse?.lststud?.any((attendance) {
+                      //           DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
+                      //           DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
+                      //           return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
+                      //         }) ??
+                      //         false;
+                      //
+                      //     var presentStatus = model.absentPresentResponse?.lststud?.firstWhere(
+                      //       (attendance) {
+                      //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
+                      //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
+                      //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
+                      //       },
+                      //       orElse: () => Lststud(
+                      //           aTTDATE: '',
+                      //           pRESENT: ''), // Return a default Lststud if no element is found
+                      //     );
+                      //
+                      //     backgroundColor = presentStatus != null
+                      //         ? getColorForAttendanceStatus(presentStatus.pRESENT ?? '')
+                      //         : Colors.grey;
+                      //     isMarked = presentStatus != null;
+                      //     if (isMarked) {
+                      //       return Container(
+                      //         width: double.infinity,
+                      //         decoration: BoxDecoration(color: backgroundColor),
+                      //         child: Column(
+                      //           children: [
+                      //             const SizedBox(height: 5),
+                      //             Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //             const SizedBox(height: 5),
+                      //             Text(
+                      //               model.allEvents.containsKey(formattedDay)
+                      //                   ? model.allEvents[formattedDay]!
+                      //                       .map((event) => event.eventName)
+                      //                       .join(', ')
+                      //                   : '',
+                      //               textAlign: TextAlign.center,
+                      //               overflow: TextOverflow.ellipsis,
+                      //               maxLines: 2,
+                      //               style: const TextStyle(color: Colors.white, fontSize: 10),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       );
+                      //     }
+                      //
+                      //     if (model.allEvents.containsKey(formattedDay)) {
+                      //       List<CalendarEvent> eventsForDay = model.allEvents[formattedDay]!;
+                      //       bool isSunday = day.weekday == DateTime.sunday;
+                      //
+                      //       if (isSunday) {
+                      //         backgroundColor = const Color(0xFF41B3B3);
+                      //       } else {
+                      //         // Check for any 'H' type event
+                      //         if (eventsForDay.any((event) => event.type == 'H')) {
+                      //           backgroundColor =
+                      //               const Color(0xFF41B3B3); // Use the color for 'H' type event
+                      //         } else {
+                      //           // Check for any 'A' type event
+                      //           if (eventsForDay.any((event) => event.type == 'A')) {
+                      //             backgroundColor = Colors.orange; // Use the color for 'A' type event
+                      //           }
+                      //           // Add more cases as needed for other event types
+                      //         }
+                      //       }
+                      //       return Container(
+                      //         width: double.infinity,
+                      //         decoration: BoxDecoration(color: backgroundColor),
+                      //         child: Column(
+                      //           children: [
+                      //             const SizedBox(height: 5),
+                      //             Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //             const SizedBox(height: 5),
+                      //             Text(
+                      //               eventsForDay.map((event) => event.eventName).join(', '),
+                      //               textAlign: TextAlign.center,
+                      //               overflow: TextOverflow.ellipsis,
+                      //               maxLines: 2,
+                      //               style: const TextStyle(color: Colors.white, fontSize: 10),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       );
+                      //     }
+                      //     return Container(
+                      //       width: double.infinity,
+                      //       decoration: BoxDecoration(color: backgroundColor),
+                      //       child: Column(
+                      //         children: [
+                      //           const SizedBox(height: 5),
+                      //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   },
+                      // )
+
+                      // calendarBuilders: CalendarBuilders(defaultBuilder: (context, day, _) {
+                      //   DateTime formattedDay = DateTime(day.year, day.month, day.day);
+                      //   bool isPresent = model.absentPresentResponse?.lststud?.any((attendance) {
+                      //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
+                      //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
+                      //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate) &&
+                      //             attendance.pRESENT == 'P';
+                      //       }) ??
+                      //       false;
+                      //   bool isAbsent = model.absentPresentResponse?.lststud?.any((attendance) {
+                      //         DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
+                      //         DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
+                      //         return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate) &&
+                      //             attendance.pRESENT == 'A';
+                      //       }) ??
+                      //       false;
+                      //
+                      //   if (isPresent) {
+                      //     return Container(
+                      //       width: double.infinity,
+                      //       decoration: const BoxDecoration(color: Colors.green),
+                      //       child: Column(
+                      //         children: [
+                      //           const SizedBox(height: 5),
+                      //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   } else if (isAbsent) {
+                      //     return Container(
+                      //       width: double.infinity,
+                      //       decoration: const BoxDecoration(color: Colors.red),
+                      //       child: Column(
+                      //         children: [
+                      //           const SizedBox(height: 5),
+                      //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   } else {
+                      //     return Container(
+                      //       width: double.infinity,
+                      //       decoration: BoxDecoration(
+                      //         color:
+                      //             day.weekday == DateTime.sunday ? const Color(0xFF41B3B3) : Colors.grey,
+                      //       ),
+                      //       child: Column(
+                      //         children: [
+                      //           const SizedBox(height: 5),
+                      //           Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   }
+                      // })
                     ),
-                    const SizedBox(height: 8),
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
                       colorWithTitle(Colors.orange, 'Activity'),
                       colorWithTitle(const Color(0xFF41B3B3), 'Holiday'),
-                      colorWithTitle(Colors.grey, 'Non-Marked')
-                    ]),
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                      colorWithTitle(Colors.grey, 'Non-Marked'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
                       colorWithTitle(Colors.green, 'Marked'),
                       colorWithTitle(Colors.purple, 'Half-day'),
                       colorWithTitle(Colors.lightBlue, 'Leave'),
-                    ]),
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                      colorWithTitle(Colors.red[900]!, 'Absent'),
-                    ]),
-                  ],
-                ));
-          });
-        });
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [colorWithTitle(Colors.red[900]!, 'Absent')],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Color? getColorForAttendanceStatus(String presentStatus) {
@@ -338,14 +418,18 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     }
   }
 
-  Container buildMarkedContainer(DateTime day, DateTime formattedDay, StudentAttendanceProvider model) {
-    var presentStatus = model.absentPresentResponse?.lststud?.firstWhere(
-      (attendance) {
-        DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-        DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
-        return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
-      },
-    ).pRESENT;
+  Container buildMarkedContainer(
+    DateTime day,
+    DateTime formattedDay,
+    StudentAttendanceProvider model,
+  ) {
+    var presentStatus = model.absentPresentResponse?.lststud?.firstWhere((
+      attendance,
+    ) {
+      DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
+      DateTime selectedDateWithoutTime = DateTime(day.year, day.month, day.day);
+      return selectedDateWithoutTime.isAtSameMomentAs(attendanceDate);
+    }).pRESENT;
 
     Color? backgroundColor = getColorForAttendanceStatus(presentStatus!);
 
@@ -359,7 +443,9 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
           const SizedBox(height: 5),
           Text(
             model.allEvents.containsKey(formattedDay)
-                ? model.allEvents[formattedDay]!.map((event) => event.eventName).join(', ')
+                ? model.allEvents[formattedDay]!
+                      .map((event) => event.eventName)
+                      .join(', ')
                 : '',
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
@@ -375,7 +461,9 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: day.weekday == DateTime.sunday ? const Color(0xFF41B3B3) : Colors.grey,
+        color: day.weekday == DateTime.sunday
+            ? const Color(0xFF41B3B3)
+            : Colors.grey,
       ),
       child: Column(
         children: [
@@ -386,7 +474,11 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     );
   }
 
-  Container buildEventContainer(DateTime day, List<CalendarEvent> eventsForDay, Color backgroundColor) {
+  Container buildEventContainer(
+    DateTime day,
+    List<CalendarEvent> eventsForDay,
+    Color backgroundColor,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(color: backgroundColor),
@@ -423,7 +515,7 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     return Colors.grey;
   }
 
-  colorWithTitle(Color color, String title) {
+  Padding colorWithTitle(Color color, String title) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -436,8 +528,13 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     );
   }
 
-  buildDayContent(DateTime day, DateTime formattedDay, StudentAttendanceProvider model,
-      List<CalendarEvent> eventsForDay, bool isSunday) {
+  Container buildDayContent(
+    DateTime day,
+    DateTime formattedDay,
+    StudentAttendanceProvider model,
+    List<CalendarEvent> eventsForDay,
+    bool isSunday,
+  ) {
     // Display all event names for the day
     String eventNames = eventsForDay.map((event) => event.eventName).join(', ');
 
@@ -462,11 +559,14 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
           backgroundColor = const Color(0xFF41B3B3);
         } else {
           if (eventsForDay.any((event) => event.type == 'H')) {
-            backgroundColor = const Color(0xFF41B3B3); // Use the color for 'H' type event
+            backgroundColor = const Color(
+              0xFF41B3B3,
+            ); // Use the color for 'H' type event
           } else {
             // Check for any 'A' type event
             if (eventsForDay.any((event) => event.type == 'A')) {
-              backgroundColor = Colors.orange; // Use the color for 'A' type event
+              backgroundColor =
+                  Colors.orange; // Use the color for 'A' type event
             } else {
               // Use a default color for other events
               backgroundColor = Colors.grey;
@@ -496,18 +596,20 @@ class _AbsentPresentStudentCalenderScreenState extends State<AbsentPresentStuden
     );
   }
 
-// Helper function to get attendance status for a specific day
-  String getAttendanceStatusForDay(DateTime formattedDay, StudentAttendanceProvider model) {
+  // Helper function to get attendance status for a specific day
+  String getAttendanceStatusForDay(
+    DateTime formattedDay,
+    StudentAttendanceProvider model,
+  ) {
     // Your existing code for checking attendance status here
     // ...
     // Example: Replace this with your logic to get attendance status for the day
-    return model.absentPresentResponse?.lststud?.firstWhere(
-          (attendance) {
-            DateTime attendanceDate = DateTime.parse(attendance.aTTDATE!).toLocal();
-            return formattedDay.isAtSameMomentAs(attendanceDate);
-          },
-          orElse: () => Lststud(aTTDATE: '', pRESENT: ''),
-        ).pRESENT ??
+    return model.absentPresentResponse?.lststud?.firstWhere((attendance) {
+          DateTime attendanceDate = DateTime.parse(
+            attendance.aTTDATE!,
+          ).toLocal();
+          return formattedDay.isAtSameMomentAs(attendanceDate);
+        }, orElse: () => Lststud(aTTDATE: '', pRESENT: '')).pRESENT ??
         '';
   }
 }

@@ -25,7 +25,7 @@ class Table1 {
   String? sTUDPASSWORD;
   String? uSER_PASSWORD;
 
-  Table1({this.sTUDPASSWORD,this.uSER_PASSWORD});
+  Table1({this.sTUDPASSWORD, this.uSER_PASSWORD});
 
   Table1.fromJson(Map<String, dynamic> json) {
     sTUDPASSWORD = json['STUD_PASSWORD'];

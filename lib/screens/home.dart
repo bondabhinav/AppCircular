@@ -9,9 +9,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: HomeScreen(),
-    );
+    return const Scaffold(body: HomeScreen());
   }
 }
 
@@ -24,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void loginType(type) async {
+  void loginType(String type) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString('global_login_type', type);
     Navigator.pushReplacement(
@@ -44,14 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // style
     var cardTextStyle = const TextStyle(
-        fontFamily: "Montserrat Regular",
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: Color.fromRGBO(63, 63, 63, 1));
-    return WillPopScope(
-      onWillPop: () async {
+      fontFamily: "Montserrat Regular",
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+      color: Color.fromRGBO(63, 63, 63, 1),
+    );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) {
         SystemNavigator.pop();
-        return false;
       },
       child: SafeArea(
         child: Column(
@@ -85,7 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: <Widget>[
                   GestureDetector(
                     child: Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       elevation: 4,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -95,22 +96,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 80,
                           ),
                           const SizedBox(height: 10.0),
-                          Text(
-                            'I am a Bus Driver',
-                            style: cardTextStyle,
-                          )
+                          Text('I am a Bus Driver', style: cardTextStyle),
                         ],
                       ),
                     ),
                     onTap: () {
                       // Bus Driver functionality - currently not implemented
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Bus Driver login is not available yet')),
+                        const SnackBar(
+                          content: Text(
+                            'Bus Driver login is not available yet',
+                          ),
+                        ),
                       );
                     },
                   ),
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     elevation: 4,
                     child: InkWell(
                       onTap: () {
@@ -124,16 +128,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 80,
                           ),
                           const SizedBox(height: 10.0),
-                          Text(
-                            'I am a Teacher',
-                            style: cardTextStyle,
-                          )
+                          Text('I am a Teacher', style: cardTextStyle),
                         ],
                       ),
                     ),
                   ),
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     elevation: 4,
                     child: InkWell(
                       onTap: () {
@@ -151,19 +154,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             'I am a \nParent/Student',
                             style: cardTextStyle,
                             textAlign: TextAlign.center,
-                          )
+                          ),
                         ],
                       ),
                     ),
                   ),
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     elevation: 4,
                     child: InkWell(
                       onTap: () {
                         // Management functionality - currently not implemented
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Management login is not available yet')),
+                          const SnackBar(
+                            content: Text(
+                              'Management login is not available yet',
+                            ),
+                          ),
                         );
                       },
                       child: Column(
@@ -178,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             'I am a \nManagement',
                             textAlign: TextAlign.center,
                             style: cardTextStyle,
-                          )
+                          ),
                         ],
                       ),
                     ),

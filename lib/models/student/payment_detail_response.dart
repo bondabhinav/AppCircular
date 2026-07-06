@@ -4,7 +4,12 @@ class PaymentDetailResponse {
   List<dynamic>? dataTable2;
   List<PaymentDetailItem>? table1;
 
-  PaymentDetailResponse({this.fEETYPE, this.dataTable1, this.dataTable2, this.table1});
+  PaymentDetailResponse({
+    this.fEETYPE,
+    this.dataTable1,
+    this.dataTable2,
+    this.table1,
+  });
 
   PaymentDetailResponse.fromJson(Map<String, dynamic> json) {
     fEETYPE = json['FEE_TYPE'];
@@ -53,4 +58,4 @@ class PaymentDetailItem {
     data['RECIPTNO'] = rECIPTNO;
     return data;
   }
-} 
+}

@@ -65,14 +65,18 @@ class StudentDashboardProvider extends ChangeNotifier {
       var body = json.encode(requestedData);
 
       final response = await apiService.post(
-          url: '${schoolBaseUrl!}DashboardForTeacher/DashboardForTeacher', data: body);
+        url: '${schoolBaseUrl}DashboardForTeacher/DashboardForTeacher',
+        data: body,
+      );
 
       final responseData = response.data;
       debugPrint("dashboard data ===> $responseData");
 
       if (responseData['lstDashobaord'] != null) {
         final List<dynamic> dashboardList = responseData['lstDashobaord'];
-        dashboardData = dashboardList.map((json) => DashboardResponse.fromJson(json)).toList();
+        dashboardData = dashboardList
+            .map((json) => DashboardResponse.fromJson(json))
+            .toList();
         _dashboardError = null;
       } else {
         _dashboardError = 'Dashboard data is null';
@@ -100,14 +104,25 @@ class StudentDashboardProvider extends ChangeNotifier {
       loaderProvider.showLoader();
       var data = {
         "ADM_NO": WebService.studentLoginData?.table1?.first.aDMNO,
-        "SESSION_ID": selectedSessionDropDownValue
+        "SESSION_ID": selectedSessionDropDownValue,
       };
-      final response = await apiService.post(url: Api.studentDetailApi, data: data);
+      final response = await apiService.post(
+        url: Api.studentDetailApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         studentDetailResponse = StudentDetailResponse.fromJson(response.data);
-        if (studentDetailResponse!.getstudentData!.isNotEmpty) {
-          Constants.studentClassId = studentDetailResponse!.getstudentData!.first.cLASSID.toString();
-          Constants.studentSectionId = studentDetailResponse!.getstudentData!.first.cURRENTSECTIONID.toString();
+        final selectedStudent =
+            studentDetailResponse?.getstudentData?.isEmpty == false
+            ? studentDetailResponse!.getstudentData!.first
+            : null;
+        if (selectedStudent != null) {
+          _syncSelectedStudentData(selectedStudent);
+          Constants.studentClassId =
+              (selectedStudent.cLASSID ?? selectedStudent.cURRENTCLASSID ?? '')
+                  .toString();
+          Constants.studentSectionId =
+              selectedStudent.cURRENTSECTIONID?.toString() ?? '';
         }
         loaderProvider.hideLoader();
         if (studentDetailResponse!.getstudentData!.isEmpty) {
@@ -128,16 +143,37 @@ class StudentDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> getNotificationCount() async {
-    var requestedData = {"STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID};
+    var requestedData = {
+      "STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID,
+    };
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(url: Api.notificationCountApi, data: body);
+      final response = await apiService.post(
+        url: Api.notificationCountApi,
+        data: body,
+      );
       if (response.statusCode == 200) {
-        notificationCountResponse = NotificationCountResponse.fromJson(response.data);
+        notificationCountResponse = NotificationCountResponse.fromJson(
+          response.data,
+        );
         NotificationCountHandler.updateNotificationCount(
-            int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
+          int.parse(
+            notificationCountResponse!
+                .notificationCount!
+                .first
+                .nOTIFICATIONCOUNT!
+                .toString(),
+          ),
+        );
         AppBadgePlus.updateBadge(
-            int.parse(notificationCountResponse!.notificationCount!.first.nOTIFICATIONCOUNT!.toString()));
+          int.parse(
+            notificationCountResponse!
+                .notificationCount!
+                .first
+                .nOTIFICATIONCOUNT!
+                .toString(),
+          ),
+        );
         notifyListeners();
       } else {}
     } catch (e) {
@@ -146,10 +182,15 @@ class StudentDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> getSessionData() async {
-    var requestedData = {"ADM_NO": WebService.studentLoginData?.table1?.first.aDMNO};
+    var requestedData = {
+      "ADM_NO": WebService.studentLoginData?.table1?.first.aDMNO,
+    };
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(url: Api.studentSessionApi, data: body);
+      final response = await apiService.post(
+        url: Api.studentSessionApi,
+        data: body,
+      );
       if (response.statusCode == 200) {
         sessionListResponse = SessionListResponse.fromJson(response.data);
         notifyListeners();
@@ -159,18 +200,48 @@ class StudentDashboardProvider extends ChangeNotifier {
     }
   }
 
-  void updateSession(newValue) {
-    _selectedSessionDropDownValue = newValue!;
+  Future<void> updateSession(int? newValue) async {
+    if (newValue == null) return;
+    _selectedSessionDropDownValue = newValue;
     Constants.sessionId = newValue;
     clearDashboardCache(); // Clear dashboard cache when session changes
-    fetchStudentDetail();
-    fetchDashboard(); // Fetch dashboard for new session
-    var sessionData = sessionListResponse?.table1?.firstWhere((data) => data.sESSIONID == newValue);
+    var sessionData = sessionListResponse?.table1?.firstWhere(
+      (data) => data.sESSIONID == newValue,
+    );
     if (sessionData != null) {
-      _sessionYear = '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
+      _sessionYear =
+          '${(sessionData.sTARTDATE)?.substring(0, 4)}-${sessionData.eNDDATE!.substring(0, 4)}';
       Constants.sessionYear = _sessionYear!;
     }
+    await fetchStudentDetail();
+    await getNotificationCount();
+    await fetchDashboard(); // Fetch dashboard for new session
     notifyListeners();
+  }
+
+  void _syncSelectedStudentData(GetstudentData selectedStudent) {
+    final loginStudent = WebService.studentLoginData?.table1?.isNotEmpty == true
+        ? WebService.studentLoginData!.table1!.first
+        : null;
+    if (loginStudent == null) {
+      return;
+    }
+
+    loginStudent.aDMSTUDENTID =
+        selectedStudent.aDMSTUDENTID ?? loginStudent.aDMSTUDENTID;
+    loginStudent.aDMNO = selectedStudent.aDMNO ?? loginStudent.aDMNO;
+    loginStudent.cLASSDESC =
+        selectedStudent.cLASSDESC ?? loginStudent.cLASSDESC;
+    loginStudent.sECTIONDESC =
+        selectedStudent.sECTIONDESC ?? loginStudent.sECTIONDESC;
+    loginStudent.sTUDPHOTO =
+        selectedStudent.sTUDPHOTO?.toString() ?? loginStudent.sTUDPHOTO;
+    loginStudent.sESSIONID =
+        _selectedSessionDropDownValue ?? Constants.sessionId;
+
+    debugPrint(
+      'Selected session student id synced: ${loginStudent.aDMSTUDENTID}',
+    );
   }
 
   void assignSessionValue() {
@@ -181,50 +252,68 @@ class StudentDashboardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getStudentImageUrl() async {
+  Future<void> getStudentImageUrl() async {
     final prefs = await SharedPreferences.getInstance();
     _imageUrl = prefs.getString('global_school_logo')!;
     notifyListeners();
-    apiService.startContinueListening(data:{"ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(), "USER_TYPE": "S"},url:"${Api.baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO");
+    apiService.startContinueListening(
+      data: {
+        "ADM_NO": WebService.studentLoginData!.table1!.first.aDMNO.toString(),
+        "USER_TYPE": "S",
+      },
+      url: "${Api.baseUrl}getDeviceDetailbyADM_NO/getDeviceDetailbyADM_NO",
+    );
   }
 
   Future<void> logoutApi(BuildContext context, String appDeviceId) async {
     // Stop the continuous API call timer before logout
     apiService.stop();
-    
+
     var requestedData = {"APP_DEVICE_ID": appDeviceId};
     var body = json.encode(requestedData);
     try {
-      final response = await apiService.post(url: Api.removeFcmTokenApi, data: body);
+      final response = await apiService.post(
+        url: Api.removeFcmTokenApi,
+        data: body,
+      );
       if (response.statusCode == 200) {
         sessionListResponse = SessionListResponse.fromJson(response.data);
         if (context.mounted) {
-          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          final LoginProvider loginStore = Provider.of<LoginProvider>(
+            context,
+            listen: false,
+          );
           loginStore.userLogout();
           AppBadgePlus.updateBadge(0);
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Home()),
-            );
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
         }
         notifyListeners();
       } else {
         if (context.mounted) {
-          final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+          final LoginProvider loginStore = Provider.of<LoginProvider>(
+            context,
+            listen: false,
+          );
           loginStore.userLogout();
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Home()),
-            );
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
         }
       }
     } catch (e) {
-      final LoginProvider loginStore = Provider.of<LoginProvider>(context, listen: false);
+      final LoginProvider loginStore = Provider.of<LoginProvider>(
+        context,
+        listen: false,
+      );
       loginStore.userLogout();
       Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Home()),
-            );
+        context,
+        MaterialPageRoute(builder: (context) => const Home()),
+      );
       debugPrint('Failed to connect to the API ${e.toString()}');
     }
   }

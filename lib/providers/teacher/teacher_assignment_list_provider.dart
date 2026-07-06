@@ -1,24 +1,18 @@
 import 'dart:convert';
-import 'dart:io';
 
 // Removed: import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/constants.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/common_model.dart';
 import 'package:flexischool/models/teacher/teacher_assignment_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
-import 'package:flexischool/utils/notification_service.dart';
 import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -26,7 +20,6 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
   final apiService = ApiService();
   final loaderProvider = getIt<LoaderProvider>();
   TeacherAssignmentListModel? teacherAssignmentListModel;
-  final QuillController _controller = QuillController.basic();
 
   String _startDate = Constants.currentDate;
 
@@ -40,8 +33,11 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
 
   String? get message => _message;
 
-  Future<void> fetchTeacherAssignmentListData(
-      {required int employeeId, required String fromDate, required String endDate}) async {
+  Future<void> fetchTeacherAssignmentListData({
+    required int employeeId,
+    required String fromDate,
+    required String endDate,
+  }) async {
     try {
       _message = null;
       loaderProvider.showLoader();
@@ -49,11 +45,16 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
         'EMPLOYEE_ID': employeeId,
         'FROM_DATE': fromDate,
         'TO_DATE': endDate,
-        'SESSION_ID': Constants.sessionId
+        'SESSION_ID': Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.getAssignmentByDatesApi, data: data);
+      final response = await apiService.post(
+        url: Api.getAssignmentByDatesApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        teacherAssignmentListModel = TeacherAssignmentListModel.fromJson(response.data);
+        teacherAssignmentListModel = TeacherAssignmentListModel.fromJson(
+          response.data,
+        );
         _message = null;
         loaderProvider.hideLoader();
         if (teacherAssignmentListModel!.lstAssignment!.isEmpty) {
@@ -91,100 +92,70 @@ class TeacherAssignmentListProvider extends ChangeNotifier {
     return _startDate;
   }
 
-
-
-
-
   Future<void> downloadFile(BuildContext context, String url) async {
     final String fileName = url.split('/').last;
-
-    // final directory = await getExternalStorageDirectory();
-
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = await getExternalStorageDirectory();
-    } else if (Platform.isIOS) {
-      directory = await getApplicationSupportDirectory();
-    }
-
-    if (directory == null) {
-      debugPrint('Error: Unsupported platform.');
-      return;
-    }
-
-    final savePath = '${directory.path}/$fileName';
-    debugPrint('save Path $savePath');
-    debugPrint('download url ${Api.imageBaseUrl + url}');
-
-    try {
-      final dio = Dio();
-      await dio.download(
-        '${Api.imageBaseUrl}/$url',
-        savePath,
-        onReceiveProgress: (received, total) async {
-          int progress = ((received / total) * 100).toInt();
-          debugPrint('progress---> $progress');
-          if (Platform.isAndroid) {
-            await NotificationService.showNotification(
-              channelId: 1,
-              title: fileName,
-              body: "",
-              summary: "",
-              progress: progress,
-            );
-          }
-          //  NotificationService().showProgressNotification(progress, fileName);
-        },
-      );
-      await NotificationService.cancelProgressNotification();
-      await NotificationService.showNotification(
-        channelId: 2,
-        title: fileName,
-        body: "",
-        summary: "",
-        payload: {"path": savePath},
-      );
-      //  NotificationService().cancelProgressNotification();
-      //  NotificationService().showNotification(savePath, fileName);
-    } catch (e) {
-      debugPrint('Error during file download: $e');
-    }
+    await DownloadPdf.downloadPdf(
+      '${Api.imageBaseUrl}/$url',
+      fileName,
+      context,
+      (message) => debugPrint('download message -> $message'),
+    );
   }
 
   String getContentAsHTML(String jsonString) {
-    List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List).cast<Map<String, dynamic>>();
+    List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List)
+        .cast<Map<String, dynamic>>();
     Delta delta = Delta.fromJson(quillDelta);
-    String plainText = delta.toList().where((op) => op.data != null).map((op) => op.data).join('');
+    String plainText = delta
+        .toList()
+        .where((op) => op.data != null)
+        .map((op) => op.data)
+        .join('');
     return plainText;
   }
 
-  Future<void> inActiveAssignment(LstAssignment assignment, BuildContext context) async {
+  Future<void> inActiveAssignment(
+    LstAssignment assignment,
+    BuildContext context,
+  ) async {
     try {
       loaderProvider.showLoader();
       var data = {"APP_ASSIGNMENT_ID": assignment.aPPASSIGNMENTID};
       notifyListeners();
-      final response = await apiService.post(url: Api.inActiveAssignmentApi, data: data);
+      final response = await apiService.post(
+        url: Api.inActiveAssignmentApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         final commonResponse = CommonResponse.fromJson(response.data);
         if (commonResponse.success ?? false) {
           assignment.aCTIVE = "N";
         } else {
           if (context.mounted) {
-            ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+            ShowSnackBar.error(
+              context: context,
+              showMessage: 'Something wents wrong',
+            );
           }
         }
         loaderProvider.hideLoader();
         notifyListeners();
       } else {
         if (context.mounted) {
-          ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+          ShowSnackBar.error(
+            context: context,
+            showMessage: 'Something wents wrong',
+          );
         }
         loaderProvider.hideLoader();
         notifyListeners();
       }
     } catch (e) {
       if (context.mounted) {
-        ShowSnackBar.error(context: context, showMessage: 'Something wents wrong');
+        ShowSnackBar.error(
+          context: context,
+          showMessage: 'Something wents wrong',
+        );
       }
       loaderProvider.hideLoader();
       notifyListeners();

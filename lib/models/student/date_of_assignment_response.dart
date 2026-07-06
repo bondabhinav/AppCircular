@@ -15,7 +15,9 @@ class DateOfAssignmentResponse {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (dATEFORASSIGNMENT != null) {
-      data['DATE_FOR_ASSIGNMENT'] = dATEFORASSIGNMENT!.map((v) => v.toJson()).toList();
+      data['DATE_FOR_ASSIGNMENT'] = dATEFORASSIGNMENT!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }

@@ -4,7 +4,12 @@ class PaidFeeResponse {
   List<dynamic>? dataTable2;
   List<PaidFeeItem>? table1;
 
-  PaidFeeResponse({this.fEETYPE, this.dataTable1, this.dataTable2, this.table1});
+  PaidFeeResponse({
+    this.fEETYPE,
+    this.dataTable1,
+    this.dataTable2,
+    this.table1,
+  });
 
   PaidFeeResponse.fromJson(Map<String, dynamic> json) {
     fEETYPE = json['FEE_TYPE'];
@@ -58,7 +63,12 @@ class UnpaidFeeResponse {
   List<dynamic>? dataTable2;
   List<UnpaidFeeItem>? table1;
 
-  UnpaidFeeResponse({this.fEETYPE, this.dataTable1, this.dataTable2, this.table1});
+  UnpaidFeeResponse({
+    this.fEETYPE,
+    this.dataTable1,
+    this.dataTable2,
+    this.table1,
+  });
 
   UnpaidFeeResponse.fromJson(Map<String, dynamic> json) {
     fEETYPE = json['FEE_TYPE'];
@@ -90,7 +100,12 @@ class UnpaidFeeItem {
   String? fEETYPEDESC;
   int? uNPAID;
 
-  UnpaidFeeItem({this.fEEDUEDATE, this.fORMONTH, this.fEETYPEDESC, this.uNPAID});
+  UnpaidFeeItem({
+    this.fEEDUEDATE,
+    this.fORMONTH,
+    this.fEETYPEDESC,
+    this.uNPAID,
+  });
 
   UnpaidFeeItem.fromJson(Map<String, dynamic> json) {
     fEEDUEDATE = json['FEE_DUE_DATE'];
@@ -107,4 +122,4 @@ class UnpaidFeeItem {
     data['UNPAID'] = uNPAID;
     return data;
   }
-} 
+}

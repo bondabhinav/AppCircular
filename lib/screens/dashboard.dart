@@ -1,6 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flexischool/common/api_service.dart';
-import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/fcm_pending_navigation.dart';
 import 'package:flexischool/common/webService.dart';
@@ -15,6 +13,7 @@ import 'package:flexischool/screens/teacher/attendance_screen.dart';
 import 'package:flexischool/screens/teacher/teacher_assignment_list_screen.dart';
 import 'package:flexischool/screens/teacher/teacher_circular_list_screen.dart';
 import 'package:flexischool/screens/webview_screen.dart';
+import 'package:flexischool/widgets/profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,20 +36,19 @@ class _MyDropdownWidgetState extends State<MyDropdownWidget> {
       width: double.infinity,
       margin: const EdgeInsets.only(right: 20.0),
       child: DropdownButton(
-          items: widget.model.teacherSessionResponse?.sessionDD?.map((item) {
-            var itemDate = '${(item.sTARTDATE)!.substring(0, 4)}-${(item.eNDDATE)!.substring(0, 4)}';
-            return DropdownMenuItem(
-              value: item.sESSIONID,
-              child: Text(itemDate),
-            );
-          }).toList(),
-          value: widget.model.selectedTeacherSessionDropDownValue,
-          isExpanded: true,
-          elevation: 16,
-          alignment: Alignment.center,
-          onChanged: (newValue) {
-            widget.model.updateSession(newValue);
-          }),
+        items: widget.model.teacherSessionResponse?.sessionDD?.map((item) {
+          var itemDate =
+              '${(item.sTARTDATE)!.substring(0, 4)}-${(item.eNDDATE)!.substring(0, 4)}';
+          return DropdownMenuItem(value: item.sESSIONID, child: Text(itemDate));
+        }).toList(),
+        value: widget.model.selectedTeacherSessionDropDownValue,
+        isExpanded: true,
+        elevation: 16,
+        alignment: Alignment.center,
+        onChanged: (newValue) {
+          widget.model.updateSession(newValue);
+        },
+      ),
     );
   }
 }
@@ -69,34 +67,56 @@ class CustomUserAccountsDrawerHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            CircleAvatar(
-              backgroundImage: loginStore.photo.isNotEmpty 
-                  ? NetworkImage(loginStore.photo) 
-                  : null,
-              radius: 30,
-              child: loginStore.photo.isEmpty 
-                  ? const Icon(Icons.account_circle, color: Colors.blue, size: 60) 
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Text('${loginStore.userName}',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ProfileAvatar(imageUrl: loginStore.photo, radius: 30),
+              const SizedBox(width: 10),
+              Text(
+                loginStore.userName,
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "Montserrat Regular",
-                    color: Colors.white))
-          ]),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Montserrat Regular",
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 5),
-          Text('Employee Code : ${loginStore.employeeCode}',
-              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
-          Text('Department : ${loginStore.depName}',
-              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
-          Text('Designation : ${loginStore.designation}',
-              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
-          Text('Session : ${model.sessionYear}',
-              style: const TextStyle(fontSize: 13, fontFamily: "Montserrat Regular", color: Colors.black)),
+          Text(
+            'Employee Code : ${loginStore.employeeCode}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "Montserrat Regular",
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            'Department : ${loginStore.depName}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "Montserrat Regular",
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            'Designation : ${loginStore.designation}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "Montserrat Regular",
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            'Session : ${model.sessionYear}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "Montserrat Regular",
+              color: Colors.black,
+            ),
+          ),
         ],
       ),
     );
@@ -115,30 +135,39 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
+    super.initState();
     teacherDashboardProvider = TeacherDashboardProvider();
-    teacherDashboardProvider?.getSessionData();
     teacherDashboardProvider?.callRefreshApi();
-    teacherDashboardProvider?.fetchDashboard();
-    
+    _loadInitialDashboard();
+
     // Mark app startup as complete for FCM navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 1500), () {
         FCMPendingNavigation.markAppStartupComplete();
       });
     });
-    
-    super.initState();
+  }
+
+  Future<void> _loadInitialDashboard() async {
+    await teacherDashboardProvider?.getSessionData();
+    await teacherDashboardProvider?.fetchDashboard();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => teacherDashboardProvider,
-        builder: (context, child) {
-          return Consumer<TeacherDashboardProvider>(builder: (context, model, _) {
+      create: (_) => teacherDashboardProvider,
+      builder: (context, child) {
+        return Consumer<TeacherDashboardProvider>(
+          builder: (context, model, _) {
             return Scaffold(
               backgroundColor: Colors.white,
-              appBar: AppBar(title: const Text('Dashboard', style: TextStyle(color: Colors.white))),
+              appBar: AppBar(
+                title: const Text(
+                  'Dashboard',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
@@ -147,12 +176,17 @@ class _DashboardState extends State<Dashboard> {
                     model.teacherSessionResponse == null
                         ? const SizedBox()
                         : ListTile(
-                            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                            visualDensity: const VisualDensity(
+                              horizontal: 0,
+                              vertical: -4,
+                            ),
                             title: MyDropdownWidget(model: model),
                             leading: const Icon(Icons.access_time),
                             minLeadingWidth: 10,
                             horizontalTitleGap: 10,
-                            onTap: () {}),
+                            onTap: () {},
+                          ),
+
                     // ListTile(
                     //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                     //   title: const Text('Profile'),
@@ -171,30 +205,48 @@ class _DashboardState extends State<Dashboard> {
                     //   horizontalTitleGap: 10,
                     //   onTap: () {},
                     // ),
-
                     ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Privacy Policy'),
-                        leading: const Icon(Icons.lock),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const WebViewScreen(
-                                      url: Constants.privacyPolicyUrl, title: 'Privacy Policy')));
-                        }),
+                      visualDensity: const VisualDensity(
+                        horizontal: 0,
+                        vertical: -4,
+                      ),
+                      title: const Text('Privacy Policy'),
+                      leading: const Icon(Icons.lock),
+                      minLeadingWidth: 10,
+                      horizontalTitleGap: 10,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WebViewScreen(
+                              url: Constants.privacyPolicyUrl,
+                              title: 'Privacy Policy',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                     ListTile(
-                        visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                        title: const Text('Change Password'),
-                        leading: const Icon(Icons.lock),
-                        minLeadingWidth: 10,
-                        horizontalTitleGap: 10,
-                        onTap: () => Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()))),
+                      visualDensity: const VisualDensity(
+                        horizontal: 0,
+                        vertical: -4,
+                      ),
+                      title: const Text('Change Password'),
+                      leading: const Icon(Icons.lock),
+                      minLeadingWidth: 10,
+                      horizontalTitleGap: 10,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChangePasswordScreen(),
+                        ),
+                      ),
+                    ),
                     ListTile(
-                      visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                      visualDensity: const VisualDensity(
+                        horizontal: 0,
+                        vertical: -4,
+                      ),
                       title: const Text('Logout'),
                       leading: const Icon(Icons.logout),
                       minLeadingWidth: 10,
@@ -206,8 +258,10 @@ class _DashboardState extends State<Dashboard> {
               ),
               body: DashboardWidget(model: model),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 }
 
@@ -221,6 +275,38 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
+  static const TextStyle _profileNameStyle = TextStyle(
+    fontFamily: "Montserrat Medium",
+    color: Colors.white,
+    fontSize: 20,
+  );
+
+  static const TextStyle _profileDetailStyle = TextStyle(
+    fontSize: 14.0,
+    fontFamily: "Montserrat Regular",
+    color: Colors.black,
+  );
+
+  Widget _fittedHeaderText(
+    String text, {
+    required TextStyle style,
+    required double height,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SizedBox(
+          width: constraints.maxWidth.isFinite ? constraints.maxWidth : null,
+          height: height,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(text, maxLines: 1, softWrap: false, style: style),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -238,87 +324,93 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             height: size.height * .3,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                  alignment: Alignment.topCenter, image: AssetImage('assets/images/top_header_new.png')),
+                alignment: Alignment.topCenter,
+                image: AssetImage('assets/images/top_header_new.png'),
+              ),
             ),
           ),
           SafeArea(
             child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(children: <Widget>[
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: <Widget>[
                   Container(
-                      //height: 64,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                        CircleAvatar(
-                          radius: 42,
-                          backgroundImage: loginStore.photo.isNotEmpty 
-                              ? NetworkImage(loginStore.photo) 
-                              : null,
-                          child: loginStore.photo.isEmpty 
-                              ? const Icon(Icons.account_circle, color: Colors.blue, size: 84) 
-                              : null,
-                        ),
-                        const SizedBox(
-                          width: 16,
-                        ),
-                        Column(
+                    //height: 64,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        ProfileAvatar(imageUrl: loginStore.photo, radius: 42),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(
+                              _fittedHeaderText(
                                 loginStore.userName,
-                                style: const TextStyle(
-                                    fontFamily: "Montserrat Medium", color: Colors.white, fontSize: 18),
+                                style: _profileNameStyle,
+                                height: 26,
                               ),
-                              const SizedBox(height: 10.0),
-                              Text(
+                              const SizedBox(height: 8.0),
+                              _fittedHeaderText(
                                 'Employee Code : ${loginStore.employeeCode}',
-                                style: const TextStyle(
-                                  fontSize: 14.0,
-                                  fontFamily: "Montserrat Regular",
-                                  color: Colors.black,
-                                ),
+                                style: _profileDetailStyle,
+                                height: 20,
                               ),
                               //SizedBox(height: 10.0),
-                              Text(
+                              _fittedHeaderText(
                                 'Department : ${loginStore.depName}',
-                                style: const TextStyle(
-                                  fontSize: 14.0,
-                                  fontFamily: "Montserrat Regular",
-                                  color: Colors.black,
-                                ),
+                                style: _profileDetailStyle,
+                                height: 20,
                               ),
-                              Text(
+                              _fittedHeaderText(
                                 'Designation : ${loginStore.designation}',
-                                style: const TextStyle(
-                                  fontSize: 14.0,
-                                  fontFamily: "Montserrat Regular",
-                                  color: Colors.black,
-                                ),
+                                style: _profileDetailStyle,
+                                height: 20,
                               ),
                               //SizedBox(height: 10.0),
-                              Text(
+                              _fittedHeaderText(
                                 'Session : ${widget.model.sessionYear}',
-                                style: const TextStyle(
-                                    fontSize: 14.0, fontFamily: "Montserrat Regular", color: Colors.black),
-                              )
-                            ])
-                      ])),
+                                style: _profileDetailStyle,
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Expanded(
-                      child: Consumer<TeacherDashboardProvider>(
-                          builder: (context, dashboardModel, _) {
-                            if (dashboardModel.isDashboardLoading) {
-                              return const Center(child: CircularProgressIndicator());
-                            } else if (dashboardModel.dashboardError != null) {
-                              return Center(child: Text('Error: ${dashboardModel.dashboardError}'));
-                            } else if (dashboardModel.dashboardData != null && dashboardModel.dashboardData!.isNotEmpty) {
-                              return DashBoardList(
-                                  dashboards: dashboardModel.dashboardData!, employeeId: loginStore.employeeId);
-                            } else {
-                              return const Center(child: Text('No dashboard items available'));
-                            }
-                          }))
-                ])),
+                    child: Consumer<TeacherDashboardProvider>(
+                      builder: (context, dashboardModel, _) {
+                        if (dashboardModel.isDashboardLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (dashboardModel.dashboardError != null) {
+                          return Center(
+                            child: Text(
+                              'Error: ${dashboardModel.dashboardError}',
+                            ),
+                          );
+                        } else if (dashboardModel.dashboardData != null &&
+                            dashboardModel.dashboardData!.isNotEmpty) {
+                          return DashBoardList(
+                            dashboards: dashboardModel.dashboardData!,
+                            employeeId: loginStore.employeeId,
+                          );
+                        } else {
+                          return const Center(
+                            child: Text('No dashboard items available'),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -342,18 +434,23 @@ class DashBoardList extends StatelessWidget {
     'assets/images/online-learning.png',
     'assets/images/immigration.png',
     'assets/images/exam.png',
-    'assets/images/live-chat.png'
+    'assets/images/live-chat.png',
   ];
 
-  DashBoardList({super.key, required this.dashboards, required this.employeeId});
+  DashBoardList({
+    super.key,
+    required this.dashboards,
+    required this.employeeId,
+  });
 
   @override
   Widget build(BuildContext context) {
     var cardTextStyle = const TextStyle(
-        fontFamily: "Montserrat Regular",
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: Color.fromRGBO(63, 63, 63, 1));
+      fontFamily: "Montserrat Regular",
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+      color: Color.fromRGBO(63, 63, 63, 1),
+    );
     return FutureBuilder<String>(
       future: dashboardIcon(),
       builder: (context, snapshot) {
@@ -362,97 +459,142 @@ class DashBoardList extends StatelessWidget {
           return GridView.builder(
             primary: false,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10),
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
             padding: const EdgeInsets.all(8),
             shrinkWrap: true,
             itemCount: dashboards.length,
             itemBuilder: (context, index) {
               return InkWell(
                 child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 4,
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
                       CachedNetworkImage(
-                        imageUrl: iconPath! + dashboards[index].IMAGE, 
+                        imageUrl: iconPath! + dashboards[index].IMAGE,
                         height: 80,
-                        errorWidget: (context, url, error) => const Icon(Icons.error, size: 80),
-                        placeholder: (context, url) => const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error, size: 80),
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
                       ),
                       const SizedBox(height: 10.0),
-                      Text(dashboards[index].MENUNAME, style: cardTextStyle)
-                    ])),
+                      Text(dashboards[index].MENUNAME, style: cardTextStyle),
+                    ],
+                  ),
+                ),
                 onTap: () async {
                   final type = await WebService.getLoginType();
-                  if (dashboards[index].MENUNAME.toString().toLowerCase() == 'circulars') {
+                  if (dashboards[index].MENUNAME.toString().toLowerCase() ==
+                      'circulars') {
                     if (type == 'S') {
                       if (context.mounted) {
                         Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => const StudentCircularScreen()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const StudentCircularScreen(),
+                          ),
+                        );
                       }
                     } else {
                       if (context.mounted) {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TeacherCircularListScreen(
-                                      employeeId: employeeId,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TeacherCircularListScreen(
+                              employeeId: employeeId,
+                            ),
+                          ),
+                        );
                       }
                     }
-                  } else if (dashboards[index].MENUNAME.toString().toLowerCase() == 'attendance') {
+                  } else if (dashboards[index].MENUNAME
+                          .toString()
+                          .toLowerCase() ==
+                      'attendance') {
                     if (type == 'T') {
                       if (context.mounted) {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AttendanceScreen(
-                                      employeeId: employeeId,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AttendanceScreen(employeeId: employeeId),
+                          ),
+                        );
                       }
                     } else {
                       if (context.mounted) {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => const StudentAttendanceGraphScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const StudentAttendanceGraphScreen(),
+                          ),
+                        );
                       }
                     }
-                  } else if (dashboards[index].MENUNAME.toString().toLowerCase() == 'assignments') {
+                  } else if (dashboards[index].MENUNAME
+                          .toString()
+                          .toLowerCase() ==
+                      'assignments') {
                     if (type == 'T') {
                       if (context.mounted) {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TeacherAssignmentListScreen(
-                                      employeeId: employeeId,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TeacherAssignmentListScreen(
+                              employeeId: employeeId,
+                            ),
+                          ),
+                        );
                       }
                     } else if (type == 'S') {
                       if (context.mounted) {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StudentAssignmentCalenderWithList(
-                                      employeeId: employeeId,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StudentAssignmentCalenderWithList(
+                                  employeeId: employeeId,
+                                ),
+                          ),
+                        );
                       }
                     }
-                  } else if (dashboards[index].MENUNAME.toString().toLowerCase() == 'academic') {
+                  } else if (dashboards[index].MENUNAME
+                          .toString()
+                          .toLowerCase() ==
+                      'academic') {
                     if (type == 'S') {
                       if (context.mounted) {
                         Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => const AcademicCalenderScreen()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const AcademicCalenderScreen(),
+                          ),
+                        );
                       }
                     }
-                  }
-
-                  else if(dashboards[index].MENUNAME.toString().toLowerCase() == 'fees'){
+                  } else if (dashboards[index].MENUNAME
+                          .toString()
+                          .toLowerCase() ==
+                      'fees') {
                     if (context.mounted) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const FeeScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const FeeScreen(),
+                        ),
                       );
                     }
                   }
-
                 },
               );
             },

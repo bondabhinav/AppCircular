@@ -46,10 +46,13 @@ class FeeProvider with ChangeNotifier {
         "SESSION_ID": Constants.sessionId,
         "SCHOOL_ID": 1,
         "CLASS_ID": Constants.studentClassId,
-        "STUDENT_ID": studentData.aDMSTUDENTID
+        "STUDENT_ID": studentData.aDMSTUDENTID,
       };
 
-      final response = await apiService.post(url: Api.getPaidFeesApi, data: requestBody);
+      final response = await apiService.post(
+        url: Api.getPaidFeesApi,
+        data: requestBody,
+      );
 
       if (response.statusCode == 200) {
         _paidFeeResponse = PaidFeeResponse.fromJson(response.data);
@@ -79,10 +82,13 @@ class FeeProvider with ChangeNotifier {
         "SESSION_ID": Constants.sessionId,
         "SCHOOL_ID": 1,
         "CLASS_ID": Constants.studentClassId,
-        "STUDENT_ID": studentData.aDMSTUDENTID
+        "STUDENT_ID": studentData.aDMSTUDENTID,
       };
 
-      final response = await apiService.post(url: Api.getUnpaidFeesApi, data: requestBody);
+      final response = await apiService.post(
+        url: Api.getUnpaidFeesApi,
+        data: requestBody,
+      );
 
       if (response.statusCode == 200) {
         _unpaidFeeResponse = UnpaidFeeResponse.fromJson(response.data);
@@ -102,12 +108,18 @@ class FeeProvider with ChangeNotifier {
 
   double get totalPaidAmount {
     if (_paidFeeResponse?.table1 == null) return 0.0;
-    return _paidFeeResponse!.table1!.fold(0.0, (sum, item) => sum + (item.pAID ?? 0));
+    return _paidFeeResponse!.table1!.fold(
+      0.0,
+      (sum, item) => sum + (item.pAID ?? 0),
+    );
   }
 
   double get totalUnpaidAmount {
     if (_unpaidFeeResponse?.table1 == null) return 0.0;
-    return _unpaidFeeResponse!.table1!.fold(0.0, (sum, item) => sum + (item.uNPAID ?? 0));
+    return _unpaidFeeResponse!.table1!.fold(
+      0.0,
+      (sum, item) => sum + (item.uNPAID ?? 0),
+    );
   }
 
   void clearData() {

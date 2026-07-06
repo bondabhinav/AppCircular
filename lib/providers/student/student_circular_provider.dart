@@ -1,21 +1,14 @@
-import 'dart:io';
-
 // Removed: import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/student/student_circular_doc_list_respnose.dart';
 import 'package:flexischool/models/student/student_circular_list_response.dart';
 import 'package:flexischool/providers/loader_provider.dart';
-import 'package:flexischool/utils/notification_service.dart';
-import 'package:flexischool/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -36,11 +29,16 @@ class StudentCircularProvider extends ChangeNotifier {
       loaderProvider.showLoader();
       var data = {
         "STUDENT_ID": WebService.studentLoginData?.table1?.first.aDMSTUDENTID,
-        "SESSION_ID": Constants.sessionId
+        "SESSION_ID": Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.studentCircularListApi, data: data);
+      final response = await apiService.post(
+        url: Api.studentCircularListApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        studentCircularListResponse = StudentCircularListResponse.fromJson(response.data);
+        studentCircularListResponse = StudentCircularListResponse.fromJson(
+          response.data,
+        );
         loaderProvider.hideLoader();
         if (studentCircularListResponse!.classlist!.isEmpty) {
           _message = 'No circular found';
@@ -61,14 +59,21 @@ class StudentCircularProvider extends ChangeNotifier {
     }
   }
 
-  Future<StudentCircularDocumentListResponse> fetchStudentDocumentData({required int circularId}) async {
-    var studentCircularDocumentListResponse = StudentCircularDocumentListResponse();
+  Future<StudentCircularDocumentListResponse> fetchStudentDocumentData({
+    required int circularId,
+  }) async {
+    var studentCircularDocumentListResponse =
+        StudentCircularDocumentListResponse();
     try {
       loaderProvider.showLoader();
       var data = {"APP_CIRCULAR_ID": circularId};
-      final response = await apiService.post(url: Api.studentDocumentListApi, data: data);
+      final response = await apiService.post(
+        url: Api.studentDocumentListApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        studentCircularDocumentListResponse = StudentCircularDocumentListResponse.fromJson(response.data);
+        studentCircularDocumentListResponse =
+            StudentCircularDocumentListResponse.fromJson(response.data);
         loaderProvider.hideLoader();
         notifyListeners();
       } else {
@@ -146,15 +151,13 @@ class StudentCircularProvider extends ChangeNotifier {
   //   return extension == '.jpg' || extension == '.jpeg' || extension == '.png' || extension == '.gif';
   // }
 
-
-
-
-
-
   Future<void> updateCircularFlag(String id) async {
     try {
       var data = {"APP_CIRCULAR_ID": id};
-      final response = await apiService.post(url: Api.updateCircularFlagApi, data: data);
+      final response = await apiService.post(
+        url: Api.updateCircularFlagApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         //  var commonResponse = CommonResponse.fromJson(response.data);
         notifyListeners();
@@ -174,57 +177,11 @@ class StudentCircularProvider extends ChangeNotifier {
 
   Future<void> downloadFile(BuildContext context, String url) async {
     final String fileName = url.split('/').last;
-
-    // final directory = await getExternalStorageDirectory();
-
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = await getExternalStorageDirectory();
-    } else if (Platform.isIOS) {
-      directory = await getApplicationSupportDirectory();
-    }
-
-    if (directory == null) {
-      debugPrint('Error: Unsupported platform.');
-      return;
-    }
-
-    final savePath = '${directory.path}/$fileName';
-    debugPrint('save Path $savePath');
-    debugPrint('download url ${Api.imageBaseUrl + url}');
-
-    try {
-      final dio = Dio();
-      await dio.download(
-        '${Api.imageBaseUrl}/$url',
-        savePath,
-        onReceiveProgress: (received, total) async {
-          int progress = ((received / total) * 100).toInt();
-          debugPrint('progress---> $progress');
-          if (Platform.isAndroid) {
-            await NotificationService.showNotification(
-              channelId: 1,
-              title: fileName,
-              body: "",
-              summary: "",
-              progress: progress,
-            );
-          }
-          //  NotificationService().showProgressNotification(progress, fileName);
-        },
-      );
-      await NotificationService.cancelProgressNotification();
-      await NotificationService.showNotification(
-        channelId: 2,
-        title: fileName,
-        body: "",
-        summary: "",
-        payload: {"path": savePath},
-      );
-      //  NotificationService().cancelProgressNotification();
-      //  NotificationService().showNotification(savePath, fileName);
-    } catch (e) {
-      debugPrint('Error during file download: $e');
-    }
+    await DownloadPdf.downloadPdf(
+      '${Api.imageBaseUrl}/$url',
+      fileName,
+      context,
+      (message) => debugPrint('download message -> $message'),
+    );
   }
 }

@@ -1,24 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 // Removed: import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flexischool/common/api_service.dart';
 import 'package:flexischool/common/api_urls.dart';
 import 'package:flexischool/common/config.dart';
 import 'package:flexischool/common/webService.dart';
+import 'package:flexischool/download_file.dart';
 import 'package:flexischool/models/student/student_assignment_model.dart';
 import 'package:flexischool/providers/loader_provider.dart';
-import 'package:flexischool/utils/notification_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/student/date_of_assignment_response.dart';
@@ -31,7 +25,6 @@ class StudentAssignmentProvider extends ChangeNotifier {
   CalendarFormat calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
-  final QuillController _controller = QuillController.basic();
   late Map<DateTime, List<dynamic>> events;
   late StreamController<Map<DateTime, List<dynamic>>> eventsStreamController;
 
@@ -53,8 +46,11 @@ class StudentAssignmentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getAssignmentDates(
-      {required String year, required String month, required DateTime dateTime}) async {
+  Future<void> getAssignmentDates({
+    required String year,
+    required String month,
+    required DateTime dateTime,
+  }) async {
     _focusedDay = dateTime;
     dateOfAssignmentResponse = null;
     events.clear();
@@ -65,15 +61,24 @@ class StudentAssignmentProvider extends ChangeNotifier {
         "YEAR": year,
         "MONTH": month,
       };
-      final response = await apiService.post(url: Api.getAssignmentDatesApi, data: data);
+      final response = await apiService.post(
+        url: Api.getAssignmentDatesApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
-        dateOfAssignmentResponse = DateOfAssignmentResponse.fromJson(response.data);
+        dateOfAssignmentResponse = DateOfAssignmentResponse.fromJson(
+          response.data,
+        );
 
         Map<DateTime, List<dynamic>> newEvents = {};
         if (dateOfAssignmentResponse!.dATEFORASSIGNMENT!.isNotEmpty) {
           for (var eventData in dateOfAssignmentResponse!.dATEFORASSIGNMENT!) {
             var endDateTime = DateTime.parse(eventData.eNDDATE!);
-            var endDate = DateTime.utc(endDateTime.year, endDateTime.month, endDateTime.day);
+            var endDate = DateTime.utc(
+              endDateTime.year,
+              endDateTime.month,
+              endDateTime.day,
+            );
 
             if (newEvents.containsKey(endDate)) {
               newEvents[endDate]!.add(eventData);
@@ -102,7 +107,10 @@ class StudentAssignmentProvider extends ChangeNotifier {
         "ASSIGNMENT_DATE": date,
         "SESSION_ID": Constants.sessionId,
       };
-      final response = await apiService.post(url: Api.getAssignmentByDateApi, data: data);
+      final response = await apiService.post(
+        url: Api.getAssignmentByDateApi,
+        data: data,
+      );
       if (response.statusCode == 200) {
         studentAssignmentModel = StudentAssignmentModel.fromJson(response.data);
         loaderProvider.hideLoader();
@@ -123,61 +131,14 @@ class StudentAssignmentProvider extends ChangeNotifier {
     }
   }
 
-
-
-
-
   Future<void> downloadFile(BuildContext context, String url) async {
     final String fileName = url.split('/').last;
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = await getExternalStorageDirectory();
-    } else if (Platform.isIOS) {
-      directory = await getApplicationSupportDirectory();
-    }
-
-    if (directory == null) {
-      debugPrint('Error: Unsupported platform.');
-      return;
-    }
-
-    final savePath = '${directory.path}/$fileName';
-    debugPrint('save Path $savePath');
-    debugPrint('download url ${Api.imageBaseUrl + url}');
-
-    try {
-      final dio = Dio();
-      await dio.download(
-        '${Api.imageBaseUrl}/$url',
-        savePath,
-        onReceiveProgress: (received, total) async {
-          int progress = ((received / total) * 100).toInt();
-          debugPrint('progress---> $progress');
-          if (Platform.isAndroid) {
-            await NotificationService.showNotification(
-              channelId: 1,
-              title: fileName,
-              body: "",
-              summary: "",
-              progress: progress,
-            );
-          }
-          //  NotificationService().showProgressNotification(progress, fileName);
-        },
-      );
-      await NotificationService.cancelProgressNotification();
-      await NotificationService.showNotification(
-        channelId: 2,
-        title: fileName,
-        body: "",
-        summary: "",
-        payload: {"path": savePath},
-      );
-      //  NotificationService().cancelProgressNotification();
-      //  NotificationService().showNotification(savePath, fileName);
-    } catch (e) {
-      debugPrint('Error during file download: $e');
-    }
+    await DownloadPdf.downloadPdf(
+      '${Api.imageBaseUrl}/$url',
+      fileName,
+      context,
+      (message) => debugPrint('download message -> $message'),
+    );
   }
 
   String getContentAsHTML(String jsonString) {
@@ -187,9 +148,14 @@ class StudentAssignmentProvider extends ChangeNotifier {
     //  // debugPrint(QuillJsonToHTML.encodeJson(deltaJson));
     //   return QuillJsonToHTML.encodeJson(jsonData);
 
-    List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List).cast<Map<String, dynamic>>();
+    List<Map<String, dynamic>> quillDelta = (jsonDecode(jsonString) as List)
+        .cast<Map<String, dynamic>>();
     Delta delta = Delta.fromJson(quillDelta);
-    String plainText = delta.toList().where((op) => op.data != null).map((op) => op.data).join('');
+    String plainText = delta
+        .toList()
+        .where((op) => op.data != null)
+        .map((op) => op.data)
+        .join('');
     debugPrint('Plain Text ===> $plainText');
     return plainText;
   }

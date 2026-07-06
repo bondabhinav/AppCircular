@@ -9,6 +9,8 @@ class Student {
 }
 
 class StudentListWidget extends StatefulWidget {
+  const StudentListWidget({super.key});
+
   @override
   _StudentListWidgetState createState() => _StudentListWidgetState();
 }
@@ -37,9 +39,9 @@ class _StudentListWidgetState extends State<StudentListWidget> {
   void toggleSelectAll() {
     setState(() {
       selectAll = !selectAll;
-      students.forEach((student) {
+      for (var student in students) {
         student.isChecked = selectAll;
-      });
+      }
       if (selectAll) {
         selectedIds = students.map((student) => student.id).toList();
       } else {
@@ -50,7 +52,8 @@ class _StudentListWidgetState extends State<StudentListWidget> {
 
   void toggleStudentSelection(int studentId, bool value) {
     setState(() {
-      students.firstWhere((student) => student.id == studentId).isChecked = value;
+      students.firstWhere((student) => student.id == studentId).isChecked =
+          value;
       if (value) {
         selectedIds.add(studentId);
       } else {
@@ -63,9 +66,7 @@ class _StudentListWidgetState extends State<StudentListWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Student List'),
-      ),
+      appBar: AppBar(title: Text('Student List')),
       body: Column(
         children: [
           Row(
@@ -75,16 +76,12 @@ class _StudentListWidgetState extends State<StudentListWidget> {
                 onPressed: toggleSelectAll,
                 child: Text(
                   selectAll ? 'Deselect All' : 'Select All',
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
+                  style: TextStyle(color: Colors.blue),
                 ),
               ),
               Text(
                 'Selected: ${selectedIds.length}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -92,7 +89,8 @@ class _StudentListWidgetState extends State<StudentListWidget> {
             child: ListView(
               children: students.map((student) {
                 return CheckboxListTile(
-                  controlAffinity: ListTileControlAffinity.trailing, // Align checkbox to the right
+                  controlAffinity: ListTileControlAffinity
+                      .trailing, // Align checkbox to the right
                   value: student.isChecked,
                   onChanged: (bool? value) {
                     toggleStudentSelection(student.id, value!);
@@ -114,5 +112,3 @@ class _StudentListWidgetState extends State<StudentListWidget> {
     );
   }
 }
-
-

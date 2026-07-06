@@ -15,7 +15,9 @@ class DashboardResponse {
     return DashboardResponse(
       MENUNAME: json['MENU_NAME']?.toString() ?? '',
       REMARKS: json['REMARKS']?.toString(),
-      SRLNO: json['SRL_NO'] is int ? json['SRL_NO'] : int.tryParse(json['SRL_NO']?.toString() ?? '0') ?? 0,
+      SRLNO: json['SRL_NO'] is int
+          ? json['SRL_NO']
+          : int.tryParse(json['SRL_NO']?.toString() ?? '0') ?? 0,
       IMAGE: json['IMAGE']?.toString() ?? '',
     );
   }

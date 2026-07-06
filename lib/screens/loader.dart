@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flexischool/app_update.dart';
 import 'package:flexischool/common/api_urls.dart';
+// import 'package:flexischool/common/ota_update_service.dart';
 import 'package:flexischool/common/webService.dart';
 import 'package:flexischool/providers/login_provider.dart';
 import 'package:flexischool/screens/check_internet.dart';
@@ -15,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/src/url_launcher_uri.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../common/config.dart';
 
@@ -37,9 +38,15 @@ class _LoaderRouteState extends State<LoaderRoute> {
   }
 
   Future<void> _initializeApp() async {
-    // Load initial data
-    await _loadInitialData();
-    
+    try {
+      // Load initial data
+      await _loadInitialData().timeout(const Duration(seconds: 5));
+    } catch (e) {
+      log('Startup data load skipped: $e');
+    }
+
+    if (!mounted) return;
+
     // Check connection and navigate
     await _checkConnectionAndNavigate();
   }
@@ -56,29 +63,34 @@ class _LoaderRouteState extends State<LoaderRoute> {
     // Load URL data
     final schoolUrl = await WebService.getSchoolUrl();
     final imageUrl = await WebService.getSchoolImageUrl();
-    
-    if (schoolUrl != null) {
-      Api.baseUrl = schoolUrl;
-      if (mounted) setState(() {});
-      log('baseUrl ***** ${Api.baseUrl}');
-    }
 
-    if (imageUrl != null) {
-      Api.imageBaseUrl = imageUrl;
-      if (mounted) setState(() {});
-      log('imageUrlData ***** ${Api.imageBaseUrl}');
-    }
+    Api.baseUrl = schoolUrl;
+    if (mounted) setState(() {});
+    log('baseUrl ***** ${Api.baseUrl}');
+
+    Api.imageBaseUrl = imageUrl;
+    if (mounted) setState(() {});
+    log('imageUrlData ***** ${Api.imageBaseUrl}');
   }
 
   Future<void> _checkConnectionAndNavigate() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    
+    List<ConnectivityResult> connectivityResult;
+    try {
+      connectivityResult = await Connectivity().checkConnectivity().timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (e) {
+      log('Connectivity check skipped: $e');
+      await _navigateBasedOnUserState();
+      return;
+    }
+
     // Wait for 3 seconds before navigation
     await Future.delayed(const Duration(seconds: 3));
-    
+
     if (!mounted) return;
 
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult.contains(ConnectivityResult.none)) {
       // No internet connection
       Navigator.pushReplacement(
         context,
@@ -93,8 +105,38 @@ class _LoaderRouteState extends State<LoaderRoute> {
   Future<void> _navigateBasedOnUserState() async {
     if (!mounted) return;
 
-    // Check if app update is required
-    if (await checkForUpdate(context)) {
+    // OTA update entry point disabled.
+    // try {
+    //   final otaUpdateAvailable = await OtaUpdateService().checkAndUpdate(
+    //     context: context,
+    //     showProgress: true,
+    //     onProgress: (progress) {
+    //       log('OTA Update Progress: ${(progress * 100).toStringAsFixed(1)}%');
+    //     },
+    //     onError: (error) {
+    //       log('OTA Update Error: $error');
+    //     },
+    //   );
+    //
+    //   // If OTA update is in progress, don't navigate (user will install update)
+    //   if (otaUpdateAvailable) {
+    //     return;
+    //   }
+    // } catch (e) {
+    //   log('Error checking OTA update: $e');
+    // }
+
+    // Fallback: Check if Play Store update is required
+    var updateRequired = false;
+    try {
+      updateRequired = await checkForUpdate(
+        context,
+      ).timeout(const Duration(seconds: 6), onTimeout: () => false);
+    } catch (e) {
+      log('Update check skipped: $e');
+    }
+
+    if (updateRequired) {
       _showUpdateRequiredScreen();
       return;
     }
@@ -142,7 +184,9 @@ class _LoaderRouteState extends State<LoaderRoute> {
         // Navigate to student dashboard
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const StudentDashboardScreen()),
+          MaterialPageRoute(
+            builder: (context) => const StudentDashboardScreen(),
+          ),
         );
       }
     }
@@ -151,9 +195,7 @@ class _LoaderRouteState extends State<LoaderRoute> {
   void _showUpdateRequiredScreen() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => _UpdateRequiredScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => _UpdateRequiredScreen()),
     );
   }
 
@@ -213,7 +255,8 @@ class _UpdateRequiredScreen extends StatelessWidget {
     return Scaffold(
       body: Material(
         child: PopScope(
-          onPopInvoked: (_) {
+          canPop: false,
+          onPopInvokedWithResult: (_, _) {
             SystemNavigator.pop();
           },
           child: Padding(
@@ -248,7 +291,8 @@ class _UpdateRequiredScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
-                        const playStoreUrl = 'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com';
+                        const playStoreUrl =
+                            'https://play.google.com/store/apps/details?id=flexischoolerpapp.sapinfotek.com';
                         if (await canLaunchUrl(Uri.parse(playStoreUrl))) {
                           await launchUrl(Uri.parse(playStoreUrl));
                         } else {

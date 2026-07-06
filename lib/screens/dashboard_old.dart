@@ -1,30 +1,19 @@
-import 'package:flexischool/screens/circulars_screen.dart';
 import 'package:flexischool/screens/loader.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  const Dashboard({super.key});
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),
       drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
@@ -38,7 +27,8 @@ class _DashboardState extends State<Dashboard> {
               accountEmail: Text('vijay@demo.com'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
-                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD5-iT2qq-hExKNkJmcZKaKJmpZGZAgLH7eUKF_PAT0g&usqp=CAU&ec=48600112'),
+                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD5-iT2qq-hExKNkJmcZKaKJmpZGZAgLH7eUKF_PAT0g&usqp=CAU&ec=48600112',
+                ),
                 radius: 50.0,
               ),
               /*
@@ -103,9 +93,9 @@ class _DashboardState extends State<Dashboard> {
               horizontalTitleGap: 10,
               onTap: () {
                 Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoaderRoute()),
-          );
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoaderRoute()),
+                );
               },
             ),
           ],
@@ -143,7 +133,7 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class DashboardWidget extends StatefulWidget {
-  const DashboardWidget({Key? key}) : super(key: key);
+  const DashboardWidget({super.key});
 
   @override
   State<DashboardWidget> createState() => _DashboardWidgetState();
@@ -164,7 +154,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       children: [
         //CardWidget(name:'Swetha',color:Colors.red,btnColor: Colors.blue,onPressed: handleButton1Press),
         //CardWidget(name:'Dharshini',color:Colors.green,btnColor: Colors.red,onPressed: handleButton2Press),
-
         Card(
           elevation: 4.0,
           color: Colors.amber,
@@ -180,7 +169,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   children: <Widget>[
                     CircleAvatar(
                       backgroundImage: NetworkImage(
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD5-iT2qq-hExKNkJmcZKaKJmpZGZAgLH7eUKF_PAT0g&usqp=CAU&ec=48600112'),
+                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD5-iT2qq-hExKNkJmcZKaKJmpZGZAgLH7eUKF_PAT0g&usqp=CAU&ec=48600112',
+                      ),
                       radius: 50.0,
                     ),
                     SizedBox(height: 10.0),
@@ -229,9 +219,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -284,11 +274,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 64,
-                          ),
+                          Icon(Icons.school, color: Colors.white, size: 64),
                           // icon
                           SizedBox(height: 10),
                           Text(
@@ -313,11 +299,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 64,
-                          ),
+                          Icon(Icons.school, color: Colors.white, size: 64),
                           // icon
                           SizedBox(height: 10),
                           Text(
@@ -342,11 +324,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 64,
-                          ),
+                          Icon(Icons.school, color: Colors.white, size: 64),
                           // icon
                           SizedBox(height: 10),
                           Text(
@@ -371,11 +349,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 64,
-                          ),
+                          Icon(Icons.school, color: Colors.white, size: 64),
                           // icon
                           SizedBox(height: 10),
                           Text(
@@ -400,11 +374,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 64,
-                          ),
+                          Icon(Icons.school, color: Colors.white, size: 64),
                           // icon
                           SizedBox(height: 10),
                           Text(

@@ -63,14 +63,17 @@ class _AssignmentFormState extends State<AssignmentForm> {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
       teacherAssignmentProvider?.filteredStudents = teacherAssignmentProvider!
-          .studentResponse!.aDMSTUDREGISTRATION!
-          .where((student) =>
-              student.fIRSTNAME!
-                  .toLowerCase()
-                  .contains(_searchController.text.toLowerCase()) ||
-              student.aDMNO!
-                  .toLowerCase()
-                  .contains(_searchController.text.toLowerCase()))
+          .studentResponse!
+          .aDMSTUDREGISTRATION!
+          .where(
+            (student) =>
+                student.fIRSTNAME!.toLowerCase().contains(
+                  _searchController.text.toLowerCase(),
+                ) ||
+                student.aDMNO!.toLowerCase().contains(
+                  _searchController.text.toLowerCase(),
+                ),
+          )
           .toList();
     });
   }
@@ -78,17 +81,19 @@ class _AssignmentFormState extends State<AssignmentForm> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => teacherAssignmentProvider,
-        builder: (context, child) {
-          return Consumer<TeacherAssignmentProvider>(
-              builder: (context, model, _) {
+      create: (_) => teacherAssignmentProvider,
+      builder: (context, child) {
+        return Consumer<TeacherAssignmentProvider>(
+          builder: (context, model, _) {
             return Stack(
               children: [
                 Scaffold(
                   appBar: AppBar(
                     centerTitle: true,
-                    title: const Text('Assignment Form',
-                        style: TextStyle(color: Colors.white)),
+                    title: const Text(
+                      'Assignment Form',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
                       color: Colors.white,
@@ -109,39 +114,48 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Class*',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
+                                    const Text(
+                                      'Class*',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                     const SizedBox(height: 5),
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                          border: Border.all(),
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
+                                        border: Border.all(),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                       child: DropdownButton(
-                                        padding:
-                                            const EdgeInsets.only(left: 10),
+                                        padding: const EdgeInsets.only(
+                                          left: 10,
+                                        ),
                                         value: model.selectedClass,
                                         underline: const SizedBox(),
                                         isExpanded: true,
                                         hint: const Text('Select a class'),
                                         items: model
-                                            .getClassResponse.cLASSandSECTION
-                                            ?.map((item) => DropdownMenuItem(
-                                                  value: item.classId,
-                                                  child: Text(
-                                                      item.cLASSDESC ?? ""),
-                                                ))
+                                            .getClassResponse
+                                            .cLASSandSECTION
+                                            ?.map(
+                                              (item) => DropdownMenuItem(
+                                                value: item.classId,
+                                                child: Text(
+                                                  item.cLASSDESC ?? "",
+                                                ),
+                                              ),
+                                            )
                                             .toList(),
                                         onChanged: (int? value) {
                                           if (value != null) {
                                             model.updateSelectedClass(
-                                                value, widget.employeeId);
+                                              value,
+                                              widget.employeeId,
+                                            );
                                           }
                                         },
                                       ),
@@ -149,62 +163,76 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                   ],
                                 ),
                           (model.getSectionResponse == null ||
-                                  model.getSectionResponse!.cLASSandSECTION!
+                                  model
+                                      .getSectionResponse!
+                                      .cLASSandSECTION!
                                       .isEmpty)
                               ? const SizedBox.shrink()
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const SizedBox(height: 15),
-                                    const Text('Section*',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
+                                    const Text(
+                                      'Section*',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                     const SizedBox(height: 5),
                                     Container(
                                       decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
+                                        borderRadius: BorderRadius.circular(
+                                          5.0,
+                                        ),
                                         border: Border.all(),
                                       ),
                                       child: LayoutBuilder(
-                                          builder: (context, constraints) {
-                                        return ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 0,
-                                            maxHeight: 200,
-                                          ).normalize(),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              children: model
-                                                  .getSectionResponse!
-                                                  .cLASSandSECTION!
-                                                  .map((item) {
-                                                final sectionId =
-                                                    item.sECTIONID;
-                                                final sectionDesc =
-                                                    item.sECTIONDESC;
-                                                return CheckboxListTile(
-                                                  title:
-                                                      Text(sectionDesc ?? ""),
-                                                  value: model
-                                                      .selectedSectionIds
-                                                      .contains(sectionId),
-                                                  onChanged: (bool? isChecked) {
-                                                    model.updateSelectedSection(
-                                                        sectionId!,
-                                                        isChecked ?? false,
-                                                        widget.employeeId);
-                                                  },
-                                                );
-                                              }).toList(),
+                                        builder: (context, constraints) {
+                                          return ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                              minHeight: 0,
+                                              maxHeight: 200,
+                                            ).normalize(),
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                children: model
+                                                    .getSectionResponse!
+                                                    .cLASSandSECTION!
+                                                    .map((item) {
+                                                      final sectionId =
+                                                          item.sECTIONID;
+                                                      final sectionDesc =
+                                                          item.sECTIONDESC;
+                                                      return CheckboxListTile(
+                                                        title: Text(
+                                                          sectionDesc ?? "",
+                                                        ),
+                                                        value: model
+                                                            .selectedSectionIds
+                                                            .contains(
+                                                              sectionId,
+                                                            ),
+                                                        onChanged:
+                                                            (bool? isChecked) {
+                                                              model.updateSelectedSection(
+                                                                sectionId!,
+                                                                isChecked ??
+                                                                    false,
+                                                                widget
+                                                                    .employeeId,
+                                                              );
+                                                            },
+                                                      );
+                                                    })
+                                                    .toList(),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      }),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -216,33 +244,39 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Subject*',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          fontFamily: "Montserrat Regular",
-                                          color: Colors.black,
-                                        )),
+                                    const Text(
+                                      'Subject*',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: "Montserrat Regular",
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                     const SizedBox(height: 5),
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                          border: Border.all(),
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
+                                        border: Border.all(),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                       child: DropdownButton(
-                                        padding:
-                                            const EdgeInsets.only(left: 10),
+                                        padding: const EdgeInsets.only(
+                                          left: 10,
+                                        ),
                                         value: model.selectedSubject,
                                         underline: const SizedBox(),
                                         isExpanded: true,
                                         hint: const Text('Select a subject'),
                                         items: model.subjectResponse?.subject
-                                            ?.map((item) => DropdownMenuItem(
-                                                  value: item.subjectId,
-                                                  child: Text(
-                                                      item.subjectName ?? ""),
-                                                ))
+                                            ?.map(
+                                              (item) => DropdownMenuItem(
+                                                value: item.subjectId,
+                                                child: Text(
+                                                  item.subjectName ?? "",
+                                                ),
+                                              ),
+                                            )
                                             .toList(),
                                         onChanged: (int? value) {
                                           if (value != null) {
@@ -260,85 +294,110 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(children: [
-                                      InkWell(
-                                        onTap: () {
-                                          for (var student
-                                              in model.lstStudentCircular) {
-                                            print(
-                                                'STUDENT_ID: ${student.STUDENT_ID}, ADM_NO: ${student.ADM_NO}');
-                                          }
-                                        },
-                                        child: const Text('Student*',
+                                    Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            for (var student
+                                                in model.lstStudentCircular) {
+                                              print(
+                                                'STUDENT_ID: ${student.STUDENT_ID}, ADM_NO: ${student.ADM_NO}',
+                                              );
+                                            }
+                                          },
+                                          child: const Text(
+                                            'Student*',
                                             style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.normal,
-                                                fontFamily:
-                                                    "Montserrat Regular",
-                                                color: Colors.black)),
-                                      ),
-                                      const Spacer(),
-                                      ElevatedButton(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              fontFamily: "Montserrat Regular",
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        ElevatedButton(
                                           onPressed: model.toggleSelectAll,
-                                          child: Text(model.selectAll
-                                              ? 'Deselect All'
-                                              : 'Select All'))
-                                    ]),
+                                          child: Text(
+                                            model.selectAll
+                                                ? 'Deselect All'
+                                                : 'Select All',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                     const SizedBox(height: 5),
                                     Container(
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          border: Border.all()),
+                                        borderRadius: BorderRadius.circular(
+                                          5.0,
+                                        ),
+                                        border: Border.all(),
+                                      ),
                                       child: Column(
                                         children: [
                                           TextFormField(
-                                              controller: _searchController,
-                                              // onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                                              decoration: const InputDecoration(
-                                                  hintText:
-                                                      'Search Students ...',
-                                                  border:
-                                                      OutlineInputBorder())),
+                                            controller: _searchController,
+                                            // onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                            decoration: const InputDecoration(
+                                              hintText: 'Search Students ...',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
                                           const SizedBox(height: 5),
                                           LayoutBuilder(
-                                              builder: (context, constraints) {
-                                            return ConstrainedBox(
-                                              constraints: const BoxConstraints(
-                                                minHeight: 0,
-                                                maxHeight: 200,
-                                              ).normalize(),
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  children: (_isSearching
-                                                          ? model
-                                                              .filteredStudents
-                                                          : model
-                                                              .studentResponse!
-                                                              .aDMSTUDREGISTRATION!)
-                                                      .map((item) {
-                                                    final studentId =
-                                                        item.aDMSTUDENTID;
-                                                    final student =
-                                                        "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
-                                                    return CheckboxListTile(
-                                                      title: Text(student),
-                                                      value: model.selectAll ||
-                                                          model.studentIds
-                                                              .contains(
-                                                                  studentId),
-                                                      onChanged:
-                                                          (bool? isChecked) {
-                                                        model.updateStudentData(
-                                                            studentId!,
-                                                            isChecked ?? false);
-                                                      },
-                                                    );
-                                                  }).toList(),
+                                            builder: (context, constraints) {
+                                              return ConstrainedBox(
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      minHeight: 0,
+                                                      maxHeight: 200,
+                                                    ).normalize(),
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    children:
+                                                        (_isSearching
+                                                                ? model
+                                                                      .filteredStudents
+                                                                : model
+                                                                      .studentResponse!
+                                                                      .aDMSTUDREGISTRATION!)
+                                                            .map((item) {
+                                                              final studentId =
+                                                                  item.aDMSTUDENTID;
+                                                              final student =
+                                                                  "${item.fIRSTNAME ?? ""} ${item.aDMNO ?? ""}";
+                                                              return CheckboxListTile(
+                                                                title: Text(
+                                                                  student,
+                                                                ),
+                                                                value:
+                                                                    model
+                                                                        .selectAll ||
+                                                                    model
+                                                                        .studentIds
+                                                                        .contains(
+                                                                          studentId,
+                                                                        ),
+                                                                onChanged:
+                                                                    (
+                                                                      bool?
+                                                                      isChecked,
+                                                                    ) {
+                                                                      model.updateStudentData(
+                                                                        studentId!,
+                                                                        isChecked ??
+                                                                            false,
+                                                                      );
+                                                                    },
+                                                              );
+                                                            })
+                                                            .toList(),
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          }),
+                                              );
+                                            },
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -346,41 +405,49 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                 ),
 
                           const SizedBox(height: 15),
-                          const Text("Assignment Details :",
-                              style: TextStyle(
-                                  fontSize: 15.0, fontWeight: FontWeight.bold)),
-
-                          Column(children: [
-                            QuillSimpleToolbar(
-                              controller: model.quillController,
-                              config: const QuillSimpleToolbarConfig(
-                                showAlignmentButtons: true,
-                                showBoldButton: true,
-                                showItalicButton: true,
-                                showUnderLineButton: true,
-                                showStrikeThrough: true,
-                                showColorButton: true,
-                                showBackgroundColorButton: true,
-                                showClearFormat: true,
-                                showHeaderStyle: true,
-                                showListNumbers: true,
-                                showListBullets: true,
-                                showListCheck: true,
-                                showCodeBlock: true,
-                                showIndent: true,
-                                showLink: true,
-                                showSearchButton: true,
-                              ),
+                          const Text(
+                            "Assignment Details :",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
                             ),
-                            Container(
+                          ),
+
+                          Column(
+                            children: [
+                              QuillSimpleToolbar(
+                                controller: model.quillController,
+                                config: const QuillSimpleToolbarConfig(
+                                  showAlignmentButtons: true,
+                                  showBoldButton: true,
+                                  showItalicButton: true,
+                                  showUnderLineButton: true,
+                                  showStrikeThrough: true,
+                                  showColorButton: true,
+                                  showBackgroundColorButton: true,
+                                  showClearFormat: true,
+                                  showHeaderStyle: true,
+                                  showListNumbers: true,
+                                  showListBullets: true,
+                                  showListCheck: true,
+                                  showCodeBlock: true,
+                                  showIndent: true,
+                                  showLink: true,
+                                  showSearchButton: true,
+                                ),
+                              ),
+                              Container(
                                 height: 300,
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    border: Border.all()),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(),
+                                ),
                                 child: QuillEditor.basic(
                                   controller: model.quillController,
-                                ))
-                          ]),
+                                ),
+                              ),
+                            ],
+                          ),
 
                           // QuillToolbar.basic(
                           //   controller: model.quillController,
@@ -413,12 +480,17 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             ),
                             trailing: const Icon(Icons.calendar_today),
                             onTap: () async {
+                              final preferredInitialDate =
+                                  Constants.parseAppDate(Constants.startDate);
                               final DateTime? pickedDate = await showDatePicker(
                                 context: context,
                                 initialDate:
-                                    DateTime.parse(Constants.startDate),
-                                firstDate: DateTime.parse(Constants.startDate),
-                                lastDate: DateTime.parse(Constants.lastDate),
+                                    Constants.scheduleDatePickerInitialDate(
+                                      preferredInitialDate,
+                                    ),
+                                firstDate:
+                                    Constants.scheduleDatePickerFirstDate,
+                                lastDate: Constants.scheduleDatePickerLastDate,
                               );
                               if (pickedDate != null) {
                                 model.updateStartDate(pickedDate);
@@ -426,8 +498,8 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             },
                           ),
                           Container(height: 1, color: const Color(0xFFD3D3D3)),
-                          //divider
 
+                          //divider
                           ListTile(
                             contentPadding: const EdgeInsets.all(0),
                             title: const Text('End Date'),
@@ -439,23 +511,30 @@ class _AssignmentFormState extends State<AssignmentForm> {
                             trailing: const Icon(Icons.calendar_today),
                             onTap: () async {
                               if (model.startDateController.text.isNotEmpty) {
-                                final DateTime? pickedDate =
-                                    await showDatePicker(
+                                final preferredInitialDate =
+                                    Constants.parseAppDate(Constants.endDate);
+                                final DateTime?
+                                pickedDate = await showDatePicker(
                                   context: context,
                                   initialDate:
-                                      DateTime.parse(Constants.startDate),
+                                      Constants.scheduleDatePickerInitialDate(
+                                        preferredInitialDate,
+                                      ),
                                   firstDate:
-                                      DateTime.parse(Constants.startDate),
-                                  lastDate: DateTime.parse(Constants.lastDate),
+                                      Constants.scheduleDatePickerFirstDate,
+                                  lastDate:
+                                      Constants.scheduleDatePickerLastDate,
                                 );
                                 if (pickedDate != null) {
-                                  if (pickedDate
-                                      .isBefore(model.selectedStartDate)) {
+                                  if (pickedDate.isBefore(
+                                    model.selectedStartDate,
+                                  )) {
                                     if (context.mounted) {
                                       ShowSnackBar.error(
-                                          context: context,
-                                          showMessage:
-                                              'End date cannot be earlier than the start date!');
+                                        context: context,
+                                        showMessage:
+                                            'End date cannot be earlier than the start date!',
+                                      );
                                     }
                                   } else {
                                     model.updateEndDate(pickedDate);
@@ -464,29 +543,35 @@ class _AssignmentFormState extends State<AssignmentForm> {
                               } else {
                                 if (context.mounted) {
                                   ShowSnackBar.error(
-                                      context: context,
-                                      showMessage:
-                                          'Start date must be selected before choosing an end date!');
+                                    context: context,
+                                    showMessage:
+                                        'Start date must be selected before choosing an end date!',
+                                  );
                                 }
                               }
                             },
                           ),
                           Container(height: 1, color: const Color(0xFFD3D3D3)),
-                          //divider
 
+                          //divider
                           ValueListenableBuilder<bool>(
-                              valueListenable: model.active,
-                              builder: (BuildContext context, bool isChecked,
-                                  Widget? child) {
-                                return CheckboxListTile(
-                                  contentPadding: const EdgeInsets.all(0),
-                                  title: const Text('Active'),
-                                  value: isChecked,
-                                  onChanged: (newValue) {
-                                    model.active.value = newValue!;
-                                  },
-                                );
-                              }),
+                            valueListenable: model.active,
+                            builder:
+                                (
+                                  BuildContext context,
+                                  bool isChecked,
+                                  Widget? child,
+                                ) {
+                                  return CheckboxListTile(
+                                    contentPadding: const EdgeInsets.all(0),
+                                    title: const Text('Active'),
+                                    value: isChecked,
+                                    onChanged: (newValue) {
+                                      model.active.value = newValue!;
+                                    },
+                                  );
+                                },
+                          ),
 
                           const Text(
                             'Upload Files',
@@ -508,20 +593,24 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                   child: Container(
                                     height: 45,
                                     padding: const EdgeInsets.only(
-                                        left: 5, top: 5, bottom: 5),
+                                      left: 5,
+                                      top: 5,
+                                      bottom: 5,
+                                    ),
                                     decoration: BoxDecoration(
-                                        border: Border.all(),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
+                                      border: Border.all(),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                     child: Row(
                                       children: [
                                         Expanded(
                                           child: Container(
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
-                                                color: Colors.grey,
-                                                borderRadius:
-                                                    BorderRadius.circular(5)),
+                                              color: Colors.grey,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                            ),
                                             child: const Text(
                                               'Browse',
                                               style: TextStyle(
@@ -562,19 +651,22 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                       model.uploadFile();
                                     } else {
                                       ShowSnackBar.info(
-                                          context: context,
-                                          showMessage: 'Please select class');
+                                        context: context,
+                                        showMessage: 'Please select class',
+                                      );
                                     }
                                   }
                                 },
                                 child: Container(
                                   alignment: Alignment.center,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
+                                    horizontal: 10,
+                                  ),
                                   height: 45,
                                   decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.circular(10)),
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                   child: const Text(
                                     'Upload',
                                     style: TextStyle(
@@ -585,7 +677,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                     ),
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                           const SizedBox(height: 5),
@@ -620,7 +712,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                                         model.deleteFile(file, index);
                                       },
                                     ),
-                                    const SizedBox(height: 100)
+                                    const SizedBox(height: 100),
                                   ],
                                 ),
 
@@ -711,92 +803,102 @@ class _AssignmentFormState extends State<AssignmentForm> {
                     ),
                   ),
                   bottomNavigationBar: SafeArea(
-                      child: BottomAppBar(
-                    child: SizedBox(
-                      height: 56.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              if (model.selectedClass == null) {
-                                ShowSnackBar.info(
+                    child: BottomAppBar(
+                      child: SizedBox(
+                        height: 56.0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                if (model.selectedClass == null) {
+                                  ShowSnackBar.info(
                                     context: context,
-                                    showMessage: 'Please select a class');
-                              } else if (model.selectedSectionIds.isEmpty) {
-                                ShowSnackBar.info(
+                                    showMessage: 'Please select a class',
+                                  );
+                                } else if (model.selectedSectionIds.isEmpty) {
+                                  ShowSnackBar.info(
                                     context: context,
-                                    showMessage: 'Please select any section');
-                              } else if (model.selectedSubject == null) {
-                                ShowSnackBar.info(
+                                    showMessage: 'Please select any section',
+                                  );
+                                } else if (model.selectedSubject == null) {
+                                  ShowSnackBar.info(
                                     context: context,
-                                    showMessage: 'Please select a subject');
-                              } else if (model.studentIds.isEmpty) {
-                                ShowSnackBar.info(
+                                    showMessage: 'Please select a subject',
+                                  );
+                                } else if (model.studentIds.isEmpty) {
+                                  ShowSnackBar.info(
                                     context: context,
-                                    showMessage: 'Please select any student');
-                              } else if (model.quillController.document
-                                  .toPlainText()
-                                  .trim()
-                                  .isEmpty) {
-                                ShowSnackBar.info(
+                                    showMessage: 'Please select any student',
+                                  );
+                                } else if (model.quillController.document
+                                    .toPlainText()
+                                    .trim()
+                                    .isEmpty) {
+                                  ShowSnackBar.info(
                                     context: context,
                                     showMessage:
-                                        'Please enter assignment detail');
-                              } else if (model.selectedStartDate == null) {
-                                ShowSnackBar.info(
+                                        'Please enter assignment detail',
+                                  );
+                                } else if (model.selectedEndDate == null) {
+                                  ShowSnackBar.info(
                                     context: context,
-                                    showMessage: 'Please select start date');
-                              } else if (model.selectedEndDate == null) {
-                                ShowSnackBar.info(
-                                    context: context,
-                                    showMessage: 'Please select end date');
-                              } else {
-                                model
-                                    .addAssignmentData(
-                                        employeeId: widget.employeeId)
-                                    .then((value) {
-                                  if (value.success ?? false) {
-                                    ShowSnackBar.successToast(
-                                        context: context,
-                                        showMessage:
-                                            'Assignment created successfully');
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const Dashboard()),
-                                    );
-                                  } else {
-                                    ShowSnackBar.error(
-                                        context: context,
-                                        showMessage: 'Something went wrong');
-                                  }
-                                });
-                              }
-                            },
-                            child: const Text('Save'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(Colors.grey),
+                                    showMessage: 'Please select end date',
+                                  );
+                                } else {
+                                  model
+                                      .addAssignmentData(
+                                        employeeId: widget.employeeId,
+                                      )
+                                      .then((value) {
+                                        if (value.success ?? false) {
+                                          ShowSnackBar.successToast(
+                                            context: context,
+                                            showMessage:
+                                                'Assignment created successfully',
+                                          );
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const Dashboard(),
+                                            ),
+                                          );
+                                        } else {
+                                          ShowSnackBar.error(
+                                            context: context,
+                                            showMessage: 'Something went wrong',
+                                          );
+                                        }
+                                      });
+                                }
+                              },
+                              child: const Text('Save'),
                             ),
-                            child: const Text('Cancel'),
-                          ),
-                        ],
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                  Colors.grey,
+                                ),
+                              ),
+                              child: const Text('Cancel'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  )),
+                  ),
                   // ),
                 ),
                 if (loaderProvider.isLoading) const CustomLoader(),
               ],
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 }
